@@ -5,8 +5,13 @@ on: [push]
 jobs:
   vue-build:
     runs-on: [ubuntu-latest]
+
     steps:
-      - name: install deps
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install Dependencies
         run: npm install frontend
       - name: build
         run: npm run build
@@ -20,7 +25,8 @@ jobs:
       run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
     - name: Generate key
       run: php artisan key:generate
-    - name: Optimizee cahe
+    - run: php artisan jwt:secret
+    - name: Optimize cache
       run: php artisan config:cache
   deploy:
     runs-on: [ubuntu-latest]
