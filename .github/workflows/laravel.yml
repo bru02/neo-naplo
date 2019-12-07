@@ -1,4 +1,4 @@
-name: Laravel
+name: Yeet
 
 on: [push]
 
@@ -13,7 +13,7 @@ jobs:
           node-version: '10.x'
       - run: cd frontend
       - run: npm install
-      - run: npm i vue-cli-service
+      - run: npm i @vue/cli-service
       - name: build
         run: npm run build
   laravel-optimize:
