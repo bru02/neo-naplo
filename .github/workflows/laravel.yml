@@ -11,11 +11,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - run: cd frontend
-      - run: npm install
-      - run: npm i @vue/cli-service
+      - run: cd frontend && npm install
+      - run: cd frontend && npm i @vue/cli-service
       - name: build
-        run: npm run build
+        run: cd frontend && npm run build
   laravel-optimize:
     runs-on: ubuntu-latest
     steps:
