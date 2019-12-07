@@ -1,0 +1,34 @@
+name: Laravel
+
+on: [push]
+
+jobs:
+  vue-build:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: install deps
+        run: npm install frontend
+      - name: build
+        run: npm run build
+  laravel-optimize:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    - name: Install Dependencies
+      run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
+    - name: Generate key
+      run: php artisan key:generate
+    - name: Optimizee cahe
+      run: php artisan config:cache
+  deploy:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: Azure/pipelines@v1
+        with:
+          azure-devops-project-url: 'https://dev.azure.com/bru02/MyProject'
+          azure-pipeline-name: 'deploy' # name of the Azure pipeline to be triggered
+          azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
+    
+
