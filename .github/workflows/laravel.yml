@@ -11,10 +11,11 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Install Dependencies
-        run: npm install frontend
+      - run: cd frontend
+      - run: npm install
+      - run: npm i vue-cli-service
       - name: build
-        run: cd frontend && npm run build
+        run: npm run build
   laravel-optimize:
     runs-on: ubuntu-latest
     steps:
@@ -36,5 +37,4 @@ jobs:
           azure-devops-project-url: 'https://dev.azure.com/bru02/MyProject'
           azure-pipeline-name: 'filc-naplo' # name of the Azure pipeline to be triggered
           azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
-    
-
+  
