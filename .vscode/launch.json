@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Launch & Debug",
+            "configurations": [ "Launch Program", "vuejs: chrome" ]
+        }
+],
+"configurations": [
+    
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Webpack",
+        "program": "${workspaceFolder}/node_modules/webpack/bin/webpack.js",
+        "args": [
+           "--config", "node_modules/laravel-mix/setup/webpack.config.js"
+        ],
+        "env" : { "NODE_ENV" : "development" }
+},
+    {
+        "type": "php",
+        "request": "launch",
+        "name": "Launch Program",
+        "cwd": "${workspaceRoot}",
+        "port": 9000
+    },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "vuejs: chrome",
+            "url": "http://localhost/eFilc/public",
+            "webRoot": "${workspaceFolder}/public",
+            "breakOnLoad": false,
+            "sourceMapPathOverrides": {
+              "webpack:///./src/*": "${webRoot}/*"
+            }
+          },
+    ]
+}

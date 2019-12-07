@@ -1,0 +1,50 @@
+<template>
+  <v-dialog
+    v-model="dialog"
+    :fullscreen="mobile"
+    :width="mobile ? null : 500"
+    :transition="`${mobile ? 'slide-x-reverse' : 'dialog'}-transition`"
+  >
+    <v-card>
+      <v-toolbar dark color="primary" v-show="mobile">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+        <v-toolbar-title>{{ title }}</v-toolbar-title>
+      </v-toolbar>
+      <v-card-text>
+        <slot></slot>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" text @click="dialog = false">Ok</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>
+<script lang="ts">
+import Mixin from '@/mixins';
+import Component, { mixins } from 'vue-class-component';
+import { Watch, Prop } from 'vue-property-decorator';
+
+@Component
+export default class Dialog extends mixins(Mixin) {
+  @Prop(String) readonly title!: String | undefined;
+  @Prop() readonly value!: any;
+
+  dialog = false;
+
+  @Watch('value')
+  onVC(val) {
+    if (val !== false) {
+      this.dialog = true;
+    }
+  }
+  @Watch('dialog')
+  onDC(val) {
+    if (!val) {
+      this.$emit('input', false);
+    }
+  }
+}
+</script>
