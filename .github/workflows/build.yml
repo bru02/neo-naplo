@@ -26,7 +26,7 @@ jobs:
         run: php artisan config:cache
       - uses: Azure/pipelines@v1
         with:
-          azure-devops-project-url: 'https://dev.azure.com/bru02/MyProject'
+          azure-devops-project-url: 'https://dev.azure.com/bru02/filc-naplo'
           azure-pipeline-name: 'filc-naplo' # name of the Azure pipeline to be triggered
           azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
   
