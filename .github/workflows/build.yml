@@ -2,6 +2,10 @@ name: Build
 
 on: [push]
 
+env:
+  AZURE_WEBAPP_NAME: filc-naplo    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+
 jobs:
   build:
     runs-on: [ubuntu-latest]
@@ -24,9 +28,10 @@ jobs:
       - run: php artisan jwt:secret
       - name: Optimize cache
         run: php artisan config:cache
-      - uses: Azure/pipelines@v1
-        with:
-          azure-devops-project-url: 'https://dev.azure.com/bru02/filc-naplo'
-          azure-pipeline-name: 'filc-naplo' # name of the Azure pipeline to be triggered
-          azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
-  
+      - name: 'Deploy to Azure WebApp'
+        uses: azure/webapps-deploy@v1
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
