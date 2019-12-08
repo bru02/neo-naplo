@@ -1,6 +1,5 @@
 <template>
   <v-card color="blue-grey" dark @click.native="$emit('input', note)">
-    <v-layout align-center justify-center>
       <v-card-title primary-title>
         {{ note.title }}
       </v-card-title>
@@ -8,7 +7,6 @@
         <div>{{ note.content }}</div>
         <div class="font-weight-thin">{{ note.teacher }}</div>
       </v-card-subtitle>
-    </v-layout>
     <v-divider light></v-divider>
     <v-card-actions class="pa-3">
       {{ note.type }}

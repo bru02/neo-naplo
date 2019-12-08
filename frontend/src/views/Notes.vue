@@ -1,20 +1,25 @@
 <template>
- <v-list v-if='mobile'>
-   <v-list-item v-for='note in notes' :key='note.id' @click='selectedNote = note'> 
-     <v-list-item-content>
-            <v-list-item-title>{{ note.title }}</v-list-item-title>
-     <v-list-item-subtitle>
-       <span class='text--primary'>{{ note.teacher }}</span> &mdash; {{ note.content.substr(0, 100)}}{{note.content.length > 100 ? '...' : '' }}
-     </v-list-item-subtitle>
-     </v-list-item-content>
+  <v-list v-if="mobile">
+    <v-list-item
+      v-for="note in notes"
+      :key="note.id"
+      @click="selectedNote = note"
+    >
+      <v-list-item-content>
+        <v-list-item-title>{{ note.title }}</v-list-item-title>
+        <v-list-item-subtitle>
+          <span class="text--primary">{{ note.teacher }}</span> &mdash;
+          {{ note.content.substr(0, 100)
+          }}{{ note.content.length > 100 ? '...' : '' }}
+        </v-list-item-subtitle>
+      </v-list-item-content>
 
-     <v-list-item-action>
-       {{ note.date | formatDate }}
-     </v-list-item-action>
-   </v-list-item>
+      <v-list-item-action>
+        {{ note.date | formatDate }}
+      </v-list-item-action>
+    </v-list-item>
     <DataViewer title="Feljegyzés" :fn="noteValues" v-model="selectedNote" />
-   
- </v-list>
+  </v-list>
   <v-data-table
     :headers="headers"
     :items="notes"
