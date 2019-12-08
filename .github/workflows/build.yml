@@ -1,9 +1,9 @@
-name: Yeet
+name: Build
 
 on: [push]
 
 jobs:
-  vue-build:
+  build:
     runs-on: [ubuntu-latest]
 
     steps:
@@ -15,22 +15,15 @@ jobs:
       - run: cd frontend && npm i @vue/cli-service
       - name: build
         run: cd frontend && npm run build
-  laravel-optimize:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-    - name: Install Dependencies
-      run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
-    - name: Generate key
-      run: php artisan key:generate
-    - run: php artisan jwt:secret
-    - name: Optimize cache
-      run: php artisan config:cache
-  deploy:
-    runs-on: [ubuntu-latest]
-    steps:
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
+      - name: Generate key
+        run: php artisan key:generate
+      - run: php artisan jwt:secret
+      - name: Optimize cache
+        run: php artisan config:cache
       - uses: Azure/pipelines@v1
         with:
           azure-devops-project-url: 'https://dev.azure.com/bru02/MyProject'
