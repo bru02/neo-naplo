@@ -10,15 +10,15 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::view('/', 'router');
-Route::view('/absences', 'router');
-Route::view('/notes', 'router');
-Route::view('/evaluations', 'router');
-Route::view('/timetable', 'router');
-Route::view('/statistics', 'router');
+Route::view('/', 'index');
+Route::view('/absences', 'index');
+Route::view('/notes', 'index');
+Route::view('/evaluations', 'index');
+Route::view('/timetable', 'index');
+Route::view('/statistics', 'index');
 
-Route::view('/timetable-skeleton-dev', 'skeleton');
+//Route::view('/timetable-skeleton-dev', 'skeleton');
 
-Route::view('/login', 'router');
+Route::view('/login', 'index');
 
 Route::any('manifest', 'eFilcController@manifest');

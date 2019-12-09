@@ -1,6 +1,10 @@
 <template>
-  <v-container fluid grid-list-lg>
+  <v-container grid-list-lg>
     <v-row dense justify="center">
+      <NextLessonCard
+        :timetable="timetable"
+        v-model="selectedLessons"
+      ></NextLessonCard>
       <ChangedLessonCard
         v-for="lesson in changedLessons"
         :key="lesson.id"
@@ -8,10 +12,6 @@
         v-model="selectedLesson"
       >
       </ChangedLessonCard>
-      <NextLessonCard
-        :timetable="timetable"
-        v-model="selectedLessons"
-      ></NextLessonCard>
       <v-col
         cols="12"
         v-for="card in cards"

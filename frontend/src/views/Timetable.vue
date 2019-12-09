@@ -46,6 +46,7 @@
           :lessons="lessons"
           :header="day(utc)"
           :showCount="false"
+          :min="min"
           v-model="selectedLesson"
         ></LessonsList>
       </v-col>
@@ -55,6 +56,7 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 import Mixin from '@/mixins';
 import LessonsList from '@/components/dataviews/LessonsList.vue';
 import DataViewer from '@/components/DataViewer.vue';
@@ -71,11 +73,12 @@ export default class TimetableComponent extends mixins(Mixin) {
 
   timetable: TimetableAPI = {};
   selectedLesson: Lesson | boolean = false;
+  min: null | number = null;
 
   @Watch('cweek')
   onCWeekChanged() {
     this.timetable = {};
-    this.obtain('timetable', this.cweek).then(v => {
+    this.obtain('timetable', this.cweek).then((v: TimetableAPI) => {
       this.timetable = v;
       if (this.lessonHash) {
         const [date, nol] = this.lessonHash.split(':');
@@ -85,6 +88,25 @@ export default class TimetableComponent extends mixins(Mixin) {
             break;
           }
         }
+      }
+      if (this.mobile == false) {
+        const counts = Object.values(v)
+          .flatMap(e => e)
+          .map((l: Lesson) => l.count);
+        this.min = Math.min(...counts);
+        const max = Math.max(...counts);
+        Vue.nextTick().then(() => {
+          // @ts-ignore
+          for (let i = +this.min; i < max; i++) {
+            const lis = [...document.querySelectorAll(`.r${i}`)];
+            const max = Math.max(
+              ...lis.map((e: Element) => {
+                return e.getBoundingClientRect().height;
+              })
+            );
+            lis.forEach(e => ((e as HTMLElement).style.height = `${max}px`));
+          }
+        });
       }
     });
   }

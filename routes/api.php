@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,7 +18,13 @@ Route::group(['middleware' => 'jwt.auth'], function(){
     Route::any('/timetable', 'eFilcController@timetableApi');
 });
 
-Route::post('/refresh')->middleware('jwt.refresh');
+Route::post('/refresh', function () {
+    try {
+        return response()->json(['access_token' => auth()->refresh()]);
+    } catch (JWTException $e) {
+        throw new UnauthorizedHttpException('jwt-auth', $e->getMessage(), $e, $e->getCode());
+    }
+});
 Route::post('/login', 'AuthController@login')->middleware('api');
 Route::any('/logout', 'AuthController@logout')->middleware('api');
 
