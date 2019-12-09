@@ -31,7 +31,7 @@ jobs:
         run: php artisan config:cache
       - name: Remove unnecesary files
         run: |
-          pwn
+          pwd
           ls
           rm -r node_modules
           rm -r tests
