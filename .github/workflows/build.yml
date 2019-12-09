@@ -46,10 +46,8 @@ jobs:
         run: php artisan config:cache
       - name: Remove unnecesary files
         run: |
-          rm -r frontend/node_modules
+          rm -r frontend
           rm -r tests
-          ls
-          cd frontend && ls
       - name: 'Deploy to Azure WebApp'
         uses: azure/webapps-deploy@v1
         with: 
