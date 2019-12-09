@@ -24,10 +24,15 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
       - name: Generate key
-        run: php artisan key:generate
-      - run: php artisan jwt:secret
+        run: |
+          php artisan key:generate
+          php artisan jwt:secret
       - name: Optimize cache
         run: php artisan config:cache
+      - name: Remove unnecesary files
+        run: |
+          rm -rf node_modules
+          rm -rf tests
       - name: 'Deploy to Azure WebApp'
         uses: azure/webapps-deploy@v1
         with: 
