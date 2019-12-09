@@ -15,12 +15,28 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - run: cd frontend && npm install
       - run: cd frontend && npm i @vue/cli-service
       - name: build
         run: cd frontend && npm run build
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
       - name: Generate key
@@ -31,9 +47,7 @@ jobs:
         run: php artisan config:cache
       - name: Remove unnecesary files
         run: |
-          pwd
-          ls
-          rm -r node_modules
+          rm -r frontend/node_modules
           rm -r tests
       - name: 'Deploy to Azure WebApp'
         uses: azure/webapps-deploy@v1
