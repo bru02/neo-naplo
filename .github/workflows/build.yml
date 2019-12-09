@@ -21,8 +21,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: cd frontend && npm install
-      - run: cd frontend && npm i @vue/cli-service
+      - run: cd frontend && npm install -D
       - name: build
         run: cd frontend && npm run build
       - name: Copy .env
@@ -49,6 +48,8 @@ jobs:
         run: |
           rm -r frontend/node_modules
           rm -r tests
+          ls
+          cd frontend && ls
       - name: 'Deploy to Azure WebApp'
         uses: azure/webapps-deploy@v1
         with: 
