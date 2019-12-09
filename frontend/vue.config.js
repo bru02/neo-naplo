@@ -3,7 +3,8 @@
 //   .default;
 // const PurgecssPlugin = require("purgecss-webpack-plugin");
 // const glob = require("glob-all");
-const path = require('path');
+const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
+  .default;
 
 module.exports = {
   transpileDependencies: ['vuetify'],
@@ -41,6 +42,9 @@ module.exports = {
   //     new WebpackDeepScopeAnalysisPlugin()
   //   ],
   chainWebpack: config => {
+    if (process.env.NODE_ENV === 'production') {
+      config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
+    }
     config.plugin('VuetifyLoaderPlugin').tap(args => [
       {
         progressiveImages: process.env.NODE_ENV === 'production'

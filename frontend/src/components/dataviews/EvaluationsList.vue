@@ -3,12 +3,14 @@
     <v-list two-line subheader>
       <template v-for="(items, header) in sorted">
         <v-subheader inset :key="header" v-if="!!header"
-          >{{ header
-          }}<span
-            v-show="sortBy == 'subject'"
-            :class="[`${getEvaluationColor(getAverage(items))}--text`]"
-          ></span
-        ></v-subheader>
+          >{{ header }}
+          <template v-show="sortBy == 'subject'">
+            &mdash;
+            <span :class="[`${getEvaluationColor(getAverage(items))}--text`]">{{
+              getAverage(items)
+            }}</span>
+          </template>
+        </v-subheader>
         <v-list-item
           v-for="item in items"
           :key="item.creatingTime"
@@ -48,25 +50,34 @@ import { Evaluation, ClassAverage } from '../../api-types';
 @Component
 export default class EvaluationList extends mixins(Mixin) {
   @Prop() readonly evaluations!: Evaluation[];
-  groupedEvaluations!: { [k: string]: Evaluation[] };
+  @Prop() readonly groupedEvaluations!: { [k: string]: Evaluation[] };
 
   sortBy = 'date';
   get sorted() {
     switch (this.sortBy) {
       case 'date':
-        return {
-          '': this.evaluations.sort((a, b) => b.date - a.date)
-        };
+        return this.byDate;
       case 'creatingTime':
-        return {
-          '': this.evaluations.sort((a, b) => b.creatingTime - a.creatingTime)
-        };
+        return this.byCreatingTime;
       case 'value':
-        return this.group(this.evaluations, 'value');
+        return this.byValue;
       case 'subject':
       default:
         return this.groupedEvaluations;
     }
+  }
+  get byDate() {
+    return {
+      '': this.evaluations.sort((a, b) => b.date - a.date)
+    };
+  }
+  get byCreatingTime() {
+    return {
+      '': this.evaluations.sort((a, b) => b.creatingTime - a.creatingTime)
+    };
+  }
+  get byValue() {
+    return this.group(this.evaluations, 'value');
   }
   sortFlags = [
     {

@@ -16,6 +16,9 @@ Route::view('/notes', 'index');
 Route::view('/evaluations', 'index');
 Route::view('/timetable', 'index');
 Route::view('/statistics', 'index');
+Route::view('/statistics/{subject}', 'index');
+Route::view('/profile', 'index');
+
 
 //Route::view('/timetable-skeleton-dev', 'skeleton');
 
