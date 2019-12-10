@@ -26,7 +26,11 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-alert :value="true" type="info" v-show="absences.length == 0">
+    <v-alert
+      :value="true"
+      type="info"
+      v-show="absences.length == 0 && !loading"
+    >
       Még nem hiányoztál
     </v-alert>
     <DataViewer
@@ -46,7 +50,12 @@ import AbsencesList from '@/components/dataviews/AbsencesList.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Absence } from '../api-types';
 @Component({
-  computed: apiMapper.mapGetters(['absences']),
+  computed: {
+    ...apiMapper.mapGetters(['absences']),
+    ...apiMapper.mapState({
+      loading: state => state.general.loading
+    })
+  },
   components: { AbsencesList, DataViewer }
 })
 export default class AbsencesComponent extends mixins(Mixin) {
@@ -55,7 +64,7 @@ export default class AbsencesComponent extends mixins(Mixin) {
     this.obtain('general');
   }
   metaInfo = {
-      title: 'Hiányzások',
-  }
+    title: 'Hiányzások'
+  };
 }
 </script>

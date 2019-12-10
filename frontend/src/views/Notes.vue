@@ -80,8 +80,8 @@ export default class NotesComponent extends mixins(Mixin) {
     this.obtain('general');
   }
   metaInfo = {
-      title: 'Feljegyzések',
-  }
+    title: 'Feljegyzések'
+  };
 }
 
 // $ adb shell pm list packages

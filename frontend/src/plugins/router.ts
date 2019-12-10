@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import VueMeta from 'vue-meta'
+import VueMeta from 'vue-meta';
 
 import Notes from '@/views/Notes.vue';
 import Absences from '@/views/Absences.vue';
@@ -92,7 +92,7 @@ const routes = [
 import VueRouter from 'vue-router';
 
 Vue.use(VueRouter);
-Vue.use(VueMeta)
+Vue.use(VueMeta);
 
 const router = new VueRouter({
   routes,

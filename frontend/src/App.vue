@@ -80,7 +80,7 @@ export default class App extends mixins(Mixin) {
   loading = 0;
   created() {
     this.$http.interceptors.request.use((config = {}) => {
-      this.loading++
+      this.loading++;
       return config;
     });
     this.$http.interceptors.response.use(
@@ -94,9 +94,9 @@ export default class App extends mixins(Mixin) {
     );
   }
   metaInfo = {
-      title: '...',
-      titleTemplate: '%s | Filc Napló'
-  }
+    title: '...',
+    titleTemplate: '%s | Filc Napló'
+  };
 }
 </script>
 <style>

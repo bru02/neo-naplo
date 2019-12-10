@@ -42,7 +42,7 @@ export default class EvaluationsComponent extends mixins(Mixin) {
     this.obtain('general');
   }
   metaInfo = {
-      title: 'Jegyek',
-  }
+    title: 'Jegyek'
+  };
 }
 </script>

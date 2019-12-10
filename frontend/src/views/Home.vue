@@ -38,7 +38,7 @@
           v-model="selectedEvent"
         />
       </v-col>
-      <v-alert :value="true" type="info" v-show="cards.length == 0">
+      <v-alert :value="true" type="info" v-show="cards.length == 0 && !loading">
         Még nem kaptál semmit..
       </v-alert>
     </v-row>
@@ -90,7 +90,8 @@ import {
 @Component({
   computed: {
     ...apiMapper.mapState({
-      events: state => state.general.data.events
+      events: state => state.general.data.events,
+      loading: state => state.general.loading
     }),
     ...apiMapper.mapGetters(['cards']),
     ...timeMapper.mapGetters(['date', 'time'])
@@ -119,6 +120,7 @@ export default class HomeComponent extends mixins(Mixin) {
   timetable: TimetableAPI = {};
   time!: Date;
   date!: Date;
+  loading!: boolean;
   mounted() {
     this.obtain('general');
     this.obtain('timetable').then(tt => (this.timetable = tt));
@@ -137,7 +139,7 @@ export default class HomeComponent extends mixins(Mixin) {
     );
   }
   metaInfo = {
-      title: 'Faliújság',
-  }
+    title: 'Faliújság'
+  };
 }
 </script>

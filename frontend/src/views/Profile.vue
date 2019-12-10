@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-img src="@/assets/profile-bg.jpg" height="300px" dark>
+    <v-img src="@/assets/profile-bg.jpg?vuetify-preload" height="300px" dark>
       <v-row class="fill-height">
         <v-spacer></v-spacer>
 
@@ -218,7 +218,7 @@ export default class Profile extends mixins(Mixin) {
     return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
   }
   metaInfo = {
-      title: 'Profil',
-  }
+    title: 'Profil'
+  };
 }
 </script>

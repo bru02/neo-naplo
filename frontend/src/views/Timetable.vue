@@ -118,7 +118,7 @@ export default class TimetableComponent extends mixins(Mixin) {
     return this.getWeek(this.cweek);
   }
   metaInfo = {
-      title: 'Órarend',
-  }
+    title: 'Órarend'
+  };
 }
 </script>

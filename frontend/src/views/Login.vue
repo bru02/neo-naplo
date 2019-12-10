@@ -125,7 +125,7 @@ export default class LoginComponent extends mixins(Mixin) {
     this.$refs.form.reset();
   }
   metaInfo = {
-      title: 'Belépés',
-  }
+    title: 'Belépés'
+  };
 }
 </script>

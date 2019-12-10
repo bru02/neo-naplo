@@ -49,8 +49,8 @@ const utc2date = (value: number | Date): Date => {
   },
   formatTime = (utc: number, sec = true): String => {
     return utc2date(utc)
-      .toLocaleString()
-      .substr(14, sec ? 7 : 4);
+      .toLocaleTimeString()
+      .substr(0, sec ? 8 : -3);
   };
 
 export { formatDate, day, toldyLink, utc2date, formatTime };

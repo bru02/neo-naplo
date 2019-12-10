@@ -71,7 +71,10 @@ export default new Vue({
         next();
       }
     });
-    if (!this.$store.getters['auth/isAuthenticated'] && this.$route.fullPath != '/login') {
+    if (
+      !this.$store.getters['auth/isAuthenticated'] &&
+      this.$route.fullPath != '/login'
+    ) {
       this.$router.push('/login');
     }
   }

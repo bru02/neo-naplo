@@ -6,25 +6,22 @@
       color="blue"
       v-if="mode != 'hidden'"
     >
-      <!-- <v-layout align-center justify-center>
-        <v-flex xs12> -->
       <v-card-title primary-title>
         {{ mode == 'today' ? nextLesson.subject : `${lessons.length} db` }}
       </v-card-title>
       <v-card-subtitle>
-        <!-- <div> -->
         {{
           mode == 'today'
             ? `lesz a következő órád, ${timeTillNextLesson}`
             : 'órád lesz holnap'
         }}
-        <span v-for="c in changes" :key="c.text" :class="[c.color]">{{
-          c.text
-        }}</span>
-        <!-- </div> -->
+        <span
+          v-for="c in changes"
+          :key="c.text"
+          :class="[c.color, 'font-style-bold']"
+          >{{ c.text }}</span
+        >
       </v-card-subtitle>
-      <!-- </v-flex>
-      </v-layout> -->
       <v-divider light></v-divider>
       <v-card-actions class="pa-3" v-if="mode == 'today'">
         {{ nextLesson.count }} / {{ lessons.length }}
@@ -134,7 +131,7 @@ export default class NextLessonCard extends mixins(Mixin) {
         });
       }
       ret.push({
-        color: 'green--text',
+        color: 'red--text',
         text: `${missed.length} elmarad`
       });
     }
