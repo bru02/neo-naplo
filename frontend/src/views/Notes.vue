@@ -79,6 +79,9 @@ export default class NotesComponent extends mixins(Mixin) {
   mounted() {
     this.obtain('general');
   }
+  metaInfo = {
+      title: 'Feljegyzések',
+  }
 }
 
 // $ adb shell pm list packages

@@ -270,5 +270,8 @@ export default class Statistics extends mixins(Mixin) {
     }
     return ret;
   }
+  metaInfo = {
+      title: 'Statisztikák',
+  }
 }
 </script>

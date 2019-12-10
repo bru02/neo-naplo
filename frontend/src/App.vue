@@ -51,7 +51,7 @@
       <v-toolbar-title>{{ this.$router.currentRoute.name }}</v-toolbar-title>
       <template v-slot:extension>
         <v-progress-linear
-          :active="loading"
+          :active="loading > 0"
           color="light-blue"
           :indeterminate="true"
           class="ma-0"
@@ -77,21 +77,25 @@ import { authMapper } from '@/store';
 export default class App extends mixins(Mixin) {
   drawer = false;
   routes = routes;
-  loading = false;
+  loading = 0;
   created() {
     this.$http.interceptors.request.use((config = {}) => {
-      this.loading = true;
+      this.loading++
       return config;
     });
     this.$http.interceptors.response.use(
       res => {
-        this.loading = false;
+        this.loading--;
         return res;
       },
       (error: any) => {
-        this.loading = false;
+        this.loading--;
       }
     );
+  }
+  metaInfo = {
+      title: '...',
+      titleTemplate: '%s | Filc Napló'
   }
 }
 </script>

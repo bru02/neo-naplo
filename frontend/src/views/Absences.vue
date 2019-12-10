@@ -54,5 +54,8 @@ export default class AbsencesComponent extends mixins(Mixin) {
   mounted() {
     this.obtain('general');
   }
+  metaInfo = {
+      title: 'Hiányzások',
+  }
 }
 </script>

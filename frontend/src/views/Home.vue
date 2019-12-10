@@ -136,5 +136,8 @@ export default class HomeComponent extends mixins(Mixin) {
         l.endTime * 1000 > +this.time
     );
   }
+  metaInfo = {
+      title: 'Faliújság',
+  }
 }
 </script>

@@ -41,5 +41,8 @@ export default class EvaluationsComponent extends mixins(Mixin) {
   mounted() {
     this.obtain('general');
   }
+  metaInfo = {
+      title: 'Jegyek',
+  }
 }
 </script>

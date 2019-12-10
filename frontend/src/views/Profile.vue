@@ -217,5 +217,8 @@ export default class Profile extends mixins(Mixin) {
     if (!classGroup) return '';
     return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
   }
+  metaInfo = {
+      title: 'Profil',
+  }
 }
 </script>

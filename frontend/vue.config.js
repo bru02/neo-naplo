@@ -50,5 +50,8 @@ module.exports = {
         progressiveImages: process.env.NODE_ENV === 'production'
       }
     ]);
+  },
+  pwa: {
+    themeColor: '#303f9f',
   }
 };
