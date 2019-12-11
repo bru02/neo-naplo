@@ -75,6 +75,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 @Component
 export default class LoginComponent extends mixins(Mixin) {
+  name = 'Belépés'
   @Prop(String) readonly csrf: string | undefined;
   @Prop(Array) readonly errors: any;
   public $refs!: {

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'eFilc'),
+    'name' => env('APP_NAME', 'Filc Napló'),
     'version' => env('APP_VERSION', '1.0.0'),
     /*
     |--------------------------------------------------------------------------

@@ -182,6 +182,7 @@ import { GeneralAPI, OsztalyCsoport, Tutelary } from '../api-types';
   })
 })
 export default class Profile extends mixins(Mixin) {
+  name = 'Profil'
   general!: GeneralAPI;
   mounted() {
     this.obtain('general');

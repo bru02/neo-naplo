@@ -36,18 +36,18 @@ class eFilcController extends Controller
         return response()->file('datas.json');
     }
 
-    public function manifest() {
-       return response()->json([
-            "name"=> config('app.name'),
-            "short_name" => "eFilc",
-            "theme_color" => "#2196f3",
-            "background_color" => "#ffffff",
-            "display" => "standalone",
-            "lang" => "hu-HU",
-            "scope"=> config('app.url') . '/',
-            "start_url"=> config('app.url') . '/?utm_source=a2hs',
-            "gcm_sender_id"=> config('webpush.gcm.sender_id') . '',
-       ]);
+    // public function manifest() {
+    //    return response()->json([
+    //         "name"=> config('app.name'),
+    //         "short_name" => "Filc",
+    //         "theme_color" => "#303f9f",
+    //         "background_color" => "#ffffff",
+    //         "display" => "standalone",
+    //         "lang" => "hu-HU",
+    //         "scope"=> config('app.url') . '/',
+    //         "start_url"=> config('app.url') . '/?utm_source=a2hs',
+    //         "gcm_sender_id"=> config('webpush.gcm.sender_id') . '',
+    //    ]);
           
-    }
+    // }
 }

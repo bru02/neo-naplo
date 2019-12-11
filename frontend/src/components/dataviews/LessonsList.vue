@@ -7,6 +7,8 @@
       :key="lesson.id"
       @click="lesson.date && $emit('input', lesson)"
       :class="[`r${lesson.count}`]"
+      :ripple="lesson.date"
+      :inactive="!lesson.date"
     >
       <v-list-item-icon v-show="showCount">
         <h4>{{ lesson.count }}</h4>

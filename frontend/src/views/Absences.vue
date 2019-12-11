@@ -59,6 +59,7 @@ import { Absence } from '../api-types';
   components: { AbsencesList, DataViewer }
 })
 export default class AbsencesComponent extends mixins(Mixin) {
+  name = 'Hiányzások'
   selectedAbsence: Absence | boolean = false;
   mounted() {
     this.obtain('general');

@@ -66,7 +66,9 @@ import { Lesson, TimetableAPI } from '@/api-types';
 @Component({
   components: { LessonsList, DataViewer }
 })
-export default class TimetableComponent extends mixins(Mixin) {
+export default class TimetableComponent extends mixins(Mixin) {  name = 'Órarend'
+
+
   active = 0;
   @Prop() cweek!: number;
   @Prop({ default: '' }) lessonHash!: string;

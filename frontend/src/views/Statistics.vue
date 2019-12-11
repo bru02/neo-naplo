@@ -1,5 +1,6 @@
 <template>
-  <v-list v-if="!subject">
+<v-container v-if="!subject">
+    <v-list>
     <v-list-item-group>
       <v-list-item
         v-for="(item, i) in values"
@@ -21,6 +22,8 @@
       </v-list-item>
     </v-list-item-group>
   </v-list>
+</v-container>
+
   <v-container v-else fluid>
     <v-card class="mx-auto">
       <v-img
@@ -164,6 +167,7 @@ interface Stat {
   components: { DataViewer, AbsencesList }
 })
 export default class Statistics extends mixins(Mixin) {
+  name = 'Statisztikák'
   @Prop({ default: false }) subject!: string;
   evaluations!: Evaluation[];
   absences!: AbsenceGroup[];

@@ -110,6 +110,7 @@ import {
   }
 })
 export default class HomeComponent extends mixins(Mixin) {
+  name = 'Kezdőlap'
   selectedNote: Note | boolean = false;
   selectedAbsence: Absence | boolean = false;
   selectedEval: Evaluation | boolean = false;
