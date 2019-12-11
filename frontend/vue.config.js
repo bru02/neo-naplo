@@ -52,6 +52,6 @@ module.exports = {
     ]);
   },
   pwa: {
-    manifestPath: '/manifest'
+    themeColor: '#303f9f'
   }
 };

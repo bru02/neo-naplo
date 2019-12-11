@@ -63,11 +63,15 @@ import DataViewer from '@/components/DataViewer.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Watch, Prop } from 'vue-property-decorator';
 import { Lesson, TimetableAPI } from '@/api-types';
-@Component({
-  components: { LessonsList, DataViewer }
-})
-export default class TimetableComponent extends mixins(Mixin) {  name = 'Órarend'
+import { timeMapper } from '@/store';
 
+@Component({
+  components: { LessonsList, DataViewer },
+  computed: timeMapper.mapGetters(['date'])
+})
+export default class TimetableComponent extends mixins(Mixin) {
+  name = 'Órarend';
+  date!: Date;
 
   active = 0;
   @Prop() cweek!: number;
@@ -82,6 +86,9 @@ export default class TimetableComponent extends mixins(Mixin) {  name = 'Óraren
     this.timetable = {};
     this.obtain('timetable', this.cweek).then((v: TimetableAPI) => {
       this.timetable = v;
+      if (+this.date / 1000 in v) {
+        this.active = Object.keys(v).indexOf(`${+this.date / 1000}`);
+      }
       if (this.lessonHash) {
         const [date, nol] = this.lessonHash.split(':');
         for (const l of v[date]) {

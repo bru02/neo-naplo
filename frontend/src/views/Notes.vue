@@ -65,7 +65,7 @@ import DataViewer from '@/components/DataViewer.vue';
   components: { DataViewer }
 })
 export default class NotesComponent extends mixins(Mixin) {
-  name = 'Feljegyzések'
+  name = 'Feljegyzések';
   selectedNote: Note | boolean = false;
   headers = [
     {

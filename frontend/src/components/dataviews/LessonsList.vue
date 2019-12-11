@@ -3,11 +3,10 @@
     <v-subheader v-show="!!header">{{ header }}</v-subheader>
     <v-list-item
       v-for="lesson in groupedLessons"
-      v-ripple
       :key="lesson.id"
       @click="lesson.date && $emit('input', lesson)"
       :class="[`r${lesson.count}`]"
-      :ripple="lesson.date"
+      :ripple="!!lesson.date"
       :inactive="!lesson.date"
     >
       <v-list-item-icon v-show="showCount">
@@ -57,7 +56,7 @@ export default class LessonList extends mixins(Mixin) {
         for (const l of this.lessons) {
           if (l.count == min + i) return l;
         }
-        return { subject: '-', count: i + min };
+        return { subject: '', count: i + min };
       });
     }
   }

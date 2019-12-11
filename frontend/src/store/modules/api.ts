@@ -95,6 +95,7 @@ class ApiActions extends Actions<
   ApiActions
 > {
   pullGeneral(): Promise<GeneralAPI> {
+    this.state.general.loading = true;
     return api.getGeneral().then(response => {
       this.commit('updateGeneral', response);
       return response;

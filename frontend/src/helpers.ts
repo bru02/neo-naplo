@@ -50,7 +50,7 @@ const utc2date = (value: number | Date): Date => {
   formatTime = (utc: number, sec = true): String => {
     return utc2date(utc)
       .toLocaleTimeString()
-      .substr(0, sec ? 8 : -3);
+      .slice(0, sec ? 8 : -3);
   };
 
 export { formatDate, day, toldyLink, utc2date, formatTime };

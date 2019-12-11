@@ -301,7 +301,7 @@ class KretaApi {
                 }
                 $hirdetmenyek[] = [
                     'date' => $date,
-                    'content' => ucwords($title) . ": $con",
+                    'content' => trim(ucwords($title)) . ": $con",
                     'teacher' => $author,
                     'attachments' => $attachments,
                     'id' => "tld$id",

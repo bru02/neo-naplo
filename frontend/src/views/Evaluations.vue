@@ -37,7 +37,7 @@ import { Evaluation } from '../api-types';
   components: { EvaluationsTable, EvaluationsList, DataViewer }
 })
 export default class EvaluationsComponent extends mixins(Mixin) {
-  name = 'Jegyek'
+  name = 'Jegyek';
   selectedEvaluation: Evaluation | boolean = false;
   mounted() {
     this.obtain('general');

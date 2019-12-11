@@ -1,28 +1,28 @@
 <template>
-<v-container v-if="!subject">
+  <v-container v-if="!subject">
     <v-list>
-    <v-list-item-group>
-      <v-list-item
-        v-for="(item, i) in values"
-        :key="i"
-        :to="`/statistics/${item.subject}`"
-      >
-        <v-list-item-icon>
-          <v-icon>{{ getSubjectIcon(item.subjectCategoryName) }}</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>{{ item.subject }}</v-list-item-title>
-          <v-list-item-subtitle
-            >{{ (item.average && `${item.average} &dash;`) || '' }}
-            <span :class="[`${item.absencesCount.color}--text`]">{{
-              item.absencesCount.text
-            }}</span></v-list-item-subtitle
-          >
-        </v-list-item-content>
-      </v-list-item>
-    </v-list-item-group>
-  </v-list>
-</v-container>
+      <v-list-item-group>
+        <v-list-item
+          v-for="(item, i) in values"
+          :key="i"
+          :to="`/statistics/${item.subject}`"
+        >
+          <v-list-item-icon>
+            <v-icon>{{ getSubjectIcon(item.subjectCategoryName) }}</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>{{ item.subject }}</v-list-item-title>
+            <v-list-item-subtitle
+              >{{ (item.average && `${item.average} &dash;`) || '' }}
+              <span :class="[`${item.absencesCount.color}--text`]">{{
+                item.absencesCount.text
+              }}</span></v-list-item-subtitle
+            >
+          </v-list-item-content>
+        </v-list-item>
+      </v-list-item-group>
+    </v-list>
+  </v-container>
 
   <v-container v-else fluid>
     <v-card class="mx-auto">
@@ -167,7 +167,7 @@ interface Stat {
   components: { DataViewer, AbsencesList }
 })
 export default class Statistics extends mixins(Mixin) {
-  name = 'Statisztikák'
+  name = 'Statisztikák';
   @Prop({ default: false }) subject!: string;
   evaluations!: Evaluation[];
   absences!: AbsenceGroup[];

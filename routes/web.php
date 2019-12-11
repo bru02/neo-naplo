@@ -16,6 +16,7 @@ Route::view('/notes', 'index');
 Route::view('/evaluations', 'index');
 Route::view('/timetable', 'index');
 Route::view('/timetable/{week}', 'index');
+Route::view('/timetable/{week}/{lessonHash}', 'index');
 Route::view('/statistics', 'index');
 Route::view('/statistics/{subject}', 'index');
 Route::view('/profile', 'index');
