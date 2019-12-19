@@ -111,7 +111,8 @@ export default class LoginComponent extends mixins(Mixin) {
         .dispatch('auth/login', {
           school: this.school,
           username: this.username,
-          password: this.password
+          password: this.password,
+          rme: this.rememberMe
         })
         .then(() => {
           this.loading = false;

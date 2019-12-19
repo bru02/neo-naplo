@@ -13,7 +13,11 @@
           <v-list-item-content>
             <v-list-item-title>{{ item.subject }}</v-list-item-title>
             <v-list-item-subtitle
-              >{{ (item.average && `${item.average} &dash;`) || '' }}
+              ><span
+                :class="[`${getEvaluationColor(item.average)}--text`]"
+                v-if="!!item.average"
+                >{{ item.average }}</span
+              >{{ item.average && item.absencesCount.text && ' &mdash; ' }}
               <span :class="[`${item.absencesCount.color}--text`]">{{
                 item.absencesCount.text
               }}</span></v-list-item-subtitle
@@ -25,7 +29,31 @@
   </v-container>
 
   <v-container v-else fluid>
-    <v-card class="mx-auto">
+    <v-card class="mx-auto" loading>
+      <template v-slot:progress>
+        <div class="stacked-bar-graph v-pogress-linear">
+          <span
+            :style="{ width: `${(bars['darken-1 green'] || 0) * 100}%` }"
+            class="darken-1 green"
+          ></span>
+          <span
+            :style="{ width: `${(bars['darken-1 light-green'] || 0) * 100}%` }"
+            class="darken-1 light-green"
+          ></span>
+          <span
+            :style="{ width: `${(bars['darken-2 lime'] || 0) * 100}%` }"
+            class="darken-2 lime"
+          ></span>
+          <span
+            :style="{ width: `${(bars['darken-3 amber'] || 0) * 100}%` }"
+            class="darken-3 amber"
+          ></span>
+          <span
+            :style="{ width: `${(bars['darken-4 deep-orange'] || 0) * 100}%` }"
+            class="darken-4 deep-orange"
+          ></span>
+        </div>
+      </template>
       <v-img
         :src="
           require(`@/assets/subject-bg/${getSubjectIcon(
@@ -221,7 +249,7 @@ export default class Statistics extends mixins(Mixin) {
     for (const stat of this.values) {
       if (stat.subject == this.subject) return stat;
     }
-    return null;
+    return {} as any;
   }
 
   get groupedAbsences(): { [k: string]: Absence[] } {
@@ -230,6 +258,36 @@ export default class Statistics extends mixins(Mixin) {
 
   get absencesList() {
     return this.absences.map(ag => ag.items).flatMap(a => a);
+  }
+
+  get csebv() {
+    // Kell a cache
+    return this.group(
+      this.currentSubject.evaluations.filter(
+        (e: Evaluation) => e.isAtlagbaBeleszamit && e.form == 'Mark'
+      ),
+      'numberValue'
+    );
+  }
+
+  get bars() {
+    const ret: { [k: string]: number } = {};
+    if (this.active == 1) {
+      const sum = this.currentSubject.absences.length;
+      for (const type in this.currentSubject.absencesCount
+        .absencesByJustification) {
+        // @ts-ignore
+        ret[this.getAbsenceColor(type)] =
+          this.currentSubject.absencesCount.absencesByJustification[type]
+            .length / sum;
+      }
+    } else {
+      const sum = this.currentSubject.evaluations.length;
+      for (const val in this.csebv) {
+        ret[this.getEvaluationColor(+val)] = this.csebv[val].length / sum;
+      }
+    }
+    return ret;
   }
 
   getAbsencesCount(absences: Absence[]) {
@@ -279,3 +337,15 @@ export default class Statistics extends mixins(Mixin) {
   };
 }
 </script>
+<style lang="scss">
+.stacked-bar-graph {
+  width: 100%;
+  height: 4px;
+  span {
+    height: 100%;
+    box-sizing: border-box;
+    transition: width 0.4s ease-in-out;
+    float: left;
+  }
+}
+</style>

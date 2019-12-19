@@ -3,7 +3,6 @@ import store from './store';
 import router from './plugins/router';
 import vuetify from './plugins/vuetify';
 import './plugins/axios';
-//import './plugins/auth';
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import '@mdi/font/css/materialdesignicons.css';
 

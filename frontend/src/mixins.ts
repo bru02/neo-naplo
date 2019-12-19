@@ -20,7 +20,7 @@ export default class Mixin extends Vue {
   time!: Date;
   date!: Date;
 
-  getEvaluationColor(nv) {
+  getEvaluationColor(nv: number) {
     if (nv >= 4.5) return 'darken-1 green';
     if (nv >= 3.5) return 'darken-1 light-green';
     if (nv >= 2.5) return 'darken-2 lime';
@@ -29,6 +29,7 @@ export default class Mixin extends Vue {
   }
 
   getAverage(evaluations) {
+    if (!evaluations.length) return 0;
     let sum = 0,
       n = 0;
     for (const evaluation of evaluations) {
@@ -43,9 +44,9 @@ export default class Mixin extends Vue {
 
   getAbsenceColor(justificationState: JustificationState) {
     return {
-      Justified: 'green',
-      BeJustified: 'orange',
-      UnJustified: 'red'
+      Justified: 'darken-1 green',
+      BeJustified: 'darken-3 amber',
+      UnJustified: 'darken-4 deep-orange'
     }[justificationState];
   }
   getKey(item) {

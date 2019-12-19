@@ -38,11 +38,7 @@ jobs:
             ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
-      - name: Generate key
-        run: |
-          php artisan key:generate
-          php artisan jwt:secret
-      - name: Optimize cache
+      - name: cache config
         run: php artisan config:cache
       - name: Remove unnecesary files
         run: |
@@ -78,4 +74,3 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-

@@ -51,9 +51,6 @@ export default class ChangedLessonCard extends mixins(Mixin) {
   get mode() {
     return this.lesson.state == 'Missed' ? 'missed' : 'substitution';
   }
-  get isToday() {
-    return this.lesson.date == +this.date / 1000;
-  }
   get relativeDay() {
     let day: String;
     if (this.lesson.date == +this.date / 1000) {
@@ -64,7 +61,7 @@ export default class ChangedLessonCard extends mixins(Mixin) {
       day = this.day(this.lesson.date);
     }
     if (this.mode == 'missed') {
-      day = day.substr(0, 1).toUpperCase() + day.slice(1) + 'a(z) ';
+      day = day.substr(0, 1).toUpperCase() + day.slice(1) + ' a(z) ';
     }
     return day;
   }

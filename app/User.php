@@ -3,25 +3,29 @@ namespace App;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Log;
 use Session;
 use Jenssegers\Model\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Str;
+
 
 class User extends Model implements Authenticatable, JWTSubject
 {
     protected $refresh_token;
     protected $access_token;
-    protected $rme;
+    protected $encryptionKey;
+    protected $hash;
 
     public $school;
     public $data;
-    public $toldyClassCode;
     public $id;
     public $timetable;
 
     private $tokenData;
 
-    public function __construct($result = null)
+    public function __construct($result = null, $keys = null)
     {
         if(isset($result)) {
             $this->access_token = $result->access_token;
@@ -30,6 +34,16 @@ class User extends Model implements Authenticatable, JWTSubject
             $this->school = $this->tokenData->{'kreta:institute_code'};
             $this->id = $this->tokenData->{'kreta:institute_user_id'};
             $this->timetable = (object)[];
+        }
+        if(isset($keys)) {
+            $this->hash = $keys['hash'];
+            $this->encryptionKey = $keys['key'];
+        } else {
+            $this->hash = Str::random(60);
+            $this->encryptionKey = Encrypter::generateKey(config('app.cipher'));
+            DB::table('tokens')->insert(
+                ['kreta_id' => $this->getAuthIdentifier(), 'remember_token' => $this->hash, 'access_token' => $this->encrypt($this->access_token) , 'refresh_token' => $this->encrypt($this->refresh_token)]
+            );
         }
     }
 
@@ -44,7 +58,7 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function getAuthIdentifierName()
     {
-       return $this->id;
+       return 'kreta_id';
     }
 
     /**
@@ -52,7 +66,7 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function getAuthIdentifier()
     {
-       return $this->id;
+       return $this->tokenData->{'idp:user_id'};
     }
 
     /**
@@ -68,7 +82,7 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function getRememberToken()
     {
-        return $this->rme;
+        return DB::table('tokens')->where('kreta_id', $this->getAuthIdentifier())->value('remember_token');
     }
 
     /**
@@ -77,25 +91,20 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function setRememberToken($value)
     {
-        $this->rme = $value;
+        DB::table('tokens')
+        ->where($this->getAuthIdentifierName(), $this->getAuthIdentifier())
+        ->update([$this->getRememberTokenName() => $value]);
     }
-
-    /**
-     * @return  string
-     */
     public function getRememberTokenName()
     {
         // Return the name of the column / attribute used to store the "remember me" token
         return $this->rme;
     }
-
     public function stringify() {
         $attrs = [
-            'rme',
             'id',
             'data',
             'school',
-            'toldyClassCode',
             'timetable',
             'tokenData',
             'access_token',
@@ -120,7 +129,7 @@ class User extends Model implements Authenticatable, JWTSubject
     }
 
     public function loadData() {
-        $data = KretaApi::getStudent($this->school, $this->getToken(), $this->toldyClassCode);
+        $data = KretaApi::getStudent($this->school, $this->getToken());
         $this->data = $data;
         return $data;
     }
@@ -153,11 +162,23 @@ class User extends Model implements Authenticatable, JWTSubject
         return $this->access_token;
     }
 
+    private static function row() {
+        return DB::table('tokens')
+        ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])->first();
+    }
+
+    private function encrypt($string) {
+
+        $enc =  new Encrypter($this->encryptionKey, config('app.cipher'));
+        return $enc->encrypt( $string );
+    } 
+
     private function refreshToken() {
         $result = KretaApi::getToken($this->school, $this->refresh_token);
         $this->access_token = $result->access_token;
         $this->refresh_token = $result->refresh_token;
         $this->tokenData = $this->decompileToken();
+        self::row()->update(['access_token' => $this-> encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
         $this->log([
             'action' => __FUNCTION__,
             'caller' => debug_backtrace()[0],
@@ -173,21 +194,21 @@ class User extends Model implements Authenticatable, JWTSubject
     }
 
     private function log($what) {
-        Log::debug("Action: $what[action], caller: , at: $what[access_token], rt: $what[refresh_token], exp: $what[exp]");
+        // Log::debug("Action: $what[action], caller: , at: $what[access_token], rt: $what[refresh_token], exp: $what[exp]");
     }
 
     public function getJWTIdentifier()
     {
-      return $this->getAuthIdentifier();
+      return ['hash' => $this->hash, 'key' => 'base64:'.base64_encode($this->encryptionKey), 'id' => $this->getAuthIdentifier()];
     }
 
     public function getJWTCustomClaims()
     {
       return [
-          'usr' => [
-              'id' => $this->tokenData->{'idp:user_id'},
-              'role' => $this->tokenData->role
-          ]
+        //   'usr' => [
+        //       'id' => $this->tokenData->{'idp:user_id'},
+        //       'role' => $this->tokenData->role
+        //   ]
       ];
     }
 

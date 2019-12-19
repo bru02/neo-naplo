@@ -9,6 +9,7 @@ import Evaluations from '@/views/Evaluations.vue';
 import Statistics from '@/views/Statistics.vue';
 import Profile from '@/views/Profile.vue';
 import Login from '@/views/Login.vue';
+import NotFound from '@/views/NotFound.vue';
 
 const routes = [
   {
@@ -86,6 +87,10 @@ const routes = [
     meta: {
       auth: true
     }
+  },
+  {
+    path: '*',
+    component: NotFound
   }
 ];
 

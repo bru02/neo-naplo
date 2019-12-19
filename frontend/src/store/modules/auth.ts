@@ -41,7 +41,7 @@ class AuthActions extends Actions<
     // Create and retain foo module context
     this.api = apiModule.context(store);
   }
-  async login({ username, password, school }) {
+  async login({ username, password, school, rme }) {
     const res = await api.login(username, password, school);
     if (res.data.access_token) {
       this.commit('updateToken', res.data.access_token);
@@ -50,8 +50,10 @@ class AuthActions extends Actions<
     return Promise.reject('No tokens supplied');
   }
   async logout() {
-    api.logout();
-    this.commit('updateToken', '');
+    api.logout().then(() => {
+      this.commit('updateToken', '');
+    });
+
     this.api.commit('reset');
   }
   async refreshToken(): Promise<any> {

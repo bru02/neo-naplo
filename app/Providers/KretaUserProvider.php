@@ -4,7 +4,9 @@ use App\User;
 use Illuminate\Contracts\Auth\UserProvider as IlluminateUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Session;
-use DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Str;
 
 class KretaUserProvider implements IlluminateUserProvider
 {
@@ -21,9 +23,22 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveById($identifier)
     {
-        $usr = new User();
-        $usr->load(Session::get('user'));
-        if($usr->id == $identifier) return $usr;
+        $user = DB::table('tokens')->select('*')->where([
+            ['kreta_id',$identifier->id],
+            ['remember_token', $identifier->hash]])->first();
+            if(!isset($user)) {
+                return null;
+            }
+        if (Str::startsWith($key = $identifier->key, 'base64:')) {
+            $key = base64_decode(substr($key, 7));
+        }
+        $enc =  new Encrypter($key, config('app.cipher'));
+        return new User((object)[
+            'access_token' => $enc->decrypt( $user->access_token),            'refresh_token' => $enc->decrypt($user->refresh_token)
+        ], [
+            'hash' =>$identifier->hash,
+            'key' => $key
+        ]);
     }
 
     /**
@@ -35,10 +50,7 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveByToken($identifier, $token)
     {
-        $results = DB::table('users')->select('*')->where([
-            ['uid',$identifier],
-            ['token', $token]])->get();
-        return $results[0];
+        return 'No.';
     }
 
     /**
@@ -50,9 +62,6 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function updateRememberToken(Authenticatable $user, $token)
     {
-        DB::table('rme')
-        ->where($user->getAuthIdentifierName(), $user->getAuthIdentifier())
-        ->update([$user->getRememberTokenName() => $token]);
         $user->setRememberToken($token);
     }
 

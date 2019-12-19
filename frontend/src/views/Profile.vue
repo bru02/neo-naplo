@@ -147,7 +147,7 @@
               p => p.tipus == 'PublikusTelefonszam'
             )"
             :key="phoneNumber.uid"
-            :href="`${mobile ? 'tel' : 'call'}to:${phoneNumber.telefonszam}`"
+            :href="`${mobile ? 'tel' : 'callto'}:${phoneNumber.telefonszam}`"
           >
             <v-list-item-icon>
               <v-icon v-show="i == 0"></v-icon>
@@ -194,7 +194,7 @@ export default class Profile extends mixins(Mixin) {
         ret.push({
           title: obj.phoneNumber,
           icon: 'mdi-phone',
-          href: `${this.mobile ? 'tel' : 'call'}to:${obj.phoneNumber}`
+          href: `${this.mobile ? 'tel' : 'callto'}:${obj.phoneNumber}`
         });
       }
       if (obj.email) {
