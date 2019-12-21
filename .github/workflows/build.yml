@@ -34,8 +34,6 @@ jobs:
             ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist --optimize-autoloader --no-dev
-      - name: cache config
-        run: php artisan config:cache
       - name: Remove unnecesary files
         run: |
           rm -r frontend
