@@ -68,9 +68,27 @@ jobs:
   #        asset_path: ./my-artifact.zip
   #        asset_name: my-artifact.zip
   #        asset_content_type: application/zip
-      - name: 'Deploy to Azure WebApp'
-        uses: azure/webapps-deploy@v1
-        with: 
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      # - name: 'Deploy to Azure WebApp'
+      #   uses: azure/webapps-deploy@v1
+      #   with: 
+      #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
+      #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      #     package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          - name: login
+              uses: actions/heroku@master
+              env:
+                HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+              with:
+                args: container:login
+            - name: push
+              uses: actions/heroku@master
+              env:
+                HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+              with:
+                args: container:push -a calm-fortress-1234 web
+            - name: release
+              uses: actions/heroku@master
+              env:
+                HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+              with:
+                args: container:release -a calm-fortress-1234 web
