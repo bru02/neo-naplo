@@ -2,6 +2,7 @@
     "name": "heroku-bad",
     "version": "0.1.0",
     "scripts": {
-      "postinstall": "npm install --dev --prefix frontend"
+      "postinstall": "npm install --prefix frontend",
+      "build": "npm run build --prefix frontend"
     }
   }
