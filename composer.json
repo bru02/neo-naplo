@@ -67,7 +67,7 @@
         "post-install-cmd": [
             "php artisan migrate --force",
             "php artisan config:cache",
-            "frontend/build.sh"
+            "bash frontend/build.sh"
         ]
     }
 }
