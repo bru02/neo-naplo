@@ -75,6 +75,8 @@ class KretaApi {
             'headers' => [
                 'apiKey' => '7856d350-1fda-45f5-822d-e1a2f3f1acf0'
             ],
+            'verify' => false,
+
         ])->getBody();
         $sch = json_decode($response);
         $out = [];
@@ -84,7 +86,7 @@ class KretaApi {
                 'code' => $school->InstituteCode
             );
         }
-        // file_put_contents("../public/datas.json", json_encode($out, JSON_UNESCAPED_UNICODE));
+        file_put_contents("../public/datas.json", json_encode($out, JSON_UNESCAPED_UNICODE));
         return $out;
     }
 

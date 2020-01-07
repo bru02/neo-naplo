@@ -15,9 +15,9 @@
             <v-list-item-subtitle
               ><span
                 :class="[`${getEvaluationColor(item.average)}--text`]"
-                v-if="!!item.average"
-                >{{ item.average }}</span
-              >{{ item.average && item.absencesCount.text && ' &mdash; ' }}
+                v-if="item.average"
+                >{{ item.average  }}{{ item.absencesCount.text && ' &mdash; ' }}</span
+              >
               <span :class="[`${item.absencesCount.color}--text`]">{{
                 item.absencesCount.text
               }}</span></v-list-item-subtitle
@@ -56,10 +56,12 @@
       </template>
       <v-img
         :src="
-          require(`@/assets/subject-bg/${getSubjectIcon(
+          require(`@/assets/resized/${getSubjectIcon(
             currentSubject.subjectCategoryName
-          )}.jpg?vuetify-preload`)
+          )}-xl.jpg`)
         "
+        :srcset="getSrcset(getSubjectIcon(currentSubject.subjectCategoryName))"
+        sizes="(max-width: 600px) 563px, (max-width: 960px) 900px, (max-width: 1264px) 1185px, 1785px"
         height="300px"
         dark
       >
@@ -243,6 +245,21 @@ export default class Statistics extends mixins(Mixin) {
       subjectCategoryName: 'Összes tantárgy'
     });
     return ret;
+  }
+
+  getSrcset(name) {
+    const sizes = {
+      sm: 563,
+      md: 900,
+      lg: 1185,
+      xl: 1785
+    };
+    return Object.entries(sizes)
+      .map(
+        ([size, width]) =>
+          `${require(`@/assets/resized/${name}-${size}.jpg`)} ${width}w`
+      )
+      .join(',');
   }
 
   get currentSubject() {
