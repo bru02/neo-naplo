@@ -2,7 +2,7 @@
     "name": "heroku-bad",
     "version": "0.1.0",
     "scripts": {
-      "postinstall": "mkdir -p frontend/node_modules && cd frontend && NODE_ENV=DEVELOPMENT && npm install -D --prefix frontend/node_modules",
+      "postinstall": "cd frontend npm install -D",
       "build": "cd frontend && npm run build"
     }
   }
