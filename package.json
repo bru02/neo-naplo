@@ -2,7 +2,7 @@
   "name": "heroku-bad",
   "version": "0.1.0",
   "scripts": {
-    "postinstall": "cd frontend && npm install -D&& npm run build",
+    "postinstall": "npm i -g vue-cli && cd frontend && npm install -D&& npm run build",
     "build": "ls"
   }
 }
