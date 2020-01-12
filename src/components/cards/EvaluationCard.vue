@@ -5,7 +5,7 @@
     @click.native="$emit('input', evaluation)"
   >
     <div class="d-flex flex-no-wrap">
-      <v-avatar class="ma-3" size="125" tile>
+      <v-avatar class="ma-3" size="auto" tile>
         <h1
           :class="[
             'display-1',

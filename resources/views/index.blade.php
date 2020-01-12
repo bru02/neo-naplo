@@ -1,13 +1,1 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="description" content="Nem hivatalos eKRÉTA kliens">
-    <title>Filc Napló</title>
-</head>
-<body>
-    
-</body>
-</html>
+<!DOCTYPE html><html lang=hu><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=description content="Nem hivatalos eKRÉTA kliens"><title>Filc Napló</title><link href=/js/insights.01c79b57.js rel=prefetch><link href=/css/app.6d97a68b.css rel=preload as=style><link href=/css/chunk-vendors.f2b55967.css rel=preload as=style><link href=/js/app.5cf5b73c.js rel=preload as=script><link href=/js/chunk-vendors.f5c5e6e9.js rel=preload as=script><link href=/css/chunk-vendors.f2b55967.css rel=stylesheet><link href=/css/app.6d97a68b.css rel=stylesheet><link rel=icon type=image/png sizes=32x32 href=/img/icons/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/img/icons/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=theme-color content=#303f9f><meta name=apple-mobile-web-app-capable content=no><meta name=apple-mobile-web-app-status-bar-style content=default><meta name=apple-mobile-web-app-title content=filc><link rel=apple-touch-icon href=/img/icons/apple-touch-icon-152x152.png><link rel=mask-icon href=/img/icons/safari-pinned-tab.svg color=#303f9f><meta name=msapplication-TileImage content=/img/icons/msapplication-icon-144x144.png><meta name=msapplication-TileColor content=#000000></head><body><div id=app></div><script src=/js/chunk-vendors.f5c5e6e9.js></script><script src=/js/app.5cf5b73c.js></script></body></html>

@@ -188,11 +188,11 @@
       :fn="evalValues"
       v-model="selectedEvaluation"
     />
-    <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
         <v-fab-transition>
           <v-btn
-            v-show="active == 0"
+            v-show="this.currentSubject.evaluations.length && active == 0"
             color="red"
             dark
             fixed

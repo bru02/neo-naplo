@@ -12,13 +12,18 @@
             <span style="float: right">{{ entry.date | formatDate }}</span>
           </div>
           <template v-slot:actions>
-            <v-icon :color="getAbsenceColor(entry.items[0].justificationState)">{{
-              {
-                Justified: 'mdi-check',
-                BeJustified: 'mdi-help-circle-outline',
-                UnJustified: 'mdi-close'
-              }[entry.items[0].justificationState]
-            }}</v-icon>
+            <v-icon
+              :class="[
+                `${getAbsenceColor(entry.items[0].justificationState)}--text`
+              ]"
+              >{{
+                {
+                  Justified: 'mdi-check',
+                  BeJustified: 'mdi-help-circle-outline',
+                  UnJustified: 'mdi-close'
+                }[entry.items[0].justificationState]
+              }}</v-icon
+            >
           </template>
         </v-expansion-panel-header>
         <v-expansion-panel-content>

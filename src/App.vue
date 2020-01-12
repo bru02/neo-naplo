@@ -54,9 +54,8 @@
           :active="loading > 0"
           color="light-blue"
           :indeterminate="true"
-          class="ma-0"
-          height="4"
-          style="top: -2px;"
+          absolute
+          bottom
         ></v-progress-linear>
       </template>
     </v-app-bar>
@@ -119,14 +118,7 @@ export default class App extends mixins(Mixin) {
   text-overflow: clip;
   white-space: normal;
 }
-.v-toolbar__extension {
-  padding: 0px !important;
-}
-.v-progress-linear {
-  -moz-transform: scale(1, -1);
-  -webkit-transform: scale(1, -1);
-  -o-transform: scale(1, -1);
-  -ms-transform: scale(1, -1);
-  transform: scale(1, -1);
+.v-bottom-navigation {
+  overflow-y: auto;
 }
 </style>
