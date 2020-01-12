@@ -48,6 +48,7 @@ module.exports = {
       config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
       config.plugin('purge').use(
         new PurgecssPlugin({
+          whitelistPatterns: [/^_/],
           paths: glob.sync([
             path.join(__dirname, './src/**/*.vue'),
             path.join(__dirname, './src/**/*.ts')
