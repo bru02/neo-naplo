@@ -71,20 +71,6 @@ export default new Vue({
         next();
       }
     });
-    if (this.$store.getters['auth/isAuthenticated']) {
-      const w = this.week(0);
-      for (const key in ['general', `timetable?from=${w.from}&to=${w.to}`]) {
-        const cachedResponse = await caches.match(`/api/${key}`);
-        let a = key.split('?')[0];
-        if (cachedResponse)
-          this.$store.dispatch(
-            `update${a[0].toUpperCase() + a.substr(1)}`,
-            cachedResponse
-          );
-      }
-    } else if (this.$route.fullPath != '/login') {
-      this.$router.push('/login');
-    }
   }
 });
 

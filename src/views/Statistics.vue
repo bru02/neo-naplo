@@ -16,7 +16,8 @@
               ><span
                 :class="[`${getEvaluationColor(item.average)}--text`]"
                 v-if="item.average"
-                >{{ item.average  }}{{ item.absencesCount.text && ' &mdash; ' }}</span
+                >{{ item.average
+                }}{{ item.absencesCount.text && ' &mdash; ' }}</span
               >
               <span :class="[`${item.absencesCount.color}--text`]">{{
                 item.absencesCount.text
@@ -83,7 +84,12 @@
                   :class="[
                     `${getEvaluationColor(currentSubject.average)}--text`
                   ]"
-                  >{{ currentSubject.average }}</span
+                  >{{
+                    getAverage([
+                      ...currentSubject.evaluations,
+                      ...(added[subject] || [])
+                    ])
+                  }}</span
                 >
               </div>
               <div v-if="currentSubject.classAverage">
@@ -128,6 +134,27 @@
                 {{ formatDate(item.date) }}
               </v-list-item-action>
             </v-list-item>
+            <v-list-item
+              v-for="(item, i) in added[subject] || []"
+              :key="item.id"
+            >
+              <v-list-item-avatar>
+                {{ item.numberValue }}
+              </v-list-item-avatar>
+
+              <v-list-item-content>
+                <v-list-item-title v-text="subject"></v-list-item-title>
+                <v-list-item-subtitle
+                  v-text="item.weight"
+                ></v-list-item-subtitle>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-btn icon color="red" @click="$delete(added[subject], i)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
           </v-list>
         </v-tab-item>
         <v-tab-item v-if="currentSubject.absences.length">
@@ -161,6 +188,62 @@
       :fn="evalValues"
       v-model="selectedEvaluation"
     />
+    <v-dialog v-model="dialog" persistent max-width="600px">
+      <template v-slot:activator="{ on }">
+        <v-fab-transition>
+          <v-btn
+            v-show="active == 0"
+            color="red"
+            dark
+            fixed
+            bottom
+            right
+            fab
+            v-on="on"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </v-fab-transition>
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="headline">Milenne ha kapnék egy..</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-radio-group v-model="numberValue" row>
+              <v-radio
+                v-for="(e, i) in new Array(5)"
+                :label="i + 1 + ''"
+                :value="i + 1"
+                :key="i"
+              ></v-radio>
+            </v-radio-group>
+            <hr />
+            <v-radio-group v-model="weight" row>
+              <v-radio label="50%" value="50%"></v-radio>
+              <v-radio label="100%" value="100%"></v-radio>
+              <v-radio label="200%" value="200%"></v-radio>
+            </v-radio-group>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="dialog = false"
+            >Mégse</v-btn
+          >
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="
+              dialog = false;
+              addEval();
+            "
+            >Hozzáadás</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 <script lang="ts">
@@ -176,6 +259,7 @@ import { apiMapper } from '@/store';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import DataViewer from '@/components/DataViewer.vue';
+import Vue from 'vue';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
 
 interface Stat {
@@ -205,10 +289,12 @@ export default class Statistics extends mixins(Mixin) {
   groupedEvaluations!: { [k: string]: Evaluation[] };
 
   active = 0;
-
+  added = {};
+  numberValue = 5;
+  weight = '100%';
+  dialog = false;
   selectedAbsence = false;
   selectedEvaluation = false;
-
   mounted() {
     this.obtain('general');
   }
@@ -245,6 +331,18 @@ export default class Statistics extends mixins(Mixin) {
       subjectCategoryName: 'Összes tantárgy'
     });
     return ret;
+  }
+  addEval() {
+    if (!(this.subject in this.added)) Vue.set(this.added, this.subject, []);
+    this.added[this.subject].push({
+      numberValue: this.numberValue,
+      // @ts-ignore
+      weight: this.weight,
+      subject: this.subject,
+      id: +new Date(),
+      isAtlagbaBeleszamit: true,
+      form: 'Mark'
+    });
   }
 
   getSrcset(name) {
