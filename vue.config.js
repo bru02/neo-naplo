@@ -5,9 +5,6 @@
 // const glob = require("glob-all");
 const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
   .default;
-const PurgecssPlugin = require('purgecss-webpack-plugin');
-const glob = require('glob-all');
-const path = require('path');
 module.exports = {
   transpileDependencies: ['vuetify'],
   outputDir: 'public',
@@ -46,15 +43,6 @@ module.exports = {
   chainWebpack: config => {
     if (process.env.NODE_ENV === 'production') {
       config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
-      config.plugin('purge').use(
-        new PurgecssPlugin({
-          whitelistPatterns: [/^_/],
-          paths: glob.sync([
-            path.join(__dirname, './src/**/*.vue'),
-            path.join(__dirname, './src/**/*.ts')
-          ])
-        })
-      );
     }
     config.plugin('VuetifyLoaderPlugin').tap(args => [
       {
