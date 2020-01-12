@@ -8,7 +8,7 @@ const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
 
 module.exports = {
   transpileDependencies: ['vuetify'],
-  outputDir: '../public',
+  outputDir: 'public',
   devServer: {
     proxy: 'http://127.0.0.1:8000'
   },
