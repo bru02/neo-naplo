@@ -58,7 +58,6 @@ class AuthActions extends Actions<
   }
   async refreshToken(): Promise<any> {
     const res = await api.refresh();
-    debugger;
     if (res.data.access_token) {
       this.commit('updateToken', res.data.access_token);
       return res;
