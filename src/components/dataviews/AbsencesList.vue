@@ -13,12 +13,7 @@
           >{{ abs.justificationStateName }}</v-list-item-subtitle
         >
       </v-list-item-content>
-      <v-list-item-action>
-        <v-list-item-action-text v-show="showDate">{{
-          abs.date | formatDate
-        }}</v-list-item-action-text
-        >{{ abs.numberOfLessons }}.óra
-      </v-list-item-action>
+      <v-list-item-action> {{ abs.numberOfLessons }}.óra </v-list-item-action>
     </v-list-item>
   </v-list>
 </template>
@@ -31,6 +26,5 @@ import { Absence } from '../../api-types';
 @Component
 export default class AbsencesList extends mixins(Mixin) {
   @Prop() readonly absences: Absence[] | undefined;
-  @Prop({ default: false }) readonly showDate!: boolean;
 }
 </script>

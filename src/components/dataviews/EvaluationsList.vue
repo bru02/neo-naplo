@@ -24,26 +24,30 @@
                 >
               </span>
             </v-subheader>
-            <v-list-item
+            <v-lazy
+              min-height="50px"
               v-for="item in items"
               :key="item.creatingTime"
-              @click="$emit('input', item)"
             >
-              <v-list-item-avatar>
-                {{ item.numberValue }}
-              </v-list-item-avatar>
+              <v-list-item @click="$emit('input', item)">
+                <v-list-item-avatar>
+                  {{ item.numberValue }}
+                </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-list-item-title v-text="item.subject"></v-list-item-title>
-                <v-list-item-subtitle
-                  v-text="item.theme"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.subject"></v-list-item-title>
+                  <v-list-item-subtitle
+                    v-text="item.theme"
+                  ></v-list-item-subtitle>
+                </v-list-item-content>
 
-              <v-list-item-action>
-                {{ formatDate(item.date) }}
-              </v-list-item-action>
-            </v-list-item>
+                <v-list-item-action>
+                  <v-list-item-action-text>
+                    {{ formatDate(item.date) }}
+                  </v-list-item-action-text>
+                </v-list-item-action>
+              </v-list-item>
+            </v-lazy>
 
             <v-divider inset :key="header + '_div'"></v-divider>
           </template>

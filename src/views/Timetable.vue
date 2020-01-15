@@ -22,11 +22,11 @@
         <v-icon>mdi-arrow-right</v-icon>
       </v-btn>
     </v-sheet>
-    <v-tabs v-model="active" v-if="mobile">
+    <v-tab-items v-model="active" v-if="mobile">
       <v-tab-item v-for="(lessons, day) in timetable" :key="day">
         <LessonsList :lessons="lessons" v-model="selectedLesson"></LessonsList>
       </v-tab-item>
-    </v-tabs>
+    </v-tab-items>
     <v-bottom-navigation fixed v-model="active" dark shift v-if="mobile">
       <v-btn v-for="(lessons, utc) in timetable" :key="utc">
         <span>{{ utc | day }}</span>

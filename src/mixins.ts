@@ -73,20 +73,26 @@ export default class Mixin extends Vue {
       Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
     };
   }
-  evalValues({
-    value,
-    weight,
-    theme,
-    subject,
-    mode,
-    typeName,
-    date,
-    teacher,
-    creatingTime,
-    osztalyCsoportUid
-  }: Evaluation) {
+  evalValues(evaluation: Evaluation) {
+    const {
+      value,
+      weight,
+      theme,
+      subject,
+      mode,
+      typeName,
+      date,
+      teacher,
+      creatingTime,
+      osztalyCsoportUid
+    } = evaluation;
+    const evals = this.$store.getters['api/groupedEvaluations'][subject];
+    const others = [...evals];
+    others.splice(others.indexOf(evaluation), 1);
+    const impact = this.getAverage(evals) - this.getAverage(others);
     return {
       Jegy: `${value} (${weight})`,
+      'Hatás az átlagodra': impact,
       Téma: theme || '-',
       Tantárgy: subject,
       Mód: mode,

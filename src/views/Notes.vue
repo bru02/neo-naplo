@@ -15,7 +15,9 @@
       </v-list-item-content>
 
       <v-list-item-action>
-        {{ note.date | formatDate }}
+        <v-list-item-action-text>
+          {{ note.date | formatDate }}
+        </v-list-item-action-text>
       </v-list-item-action>
     </v-list-item>
     <DataViewer title="Feljegyzés" :fn="noteValues" v-model="selectedNote" />

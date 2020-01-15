@@ -32,7 +32,7 @@ class ApiGetters extends Getters<ApiState> {
     let cards: any[] = [];
     for (let type of ['absences', 'notes', 'evaluations', 'events']) {
       cards.push(
-        ...this.state.general.data[type].slice(0).map(e => {
+        ...this.state.general.data[type].map(e => {
           e.category = type;
           return e;
         })

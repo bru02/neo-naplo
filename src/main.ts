@@ -50,7 +50,7 @@ export default new Vue({
             this.$router.push('/login');
           }
         }
-        return Promise.reject(error);
+        return {};
       }
     );
     this.$router.beforeEach((to, from, next) => {
