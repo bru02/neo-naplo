@@ -456,7 +456,9 @@ export default class Statistics extends mixins(Mixin) {
             .length / sum;
       }
     } else {
-      const sum = this.currentSubject.evaluations.length;
+      const sum = this.currentSubject.evaluations.filter(
+        (e: Evaluation) => e.isAtlagbaBeleszamit && e.form == 'Mark'
+      ).length;
       for (const val in this.csebv) {
         ret[this.getEvaluationColor(+val)] = this.csebv[val].length / sum;
       }

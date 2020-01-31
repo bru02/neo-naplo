@@ -20,16 +20,25 @@
             :key="evaluation.id"
           >
             <template v-slot:activator="{ on }">
-              <span :class="getClasses(evaluation)" v-on="on"
+              <span
+                :class="getClasses(evaluation)"
+                v-on="on"
+                @click="$emit('input', evaluation)"
                 >{{ evaluation.numberValue }}
               </span>
             </template>
             <span>
               {{ evaluation.date | formatDate }} <br />
               {{ evaluation.value }} <br />
-              {{ evaluation.mode }} <br />
-              Téma: {{ evaluation.theme }} <br />
-              Súly: {{ evaluation.weight }} <br />
+              <template v-if="evaluation.mode">
+                {{ evaluation.mode }} <br />
+              </template>
+              <template v-if="evaluation.theme">
+                Téma: {{ evaluation.theme }} <br />
+              </template>
+              <template v-if="evaluation.weight && evaluation.weight != '-'">
+                Súly: {{ evaluation.weight }} <br />
+              </template>
               {{ evaluation.teacher }}
             </span>
           </v-tooltip>
@@ -81,7 +90,8 @@ export default class EvaluationsTable extends mixins(Mixin) {
           key = {
             EndYear: 'Évvégi',
             HalfYear: 'Félévi',
-            QuarterEvaluation: 'Negyedéves'
+            IQuarterEvaluation: 'Negyedéves',
+            IIIQuarterEvaluation: 'Negyedéves'
           }[evaluation.type];
         }
 
@@ -97,14 +107,14 @@ export default class EvaluationsTable extends mixins(Mixin) {
       .filter((v, i, a) => {
         return a.indexOf(v) == i;
       })
-      .sort();
+      .reverse();
     return ret;
   }
   getClasses(evaluation) {
     return {
       'green--text': evaluation.mode == 'Beszámoló',
       'blue--text': evaluation.mode == 'Gyakorlati feladat',
-      'red--text': evaluation.weight != '100%',
+      'red--text': evaluation.weight && evaluation.weight != '100%',
       'gray--text': evaluation.mode == 'Órai munka',
       'teal--text-lighten-2': evaluation.mode == 'Házi dolgozat',
       'font-weight-bold': evaluation.weight == '200%'
@@ -116,7 +126,11 @@ export default class EvaluationsTable extends mixins(Mixin) {
       : null;
   }
   getDifference(subject) {
-    if (!this.getClassAverage(subject)) return '-';
+    if (
+      !this.getClassAverage(subject) ||
+      !this.getAverage(this.groupedEvaluations[subject])
+    )
+      return '-';
     return round(
       this.getAverage(this.groupedEvaluations[subject]) -
         // @ts-ignore

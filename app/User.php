@@ -162,7 +162,7 @@ class User extends Model implements Authenticatable, JWTSubject
         return $this->access_token;
     }
 
-    private static function row() {
+    private function row() {
         return DB::table('tokens')
         ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])->first();
     }
@@ -178,7 +178,7 @@ class User extends Model implements Authenticatable, JWTSubject
         $this->access_token = $result->access_token;
         $this->refresh_token = $result->refresh_token;
         $this->tokenData = $this->decompileToken();
-        self::row()->update(['access_token' => $this-> encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
+        $this->row()->update(['access_token' => $this->encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
         $this->log([
             'action' => __FUNCTION__,
             'caller' => debug_backtrace()[0],

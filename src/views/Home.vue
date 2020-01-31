@@ -12,32 +12,32 @@
         v-model="selectedLesson"
       >
       </ChangedLessonCard>
+
       <v-col
         cols="12"
         v-for="card in cards"
         :key="(card.id || card.date) + card.category"
       >
-        <NoteCard
-          :note="card"
-          v-if="card.category == 'notes'"
-          v-model="selectedNote"
-        />
-        <EvaluationCard
-          :evaluation="card"
-          v-else-if="card.category == 'evaluations'"
-          v-model="selectedEval"
-        />
-        <AbsencesCard
-          :absences="card"
-          v-else-if="card.category == 'absences'"
-          v-model="selectedAbsenceGroup"
-        />
-        <EventCard
-          :event="card"
-          v-else-if="card.category == 'events'"
-          v-model="selectedEvent"
-        />
+        <v-lazy :height="150">
+          <NoteCard
+            :note="card"
+            v-if="card.category == 'notes'"
+            v-model="selectedNote"/>
+          <EvaluationCard
+            :evaluation="card"
+            v-else-if="card.category == 'evaluations'"
+            v-model="selectedEval"/>
+          <AbsencesCard
+            :absences="card"
+            v-else-if="card.category == 'absences'"
+            v-model="selectedAbsenceGroup"/>
+          <EventCard
+            :event="card"
+            v-else-if="card.category == 'events'"
+            v-model="selectedEvent"
+        /></v-lazy>
       </v-col>
+
       <v-alert :value="true" type="info" v-show="cards.length == 0 && !loading">
         Még nem kaptál semmit..
       </v-alert>

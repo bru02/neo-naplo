@@ -60,7 +60,7 @@ class AuthActions extends Actions<
     const res = await api.refresh();
     if (res.data.access_token) {
       this.commit('updateToken', res.data.access_token);
-      return res;
+      return res.data.access_token;
     }
     return Promise.reject('No tokens supplied');
   }

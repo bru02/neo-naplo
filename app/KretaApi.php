@@ -132,51 +132,54 @@ class KretaApi {
         $evals = [];
         $groupedEvals = [];
         foreach ($out->evaluations as $eval) {
+            $newVal = ucfirst($eval->value);
             switch ($eval->form) {
                 case 'Deportment':
                     $eval->subject = "Magatartás";
+                    $eval->id .= 'e';
                 break;
 
                 case 'Diligence':
                     $eval->subject = "Szorgalom";
+                    $eval->id .= 'i';
+
                 break;
                 case 'Mark':
                     $eval->value = explode('(', $eval->value)[0];
-                    break;
-                default:
-                    $newVal = ucfirst($eval->value);
-
-                    switch (ucfirst($eval->value)) {
-                        case "Példás":
-                        case "Megfelelt":
-                            $newVal = 5;
-                            break;
-
-                        case "Jó":
-                            $newVal = 4;
-                            break;
-
-                        case "Változó":
-                        case "Közepes":
-                            $newVal = 3;
-                            break;
-
-                        case "Hanyag":
-                        case "Elégséges":
-                            $newVal = 2;
-                            break;
-
-                        case "Elégtelen":
-                            $newVal = 1;
-                            break;
-
-                        default:
-                            break;
-
-                    }
-                    $eval->numberValue = $newVal;
+                    $newVal = $eval->numberValue;
                     break;
             }
+            
+
+            switch (ucfirst($eval->value)) {
+                case "Példás":
+                case "Megfelelt":
+                    $newVal = 5;
+                    break;
+
+                case "Jó":
+                    $newVal = 4;
+                    break;
+
+                case "Változó":
+                case "Közepes":
+                    $newVal = 3;
+                    break;
+
+                case "Hanyag":
+                case "Elégséges":
+                    $newVal = 2;
+                    break;
+
+                case "Elégtelen":
+                    $newVal = 1;
+                    break;
+
+                default:
+                    break;
+
+            }
+            $eval->numberValue = $newVal;
             unset($eval->formName, $eval->subjectCategory, $eval->jelleg, $eval->ertekFajta);
             $eval->typeName = explode('/', $eval->typeName)[0];
 

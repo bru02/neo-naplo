@@ -28,7 +28,7 @@ export default class Mixin extends Vue {
     return 'darken-4 deep-orange';
   }
 
-  getAverage(evaluations) {
+  getAverage(evaluations: Evaluation[]) {
     if (!evaluations.length) return 0;
     let sum = 0,
       n = 0;
@@ -86,14 +86,11 @@ export default class Mixin extends Vue {
       creatingTime,
       osztalyCsoportUid
     } = evaluation;
-    const evals = this.$store.getters['api/groupedEvaluations'][subject];
-    const others = [...evals];
-    others.splice(others.indexOf(evaluation), 1);
-    const impact = this.getAverage(evals) - this.getAverage(others);
-    return {
-      Jegy: `${value} (${weight})`,
-      'Hatás az átlagodra': impact,
-      Téma: theme || '-',
+    const haa = 'Hatás az átlagodra';
+    const ret = {
+      Jegy: `${value} ${weight && weight != '-' ? `(${weight})` : ''}`,
+      [haa]: '',
+      Téma: theme,
       Tantárgy: subject,
       Mód: mode,
       Típus: typeName,
@@ -104,6 +101,20 @@ export default class Mixin extends Vue {
       )}`,
       Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
     };
+    if (evaluation.isAtlagbaBeleszamit && evaluation.form == 'Mark') {
+      const evals = this.$store.getters['api/groupedEvaluations'][subject];
+      const others = [...evals];
+      others.splice(others.indexOf(evaluation), 1);
+      const impact =
+        Math.round(100 * (this.getAverage(evals) - this.getAverage(others))) /
+        100;
+      ret[haa] = `<span class="${
+        impact == 0 ? '' : impact > 0 ? 'green--text' : 'red--text'
+      }"> ${impact}`;
+    } else {
+      delete ret[haa];
+    }
+    return ret;
   }
   lessonValues({
     date,
@@ -194,21 +205,19 @@ export default class Mixin extends Vue {
     function _format(d: Date): string {
       return `${d.getFullYear()}-${`0${d.getMonth() + 1}`.slice(
         -2
-      )}-${`0${d.getDate() + 1}`.slice(-2)}`;
+      )}-${`0${d.getDate()}`.slice(-2)}`;
     }
     let now = new Date(this.date);
     now.setDate(now.getDate() + week * 7);
-    let monday = new Date(now);
-    monday.setDate(monday.getDate() - monday.getDay() - 1);
-    let sunday = new Date(now);
-    sunday.setDate(sunday.getDate() - sunday.getDay() + 5);
+    let monday = new Date(+now - now.getDay() * 86400000);
+    let sunday = new Date(+now - (now.getDay() - 6) * 86400000);
     return { from: _format(monday), to: _format(sunday) };
   }
   get mobile() {
     return innerWidth < 600;
   }
 
-  getClassGroupTextFromUID(uid) {
+  getClassGroupTextFromUID(uid: string) {
     let classGroup;
     for (const cg of this.state.general.data.osztalyCsoportok || []) {
       if (cg.uid == uid) {
@@ -241,55 +250,41 @@ export default class Mixin extends Vue {
     );
   }
 
-  debounce(func: Function, wait: number, immediate: boolean) {
-    var timeout;
-    return () => {
-      var context = this,
-        args = arguments;
-      var later = function() {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-      var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow) func.apply(context, args);
-    };
-  }
   toldyLink = toldyLink;
   formatDate = formatDate;
   formatTime = formatTime;
   utc2date = utc2date;
   day = day;
 
-  getSubjectIcon(subjectCategoryName) {
-    const map = {
-      'Állampolgári ismeretek': 'mdi-account-badge-horizontal-outline',
-      'Diákotthoni feladat': 'mdi-notebook-outline',
-      'Gyermekotthoni feladat': 'mdi-notebook-outline',
-      Napközi: 'mdi-notebook-outline',
-      'Életvitel és gyakorlat': 'mdi-lightbulb-on-outline',
-      Filozófia: 'mdi-lightbulb-on-outline',
-      Fizika: 'mdi-atom',
-      Földrajz: 'mdi-globe-model',
-      'Földünk – környezetünk': 'mdi-globe-model',
-      Háztartástan: 'mdi-home-alert',
-      Etika: 'mdi-scale-balance', // Nincs kép
-      'Hit- és erkölcstan': 'mdi-scale-balance',
-      'Hon- és népismeret': 'mdi-flag-variant',
-      Kémia: 'mdi-flask',
-      Könyvtárhasználat: 'mdi-library',
-      Környezetismeret: 'mdi-leaf-maple',
-      'Magyar nyelv és irodalom': 'mdi-book-open-page-variant',
-      Matematika: 'mdi-calculator-variant',
-      'Mozógképkultúra és médiaismeret': 'mdi-image-search-outline',
-      Művészetek: 'mdi-palette-outline',
-      'Osztályfőnöki, élet- és pályatervezés': 'mdi-rocket',
-      'Óvódai feladat': 'mdi-rabbit', // Nincs kép
-      'Technika, életvitel és gyakorlat': 'mdi-scissors-cutting',
-      'Testnevelés és sport': 'mdi-basketball',
-      Történelem: 'mdi-owl'
-    };
+  getSubjectIcon(scm: string | null) {
+    const subjectCategoryName = scm || '',
+      map = {
+        'Állampolgári ismeretek': 'mdi-account-badge-horizontal-outline',
+        'Diákotthoni feladat': 'mdi-notebook-outline',
+        'Gyermekotthoni feladat': 'mdi-notebook-outline',
+        Napközi: 'mdi-notebook-outline',
+        'Életvitel és gyakorlat': 'mdi-lightbulb-on-outline',
+        Filozófia: 'mdi-lightbulb-on-outline',
+        Fizika: 'mdi-atom',
+        Földrajz: 'mdi-globe-model',
+        'Földünk – környezetünk': 'mdi-globe-model',
+        Háztartástan: 'mdi-home-alert',
+        Etika: 'mdi-scale-balance', // Nincs kép
+        'Hit- és erkölcstan': 'mdi-scale-balance',
+        'Hon- és népismeret': 'mdi-flag-variant',
+        Kémia: 'mdi-flask',
+        Könyvtárhasználat: 'mdi-library',
+        Környezetismeret: 'mdi-leaf-maple',
+        'Magyar nyelv és irodalom': 'mdi-book-open-page-variant',
+        Matematika: 'mdi-calculator-variant',
+        'Mozógképkultúra és médiaismeret': 'mdi-image-search-outline',
+        Művészetek: 'mdi-palette-outline',
+        'Osztályfőnöki, élet- és pályatervezés': 'mdi-rocket',
+        'Óvódai feladat': 'mdi-rabbit', // Nincs kép
+        'Technika, életvitel és gyakorlat': 'mdi-scissors-cutting',
+        'Testnevelés és sport': 'mdi-basketball',
+        Történelem: 'mdi-owl'
+      };
     if (subjectCategoryName in map) return map[subjectCategoryName];
     let icon = 'mdi-book';
     if (subjectCategoryName.indexOf('nyelv') > -1) icon = 'mdi-headset';

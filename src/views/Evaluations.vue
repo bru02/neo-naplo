@@ -5,6 +5,7 @@
       :evaluations="evaluations"
       :groupedClassAverages="groupedClassAverages"
       :groupedEvaluations="groupedEvaluations"
+      v-model="selectedEvaluation"
     ></EvaluationsTable>
     <EvaluationsList
       v-else
