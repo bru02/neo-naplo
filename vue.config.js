@@ -51,6 +51,12 @@ module.exports = {
     ]);
   },
   pwa: {
-    themeColor: '#303f9f'
+    themeColor: '#303f9f',
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: 'black',
+    workboxPluginMode: 'InjectManifest',
+    workboxOptions: {
+      swSrc: 'src/registerServiceWorker.ts'
+    }
   }
 };

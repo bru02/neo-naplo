@@ -59,7 +59,8 @@
     "webpack-deep-scope-plugin": "^1.6.2"
   },
   "gitHooks": {
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "pre-push": "touch rel.bat && rel.bat"
   },
   "lint-staged": {
     "*.{js,vue,ts}": [
