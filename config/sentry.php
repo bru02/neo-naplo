@@ -5,7 +5,7 @@ return [
     'dsn' => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
 
     // capture release as git sha
-    'release' => env('APP_VERSION'),
+    'release' => env('HEROKU_SLUG_COMMIT'),
 
     'breadcrumbs' => [
 

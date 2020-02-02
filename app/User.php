@@ -175,16 +175,7 @@ class User extends Model implements Authenticatable, JWTSubject
         $this->tokenData = $this->decompileToken();
         DB::table('tokens')
             ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])
-            ->first()
             ->update(['access_token' => $this->encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
-        $this->log([
-            'action' => __FUNCTION__,
-            'caller' => debug_backtrace()[0],
-            'access_token' => $this->access_token,
-            'refresh_token' => $this->refresh_token,
-            'timestamp' => time(),
-            'exp' => $this->tokenData->exp
-        ]);
     }
 
     private function doRefreshToken() {

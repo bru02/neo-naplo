@@ -5,6 +5,9 @@
 // const glob = require("glob-all");
 const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
   .default;
+
+process.env.VUE_APP_SHA = process.env.SOURCE_VERSION;
+
 module.exports = {
   transpileDependencies: ['vuetify'],
   outputDir: 'public',
