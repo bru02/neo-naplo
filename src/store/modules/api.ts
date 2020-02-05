@@ -97,8 +97,11 @@ class ApiActions extends Actions<
   pullGeneral(): Promise<GeneralAPI> {
     this.state.general.loading = true;
     return api.getGeneral().then(response => {
-      this.commit('updateGeneral', response);
-      return response;
+      if (response) {
+        this.commit('updateGeneral', response);
+        return response;
+      }
+      return this.state.general.data;
     });
   }
   pullHomeworks() {
@@ -113,8 +116,11 @@ class ApiActions extends Actions<
       Vue.set(this.state.timetable, range, { data: {}, loading: true });
     } else this.state.timetable[range].loading = true;
     return api.getTimetable(from, to).then(response => {
-      this.commit('updateTimetable', { response, range });
-      return response;
+      if (response) {
+        this.commit('updateTimetable', { response, range });
+        return response;
+      }
+      return {};
     });
   }
 }

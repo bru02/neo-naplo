@@ -52,6 +52,9 @@
                 v-model="rememberMe"
               ></v-checkbox>
               <v-layout justify-space-between>
+                <p class="text-center red--text" v-show="!!errorMsg">
+                  {{ errorMsg }}
+                </p>
                 <v-btn
                   @click="login"
                   :class="{
@@ -90,6 +93,7 @@ export default class LoginComponent extends mixins(Mixin) {
   school = '';
   schoolRules = [v => !!v || 'Iskola megadása kötelező'];
   rememberMe = false;
+  errorMsg = '';
 
   schools = [];
   loading = true;
@@ -118,7 +122,8 @@ export default class LoginComponent extends mixins(Mixin) {
           this.loading = false;
           this.$router.push('/');
         })
-        .catch(() => {
+        .catch(err => {
+          console.log(err);
           this.loading = false;
         });
     }

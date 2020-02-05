@@ -52,7 +52,7 @@ export default new Vue({
             this.$router.push('/login');
           }
         }
-        return {};
+        return error;
       }
     );
     this.$router.beforeEach((to, from, next) => {

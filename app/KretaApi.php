@@ -91,12 +91,16 @@ class KretaApi {
     }
 
     public static function logIn($school, $username, $password) {
-        $response = self::send($school, 'Token', null, [
+        try {
+            $response = self::send($school, 'Token', null, [
                 'institute_code' => $school,
                 'userName' => $username,
                 'password' => $password,
                 'grant_type' => 'password',
-        ]);
+            ]);
+        } catch(\GuzzleHttp\Exception\ClientException $e) {
+        }
+
         $res = json_decode($response);
         return $res;
     }
@@ -205,7 +209,7 @@ class KretaApi {
                             $w = str_replace('%', '', $a->weight) * 2;
                             if ($w <= 200) {
                                 $a->weight = "$w%";
-                                $a->numberValue = $a->value = $a->numberValue > $b->numberValue ? "$b->numberValue/$a->numberValue" : "$a->numberValue/$b->numberValue";
+                                $a->numberValue = $a->value = $a->numberValue > $b->numberValue ? intval("$b->numberValue.$a->numberValue") : intval("$a->numberValue.$b->numberValue");
                                 $group[$i + 1]->Was = 1;
                                 $evals[] = $a;
                                 continue;

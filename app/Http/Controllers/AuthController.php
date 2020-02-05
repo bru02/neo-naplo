@@ -68,8 +68,8 @@ class AuthController extends Controller
 
         if (! $token = auth()->attempt($credentials)) {
             return response([
-                'msg' => 'gotrekt'
-            ]);
+                'error' => 'Rossz felhasználónév / jelszó!'
+            ], 401);
         }
         return $this->respondWithToken($token);
     }

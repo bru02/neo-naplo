@@ -61,6 +61,15 @@
     </v-app-bar>
     <v-content>
       <router-view></router-view>
+      <v-snackbar v-model="networkError" color="error">
+        <v-icon>
+          mdi-wifi-off
+        </v-icon>
+        Hálózati hiba
+        <v-btn icon @click="networkError = false">
+          mdi-close
+        </v-btn>
+      </v-snackbar>
     </v-content>
   </v-app>
 </template>
@@ -77,6 +86,7 @@ export default class App extends mixins(Mixin) {
   drawer = false;
   routes = routes;
   loading = 0;
+  networkError = false;
   async created() {
     this.$http.interceptors.request.use((config = {}) => {
       this.loading++;
@@ -89,6 +99,8 @@ export default class App extends mixins(Mixin) {
       },
       (error: any) => {
         this.loading--;
+        this.networkError = true;
+        return error;
       }
     );
     if (this.$store.getters['auth/isAuthenticated']) {

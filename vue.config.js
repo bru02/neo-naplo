@@ -5,6 +5,7 @@
 // const glob = require("glob-all");
 const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
   .default;
+const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
 process.env.VUE_APP_SHA = process.env.SOURCE_VERSION;
 
@@ -46,6 +47,14 @@ module.exports = {
   chainWebpack: config => {
     if (process.env.NODE_ENV === 'production') {
       config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
+      config.plugin('sentry').use(
+        new SentryWebpackPlugin({
+          include: './src',
+          ignoreFile: '.sentrycliignore',
+          ignore: ['node_modules', 'vue.config.js'],
+          configFile: 'sentry.properties'
+        })
+      );
     }
     config.plugin('VuetifyLoaderPlugin').tap(args => [
       {
