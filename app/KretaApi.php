@@ -108,10 +108,11 @@ class KretaApi {
     public static function getToken($school, $rt)
     {
         $out = self::send($school, 'Token', null, [
-                'refresh_token' => $rt,
-                'grant_type' => 'refresh_token',
+            'refresh_token' => $rt,
+            'grant_type' => 'refresh_token',
         ]);
 
+        
         $out = json_decode($out);
         if (isset($out) && is_object($out)) {
             return self::wrapApi($out);

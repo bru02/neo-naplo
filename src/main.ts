@@ -20,7 +20,6 @@ export default new Vue({
       async (config = {}) => {
         if (this.$store.getters['auth/isAuthenticated']) {
           let token = this.$store.state.auth.token;
-          window['console'].log(token);
           if (
             this.$store.getters['auth/tokenData'].exp - 240 <=
               Date.now() / 1000 &&

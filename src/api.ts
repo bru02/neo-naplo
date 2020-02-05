@@ -17,11 +17,17 @@ export default {
     });
     return r.data;
   },
-  async login(username: string, password: string, school: string) {
+  async login(
+    username: string,
+    password: string,
+    school: string,
+    rme: boolean
+  ) {
     return await Vue.axios.post('/login', {
       username,
       password,
-      school
+      school,
+      rme
     });
   },
   async logout() {

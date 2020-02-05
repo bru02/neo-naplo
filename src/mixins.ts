@@ -29,7 +29,6 @@ export default class Mixin extends Vue {
   }
 
   getAverage(evaluations: Evaluation[]) {
-    if (!evaluations.length) return 0;
     let sum = 0,
       n = 0;
     for (const evaluation of evaluations) {
@@ -39,6 +38,7 @@ export default class Mixin extends Vue {
         n += weight;
       }
     }
+    if (n == 0) return 0;
     return Math.round((100 * sum) / n) / 100;
   }
 

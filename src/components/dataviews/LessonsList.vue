@@ -47,8 +47,9 @@ export default class LessonList extends mixins(Mixin) {
 
   get groupedLessons() {
     if (this.mobile) {
-      return this.lessons;
+      return [...this.lessons, { subject: '', count: this.lessons.length + 1 }];
     } else {
+      if (this.lessons.length == 0) return [];
       // @ts-ignore
       let n: number[] = this.lessons.map(l => l.count),
         min = this.min != null ? this.min : Math.min(...n);

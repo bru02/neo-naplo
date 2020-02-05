@@ -6,7 +6,14 @@
     :transition="`${mobile ? 'slide-x-reverse' : 'dialog'}-transition`"
   >
     <v-card>
-      <v-toolbar dark color="primary" v-show="mobile">
+      <v-toolbar
+        dark
+        color="indigo darken-2"
+        v-show="mobile"
+        v-touch="{
+          right: () => (dialog = false)
+        }"
+      >
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>

@@ -1,7 +1,7 @@
 <template>
   <v-layout flex align-center justify-center>
     <v-flex xs12 sm4 elevation-6>
-      <v-toolbar color="primary" dark flat>
+      <v-toolbar color="indigo darken-2" dark flat>
         <v-toolbar-title>Belépés</v-toolbar-title>
       </v-toolbar>
       <v-card>
@@ -123,8 +123,8 @@ export default class LoginComponent extends mixins(Mixin) {
           this.$router.push('/');
         })
         .catch(err => {
-          console.log(err);
           this.loading = false;
+          throw err;
         });
     }
   }

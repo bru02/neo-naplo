@@ -42,7 +42,7 @@ class AuthActions extends Actions<
     this.api = apiModule.context(store);
   }
   async login({ username, password, school, rme }) {
-    const res = await api.login(username, password, school);
+    const res = await api.login(username, password, school, rme);
     if (res.data.access_token) {
       this.commit('updateToken', res.data.access_token);
       return res;

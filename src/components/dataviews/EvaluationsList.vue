@@ -2,7 +2,6 @@
   <v-container>
     <v-data-iterator
       disable-pagination
-      :group-by="groupBy"
       :sort-by="view"
       sort-desc
       hide-default-footer
@@ -10,25 +9,25 @@
     >
       <template v-slot:default="props">
         <v-list two-line subheader>
-          <template
-            v-for="(items, header) in props.groupedItems || { '': props.items }"
-          >
-            <v-subheader inset :key="header" v-if="header"
-              >{{ header }}
-              <span v-if="groupBy == 'subject'">
-                &#10240; &mdash; &#10240;
-                <span
-                  :class="[`${getEvaluationColor(getAverage(items))}--text`]"
-                >
-                  {{ getAverage(items) }}</span
-                >
-              </span>
+          <template v-for="(item, i) in props.items">
+            <v-subheader
+              v-if="
+                view == 'subject' &&
+                  (i == 0 || props.items[i - 1].subject != item.subject)
+              "
+              :key="item.subject"
+              >{{ item.subject }} &#10240; &mdash; &#10240;
+              <span
+                :class="[
+                  `${getEvaluationColor(
+                    getAverage(groupedEvaluations[item.subject])
+                  )}--text`
+                ]"
+              >
+                {{ getAverage(groupedEvaluations[item.subject]) || '-' }}</span
+              >
             </v-subheader>
-            <v-lazy
-              min-height="50px"
-              v-for="item in items"
-              :key="item.creatingTime"
-            >
+            <v-lazy min-height="50px" :key="item.id">
               <v-list-item @click="$emit('input', item)">
                 <v-list-item-avatar>
                   {{ item.numberValue }}
@@ -48,9 +47,8 @@
                 </v-list-item-action>
               </v-list-item>
             </v-lazy>
-
-            <v-divider inset :key="header + '_div'"></v-divider>
           </template>
+          <v-list-item></v-list-item>
         </v-list>
       </template>
     </v-data-iterator>
@@ -74,10 +72,6 @@ export default class EvaluationList extends mixins(Mixin) {
   @Prop() readonly groupedEvaluations!: { [k: string]: Evaluation[] };
 
   view = 'date';
-  get groupBy() {
-    if (['subject', 'value'].includes(this.view)) return this.view;
-    return [];
-  }
   sortFlags = [
     {
       id: 'date',
@@ -95,7 +89,7 @@ export default class EvaluationList extends mixins(Mixin) {
       icon: 'mdi-format-list-bulleted-square'
     },
     {
-      id: 'value',
+      id: 'numberValue',
       text: 'Értékelés',
       icon: 'mdi-format-list-bulleted-type'
     }

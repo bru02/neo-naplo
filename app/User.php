@@ -3,7 +3,7 @@ namespace App;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\Authenticatable;
-// use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;
 use Session;
 use Jenssegers\Model\Model;
 use Illuminate\Support\Facades\DB;
@@ -149,14 +149,6 @@ class User extends Model implements Authenticatable, JWTSubject
     }
 
     public function getToken() {
-        $this->log([
-            'action' => __FUNCTION__,
-            'caller' => debug_backtrace()[0],
-            'access_token' => $this->access_token,
-            'refresh_token' => $this->refresh_token,
-            'timestamp' => time(),
-            'exp' => $this->tokenData->exp
-        ]);
         if($this->doRefreshToken())
             $this->refreshToken();
         return $this->access_token;
@@ -169,7 +161,11 @@ class User extends Model implements Authenticatable, JWTSubject
     } 
 
     private function refreshToken() {
-        $result = KretaApi::getToken($this->school, $this->refresh_token);
+        try {
+            $result = KretaApi::getToken($this->school, $this->refresh_token);
+        } catch(\GuzzleHttp\Exception\ClientException $e) {
+            Log::debug("exp: {$this->tokenData->exp}; \r\n rt: $this->refresh_token");
+        }
         $this->access_token = $result->access_token;
         $this->refresh_token = $result->refresh_token;
         $this->tokenData = $this->decompileToken();
@@ -180,10 +176,6 @@ class User extends Model implements Authenticatable, JWTSubject
 
     private function doRefreshToken() {
         return $this->tokenData->exp < time();
-    }
-
-    private function log($what) {
-        // Log::debug("Action: $what[action], caller: , at: $what[access_token], rt: $what[refresh_token], exp: $what[exp]");
     }
 
     public function getJWTIdentifier()

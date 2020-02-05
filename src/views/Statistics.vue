@@ -111,7 +111,7 @@
         </v-tab>
       </v-tabs>
       <v-tabs-items v-model="active">
-        <v-tab-item v-if="currentSubject.evaluations.length">
+        <v-tab-item v-if="currentSubject && currentSubject.evaluations.length">
           <v-list>
             <v-list-item
               v-for="item in currentSubject.evaluations"
@@ -166,9 +166,10 @@
                 >
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
           </v-list>
         </v-tab-item>
-        <v-tab-item v-if="currentSubject.absences.length">
+        <v-tab-item v-if="currentSubject && currentSubject.absences.length">
           <v-list two-line>
             <v-list-item
               v-for="abs in currentSubject.absences"
@@ -221,6 +222,7 @@
                 <v-list-item-subtitle>Összes hiányzás</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
           </v-list>
         </v-tab-item>
       </v-tabs-items>
@@ -251,7 +253,11 @@
       <template v-slot:activator="{ on }">
         <v-fab-transition>
           <v-btn
-            v-show="currentSubject.evaluations.length > 0 && active == 0"
+            v-show="
+              currentSubject &&
+                currentSubject.evaluations.length > 0 &&
+                active == 0
+            "
             color="red"
             dark
             fixed
