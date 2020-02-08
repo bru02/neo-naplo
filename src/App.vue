@@ -61,13 +61,15 @@
     </v-app-bar>
     <v-content>
       <router-view></router-view>
-      <v-snackbar v-model="networkError" color="error">
+      <v-snackbar v-model="errorToast" color="error">
         <v-icon>
-          mdi-wifi-off
+          {{ error.icon }}
         </v-icon>
-        Hálózati hiba
-        <v-btn icon @click="networkError = false">
-          mdi-close
+        {{ error.text }}
+        <v-btn icon @click="errorToast = false">
+          <v-icon>
+            mdi-close
+          </v-icon>
         </v-btn>
       </v-snackbar>
     </v-content>
@@ -86,7 +88,8 @@ export default class App extends mixins(Mixin) {
   drawer = false;
   routes = routes;
   loading = 0;
-  networkError = false;
+  errorToast = false;
+  error = {};
   async created() {
     this.$http.interceptors.request.use((config = {}) => {
       this.loading++;
@@ -99,8 +102,31 @@ export default class App extends mixins(Mixin) {
       },
       (error: any) => {
         this.loading--;
-        this.networkError = true;
-        return error;
+        const status = error && error.response && error.response.status;
+        switch (status) {
+          case 424:
+            this.error = {
+              icon: 'mdi-sync-alert',
+              text: 'KRÉTA éppen frissít'
+            };
+            break;
+          case 401:
+            break;
+          case 500:
+            this.error = {
+              icon: 'mdi-wrench',
+              text: 'Belső hiba'
+            };
+            break;
+          default:
+            this.error = {
+              icon: 'mdi-wifi-off',
+              text: 'Hálózati hiba'
+            };
+            break;
+        }
+        this.errorToast = true;
+        throw error;
       }
     );
     if (this.$store.getters['auth/isAuthenticated']) {

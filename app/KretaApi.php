@@ -99,10 +99,11 @@ class KretaApi {
                 'grant_type' => 'password',
             ]);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
+            $response = '{"error":true}';
         }
 
-        $res = json_decode($response);
-        return $res;
+        $response = json_decode($response);
+        return $response;
     }
 
     public static function getToken($school, $rt)

@@ -24,17 +24,18 @@ class KretaUserProvider implements IlluminateUserProvider
     public function retrieveById($identifier)
     {
         $user = DB::table('tokens')->select('*')->where([
-            ['kreta_id',$identifier->id],
+            ['kreta_id', $identifier->id],
             ['remember_token', $identifier->hash]])->first();
-            if(!isset($user)) {
-                return null;
-            }
+        if(!isset($user)) {
+            return null;
+        }
         if (Str::startsWith($key = $identifier->key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
         }
-        $enc =  new Encrypter($key, config('app.cipher'));
+        $enc = new Encrypter($key, config('app.cipher'));
         return new User((object)[
-            'access_token' => $enc->decrypt( $user->access_token),            'refresh_token' => $enc->decrypt($user->refresh_token)
+            'access_token' => $enc->decrypt( $user->access_token),
+            'refresh_token' => $enc->decrypt($user->refresh_token)
         ], [
             'hash' =>$identifier->hash,
             'key' => $key

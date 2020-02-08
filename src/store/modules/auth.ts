@@ -42,12 +42,18 @@ class AuthActions extends Actions<
     this.api = apiModule.context(store);
   }
   async login({ username, password, school, rme }) {
-    const res = await api.login(username, password, school, rme);
-    if (res.data.access_token) {
-      this.commit('updateToken', res.data.access_token);
-      return res;
-    }
-    return Promise.reject('No tokens supplied');
+    return api
+      .login(username, password, school, rme)
+      .then(res => {
+        if (res.data && res.data.access_token) {
+          this.commit('updateToken', res.data.access_token);
+          return res;
+        }
+        console.log(res);
+      })
+      .catch(e => {
+        throw e;
+      });
   }
   async logout() {
     api.logout().then(() => {

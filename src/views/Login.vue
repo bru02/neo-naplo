@@ -99,9 +99,9 @@ export default class LoginComponent extends mixins(Mixin) {
   loading = true;
 
   mounted() {
-    // if(this.$store.getters['auth/isAuthenticated']) {
-    //   this.$router.push('/')
-    // }
+    if (this.$store.getters['auth/isAuthenticated']) {
+      this.$router.push('/');
+    }
     let self = this;
     this.$http.get('schools').then(response => {
       self.schools = response.data;
