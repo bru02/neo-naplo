@@ -49,7 +49,6 @@ class AuthActions extends Actions<
           this.commit('updateToken', res.data.access_token);
           return res;
         }
-        console.log(res);
       })
       .catch(e => {
         throw e;
