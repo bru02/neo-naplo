@@ -5,15 +5,12 @@
     :width="mobile ? null : 500"
     :transition="`${mobile ? 'slide-x-reverse' : 'dialog'}-transition`"
   >
-    <v-card>
-      <v-toolbar
-        dark
-        color="indigo darken-2"
-        v-show="mobile"
-        v-touch="{
-          right: () => (dialog = false)
-        }"
-      >
+    <v-card
+      v-touch="{
+        right: () => (dialog = false)
+      }"
+    >
+      <v-toolbar dark color="indigo darken-2" v-show="mobile">
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
@@ -33,8 +30,11 @@
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Watch, Prop } from 'vue-property-decorator';
+import VTouch from 'vuetify/lib/directives/touch';
 
-@Component
+@Component({
+  directives: { touch: VTouch }
+})
 export default class Dialog extends mixins(Mixin) {
   @Prop(String) readonly title!: String | undefined;
   @Prop() readonly value!: any;

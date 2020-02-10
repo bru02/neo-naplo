@@ -30,6 +30,7 @@
         }}</v-list-item-action-text>
       </v-list-item-action>
     </v-list-item>
+    <v-list-item v-if="mobile"></v-list-item>
   </v-list>
 </template>
 
@@ -47,7 +48,7 @@ export default class LessonList extends mixins(Mixin) {
 
   get groupedLessons() {
     if (this.mobile) {
-      return [...this.lessons, { subject: '', count: this.lessons.length + 1 }];
+      return this.lessons;
     } else {
       if (this.lessons.length == 0) return [];
       // @ts-ignore

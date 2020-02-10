@@ -45,7 +45,7 @@ class KretaApi {
         $options = [
             'verify' => false,
             'headers' => [
-                 'User-Agent' => "Kreta.Ellenorzo/2.9.4.2019101401 (Android; <codename> 0.0)"
+                 'User-Agent' => "Kreta.Ellenorzo/2.9.4.2019101401 (Android; POT-LX1 0.0)"
             ],
         ];
         if($endpoint == 'Token') {

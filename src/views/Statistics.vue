@@ -30,203 +30,218 @@
   </v-container>
 
   <v-container v-else fluid>
-    <v-card class="mx-auto" loading>
-      <template v-slot:progress>
-        <div class="stacked-bar-graph v-pogress-linear">
-          <span
-            :style="{ width: `${(bars['darken-1 green'] || 0) * 100}%` }"
-            class="darken-1 green"
-          ></span>
-          <span
-            :style="{ width: `${(bars['darken-1 light-green'] || 0) * 100}%` }"
-            class="darken-1 light-green"
-          ></span>
-          <span
-            :style="{ width: `${(bars['darken-2 lime'] || 0) * 100}%` }"
-            class="darken-2 lime"
-          ></span>
-          <span
-            :style="{ width: `${(bars['darken-3 amber'] || 0) * 100}%` }"
-            class="darken-3 amber"
-          ></span>
-          <span
-            :style="{ width: `${(bars['darken-4 deep-orange'] || 0) * 100}%` }"
-            class="darken-4 deep-orange"
-          ></span>
-        </div>
-      </template>
-      <v-img
-        :src="
-          require(`@/assets/resized/${getSubjectIcon(
-            currentSubject.subjectCategoryName
-          )}-xl.jpg`)
-        "
-        :srcset="getSrcset(getSubjectIcon(currentSubject.subjectCategoryName))"
-        sizes="(max-width: 600px) 563px, (max-width: 960px) 900px, (max-width: 1264px) 1185px, 1785px"
-        height="300px"
-        dark
-      >
-        <v-row class="fill-height">
-          <v-card-title>
-            <v-btn dark icon to="/statistics">
-              <v-icon>mdi-chevron-left</v-icon>
-            </v-btn>
-          </v-card-title>
+    <v-skeleton-loader
+      :loading="loading"
+      type="card, list-item-avatar-three-line, list-item-avatar-two-line,list-item-avatar-two-line"
+    >
+      <v-card class="mx-auto" loading>
+        <template v-slot:progress>
+          <div class="stacked-bar-graph v-progress-linear">
+            <span
+              :style="{ width: `${(bars['darken-1 green'] || 0) * 100}%` }"
+              class="darken-1 green"
+            ></span>
+            <span
+              :style="{
+                width: `${(bars['darken-1 light-green'] || 0) * 100}%`
+              }"
+              class="darken-1 light-green"
+            ></span>
+            <span
+              :style="{ width: `${(bars['darken-2 lime'] || 0) * 100}%` }"
+              class="darken-2 lime"
+            ></span>
+            <span
+              :style="{ width: `${(bars['darken-3 amber'] || 0) * 100}%` }"
+              class="darken-3 amber"
+            ></span>
+            <span
+              :style="{
+                width: `${(bars['darken-4 deep-orange'] || 0) * 100}%`
+              }"
+              class="darken-4 deep-orange"
+            ></span>
+          </div>
+        </template>
+        <v-img
+          :src="
+            require(`@/assets/resized/${getSubjectIcon(
+              currentSubject.subjectCategoryName
+            )}-xl.jpg`)
+          "
+          :srcset="
+            getSrcset(getSubjectIcon(currentSubject.subjectCategoryName))
+          "
+          sizes="(max-width: 600px) 563px, (max-width: 960px) 900px, (max-width: 1264px) 1185px, 1785px"
+          height="300px"
+          dark
+        >
+          <v-row class="fill-height">
+            <v-card-title>
+              <v-btn dark icon to="/statistics">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
+            </v-card-title>
 
-          <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
 
-          <v-card-title class="white--text pl-12 pt-12">
-            <div class="pl-12 pt-12">
-              <div class="display-1">{{ currentSubject.subject }}</div>
-              <div v-if="currentSubject.average">
-                Átlag:
-                <span
-                  :class="[
-                    `${getEvaluationColor(currentSubject.average)}--text`
-                  ]"
-                  >{{
-                    getAverage([
-                      ...currentSubject.evaluations,
-                      ...(added[subject] || [])
-                    ])
-                  }}</span
-                >
+            <v-card-title class="white--text pl-12 pt-12">
+              <div class="pl-12 pt-12">
+                <div class="display-1">{{ currentSubject.subject }}</div>
+                <div v-if="currentSubject.average">
+                  Átlag:
+                  <span
+                    :class="[
+                      `${getEvaluationColor(currentSubject.average)}--text`
+                    ]"
+                    >{{
+                      getAverage([
+                        ...currentSubject.evaluations,
+                        ...(added[subject] || [])
+                      ])
+                    }}</span
+                  >
+                </div>
+                <div v-if="currentSubject.classAverage">
+                  Osztály átlag:
+                  <span
+                    :class="[
+                      `${getEvaluationColor(currentSubject.classAverage)}--text`
+                    ]"
+                    >{{ currentSubject.classAverage }}</span
+                  >
+                </div>
               </div>
-              <div v-if="currentSubject.classAverage">
-                Osztály átlag:
-                <span
-                  :class="[
-                    `${getEvaluationColor(currentSubject.classAverage)}--text`
-                  ]"
-                  >{{ currentSubject.classAverage }}</span
-                >
-              </div>
-            </div>
-          </v-card-title>
-        </v-row>
-      </v-img>
-      <v-tabs v-model="active" v-if="!mobile && views.length > 1">
-        <v-tab v-for="(view, i) in views" :key="i">
-          {{ view.name }}
-        </v-tab>
-      </v-tabs>
-      <v-tabs-items v-model="active">
-        <v-tab-item v-if="currentSubject && currentSubject.evaluations.length">
-          <v-list>
-            <v-list-item
-              v-for="item in currentSubject.evaluations"
-              :key="item.creatingTime"
-              @click="selectedEvaluation = item"
-            >
-              <v-list-item-avatar>
-                {{ item.numberValue }}
-              </v-list-item-avatar>
+            </v-card-title>
+          </v-row>
+        </v-img>
+        <v-tabs v-model="active" v-if="!mobile && views.length > 1">
+          <v-tab v-for="(view, i) in views" :key="i">
+            {{ view.name }}
+          </v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="active">
+          <v-tab-item
+            v-if="currentSubject && currentSubject.evaluations.length"
+          >
+            <v-list>
+              <v-list-item
+                v-for="item in currentSubject.evaluations"
+                :key="item.creatingTime"
+                @click="selectedEvaluation = item"
+              >
+                <v-list-item-avatar>
+                  {{ item.numberValue }}
+                </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-list-item-title v-text="item.subject"></v-list-item-title>
-                <v-list-item-subtitle
-                  v-text="item.theme"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.subject"></v-list-item-title>
+                  <v-list-item-subtitle
+                    v-text="item.theme"
+                  ></v-list-item-subtitle>
+                </v-list-item-content>
 
-              <v-list-item-action>
-                <v-list-item-action-text>
-                  {{ formatDate(item.date) }}
-                </v-list-item-action-text>
-              </v-list-item-action>
-            </v-list-item>
-            <v-list-item
-              v-for="(item, i) in added[subject] || []"
-              :key="item.id"
-            >
-              <v-list-item-avatar>
-                {{ item.numberValue }}
-              </v-list-item-avatar>
+                <v-list-item-action>
+                  <v-list-item-action-text>
+                    {{ formatDate(item.date) }}
+                  </v-list-item-action-text>
+                </v-list-item-action>
+              </v-list-item>
+              <v-list-item
+                v-for="(item, i) in added[subject] || []"
+                :key="item.id"
+              >
+                <v-list-item-avatar>
+                  {{ item.numberValue }}
+                </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-list-item-title v-text="subject"></v-list-item-title>
-                <v-list-item-subtitle
-                  v-text="item.weight"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
+                <v-list-item-content>
+                  <v-list-item-title v-text="subject"></v-list-item-title>
+                  <v-list-item-subtitle
+                    v-text="item.weight"
+                  ></v-list-item-subtitle>
+                </v-list-item-content>
 
-              <v-list-item-action>
-                <v-btn icon color="red" @click="$delete(added[subject], i)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
-            <v-divider inset></v-divider>
-            <v-list-item v-for="(evals, nv) in csebv" :key="nv">
-              <v-list-item-content>
-                <v-list-item-title>{{ evals.length }} db</v-list-item-title>
-                <v-list-item-subtitle
-                  v-bind:class="[`${getEvaluationColor(nv)}--text`]"
-                  >{{ evals[0].value }}</v-list-item-subtitle
-                >
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
-          </v-list>
-        </v-tab-item>
-        <v-tab-item v-if="currentSubject && currentSubject.absences.length">
-          <v-list two-line>
-            <v-list-item
-              v-for="abs in currentSubject.absences"
-              v-ripple
-              :key="abs.id"
-              @click="selectedAbsence = abs"
-            >
-              <v-list-item-content>
-                <v-list-item-title>{{ abs.subject }}</v-list-item-title>
-                <v-list-item-subtitle
-                  v-bind:class="[
-                    `${getAbsenceColor(abs.justificationState)}--text`
-                  ]"
-                  >{{ abs.justificationStateName }}</v-list-item-subtitle
-                >
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-list-item-action-text>{{
-                  abs.date | formatDate
-                }}</v-list-item-action-text
-                >{{ abs.numberOfLessons }}.óra
-              </v-list-item-action>
-            </v-list-item>
-            <v-divider inset></v-divider>
-            <v-list-item
-              v-for="(absences, type) in currentSubject.absencesCount
-                .absencesByJustification"
-              :key="type"
-            >
-              <v-list-item-content>
-                <v-list-item-title>{{ absences.length }} db</v-list-item-title>
-                <v-list-item-subtitle
-                  v-bind:class="[`${getAbsenceColor(type)}--text`]"
-                  >{{
-                    absences[0].justificationStateName
-                  }}</v-list-item-subtitle
-                >
-              </v-list-item-content>
-            </v-list-item>
+                <v-list-item-action>
+                  <v-btn icon color="red" @click="$delete(added[subject], i)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+              <v-divider inset></v-divider>
+              <v-list-item v-for="(evals, nv) in csebv" :key="nv">
+                <v-list-item-content>
+                  <v-list-item-title>{{ evals.length }} db</v-list-item-title>
+                  <v-list-item-subtitle
+                    v-bind:class="[`${getEvaluationColor(nv)}--text`]"
+                    >{{ evals[0].value }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
+            </v-list>
+          </v-tab-item>
+          <v-tab-item v-if="currentSubject && currentSubject.absences.length">
+            <v-list two-line>
+              <v-list-item
+                v-for="abs in currentSubject.absences"
+                v-ripple
+                :key="abs.id"
+                @click="selectedAbsence = abs"
+              >
+                <v-list-item-content>
+                  <v-list-item-title>{{ abs.subject }}</v-list-item-title>
+                  <v-list-item-subtitle
+                    v-bind:class="[
+                      `${getAbsenceColor(abs.justificationState)}--text`
+                    ]"
+                    >{{ abs.justificationStateName }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-list-item-action-text>{{
+                    abs.date | formatDate
+                  }}</v-list-item-action-text
+                  >{{ abs.numberOfLessons }}.óra
+                </v-list-item-action>
+              </v-list-item>
+              <v-divider inset></v-divider>
+              <v-list-item
+                v-for="(absences, type) in currentSubject.absencesCount
+                  .absencesByJustification"
+                :key="type"
+              >
+                <v-list-item-content>
+                  <v-list-item-title
+                    >{{ absences.length }} db</v-list-item-title
+                  >
+                  <v-list-item-subtitle
+                    v-bind:class="[`${getAbsenceColor(type)}--text`]"
+                    >{{
+                      absences[0].justificationStateName
+                    }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
 
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title
-                  >{{
-                    currentSubject.absences.filter(e => e.type == 'Absence')
-                      .length
-                  }}
-                  óra{{ delayText }}</v-list-item-title
-                >
-                <v-list-item-subtitle>Összes hiányzás</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
-          </v-list>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title
+                    >{{
+                      currentSubject.absences.filter(e => e.type == 'Absence')
+                        .length
+                    }}
+                    óra{{ delayText }}</v-list-item-title
+                  >
+                  <v-list-item-subtitle>Összes hiányzás</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
+            </v-list>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-card>
+    </v-skeleton-loader>
     <v-bottom-navigation
       fixed
       v-model="active"
@@ -360,8 +375,9 @@ export default class Statistics extends mixins(Mixin) {
   dialog = false;
   selectedAbsence = false;
   selectedEvaluation = false;
+  loading = true;
   mounted() {
-    this.obtain('general');
+    this.obtain('general').then(() => (this.loading = false));
   }
 
   get values() {
