@@ -6,22 +6,29 @@
       color="blue"
       v-if="mode != 'hidden'"
     >
-      <v-card-title primary-title>
-        {{ mode == 'today' ? nextLesson.subject : `${lessons.length} db` }}
-      </v-card-title>
-      <v-card-subtitle>
-        {{
-          mode == 'today'
-            ? `lesz a következő órád, ${timeTillNextLesson}`
-            : 'órád lesz holnap'
-        }}
-        <span
-          v-for="c in changes"
-          :key="c.text"
-          :class="[c.color, 'font-style-bold']"
-          >{{ c.text }}</span
-        >
-      </v-card-subtitle>
+      <div class="d-flex flex-no-wrap">
+        <v-avatar class="ma-3" size="auto" tile v-if="mode == 'tomorrow'">
+          <v-icon> mdi-bag-personal{{ packed ? '' : '-off' }} </v-icon>
+        </v-avatar>
+        <div>
+          <v-card-title primary-title>
+            {{ mode == 'today' ? nextLesson.subject : `${lessons.length} db` }}
+          </v-card-title>
+          <v-card-subtitle>
+            {{
+              mode == 'today'
+                ? `lesz a következő órád, ${timeTillNextLesson}`
+                : 'órád lesz holnap'
+            }}
+            <span
+              v-for="c in changes"
+              :key="c.text"
+              :class="[c.color, 'font-style-bold']"
+              >{{ c.text }}</span
+            >
+          </v-card-subtitle>
+        </div>
+      </div>
       <v-divider light></v-divider>
       <v-card-actions class="pa-3" v-if="mode == 'today'">
         {{ nextLesson.count }} / {{ lessons.length }}
@@ -46,6 +53,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   date!: Date;
 
   @Prop() readonly timetable!: TimetableAPI;
+  @Prop() readonly packed!: boolean;
 
   get mode() {
     let timetableKey = +this.date / 1000;

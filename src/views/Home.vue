@@ -4,6 +4,7 @@
       <NextLessonCard
         :timetable="timetable"
         v-model="selectedLessons"
+        :packed="bag.length == bagData.length"
       ></NextLessonCard>
       <ChangedLessonCard
         v-for="lesson in changedLessons"
@@ -58,7 +59,46 @@
       />
     </Dialog>
     <Dialog title="Órák" v-model="selectedLessons">
+      <template
+        v-slot:toolbar
+        v-if="selectedLessons && selectedLessons[0].startTime * 1000 > time"
+      >
+        <!-- <v-btn icon :href='getDirections(selectedLessons[0].startTime * 1000)' target='_blank'>
+          <v-icon>
+            mdi-directions
+          </v-icon>
+        </v-btn> -->
+        <v-btn icon @click="bagDialog = true">
+          <v-icon>
+            mdi-bag-personal{{ bag.length == bagData.length ? '' : '-off' }}
+          </v-icon>
+        </v-btn>
+      </template>
       <LessonList :lessons="selectedLessons || []" v-model="selectedLesson" />
+    </Dialog>
+    <Dialog title="Bepakolás" v-model="bagDialog">
+      <v-list>
+        <v-list-item
+          v-for="subject in bagData"
+          :key="subject.name"
+          :value="subject.name"
+          v-ripple
+          @click.capture.stop="toggle(subject.name)"
+        >
+          <v-list-item-action>
+            <v-checkbox
+              v-model="bag"
+              color="primary"
+              :value="subject.name"
+              :indeterminate="subject.indeterminate"
+            ></v-checkbox>
+          </v-list-item-action>
+
+          <v-list-item-content>
+            <v-list-item-title> {{ subject.name }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </Dialog>
   </v-container>
 </template>
@@ -91,7 +131,8 @@ import {
   computed: {
     ...apiMapper.mapState({
       events: state => state.general.data.events,
-      loading: state => state.general.loading
+      loading: state => state.general.loading,
+      instituteName: state => state.general.data.instituteName
     }),
     ...apiMapper.mapGetters(['cards']),
     ...timeMapper.mapGetters(['date', 'time'])
@@ -122,6 +163,10 @@ export default class HomeComponent extends mixins(Mixin) {
   time!: Date;
   date!: Date;
   loading!: boolean;
+  instituteName!: string;
+  bagDialog = false;
+  bagData: { name: string; indeterminate: boolean }[] = [];
+  bag: string[] = [];
   mounted() {
     this.obtain('general');
     this.obtain('timetable').then(tt => (this.timetable = tt));
@@ -139,6 +184,48 @@ export default class HomeComponent extends mixins(Mixin) {
         l.endTime * 1000 > +this.time
     );
   }
+  @Watch('bagDialog')
+  onBagDialogChange(value) {
+    const timetableKey = this.selectedLessons[0].date;
+
+    if (value) {
+      const lessons = this.timetable[timetableKey];
+      const lessonsBefore = (
+        this.timetable[timetableKey - 24 * 60 * 60] || []
+      ).map(l => {
+        return l.subject;
+      });
+      this.bag =
+        JSON.parse(localStorage.getItem('bagData') || '{}')[timetableKey] || [];
+      this.bagData = lessons
+        .filter((e, i, a) => {
+          return a.indexOf(e) == i && e.state != 'Missed';
+        })
+        .map(({ subject }) => {
+          return {
+            name: subject,
+            indeterminate: lessonsBefore.includes(subject)
+          };
+        });
+    } else {
+      localStorage.setItem(
+        'bagData',
+        JSON.stringify({ [timetableKey]: this.bag })
+      );
+    }
+  }
+  toggle(subject) {
+    if (this.bag.includes(subject)) {
+      this.bag.splice(this.bag.indexOf(subject), 1);
+    } else {
+      this.bag.push(subject);
+    }
+  }
+  // getDirections(startTime) {
+  //   const parts = new Date(startTime + 3000000).toJSON().split('T') // 10p
+  //   const dateParts = parts[0].split('-')
+  //   return `https://www.google.com/maps/?daddr=${this.instituteName}&date=${dateParts[1]}/${dateParts[2]}/${dateParts[0]}&time=${parts[1].substr(0, 5)}&ttype=arr&dirflg=r`
+  // }
   metaInfo = {
     title: 'Faliújság'
   };

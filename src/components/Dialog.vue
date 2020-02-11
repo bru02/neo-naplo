@@ -10,11 +10,13 @@
         right: () => (dialog = false)
       }"
     >
-      <v-toolbar dark color="indigo darken-2" v-show="mobile">
+      <v-toolbar dark color="indigo darken-2" dense v-show="mobile">
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <v-toolbar-title>{{ title }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <slot name="toolbar"></slot>
       </v-toolbar>
       <v-card-text>
         <slot></slot>

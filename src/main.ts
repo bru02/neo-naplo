@@ -38,11 +38,10 @@ export default new Vue({
     );
     Vue.axios.interceptors.response.use(
       response => {
-        //console.log(response);
         return response;
       },
       (error: any) => {
-        const status = error && error.response && error.response.status;
+        const status = error?.response?.status;
         if (status === 401) {
           if (this.$store.getters['auth/isAuthenticated']) {
             this.$store.dispatch('auth/logout');

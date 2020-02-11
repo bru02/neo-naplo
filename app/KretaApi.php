@@ -111,6 +111,7 @@ class KretaApi {
         $out = self::send($school, 'Token', null, [
             'refresh_token' => $rt,
             'grant_type' => 'refresh_token',
+            'institute_code' => $school
         ]);
 
         

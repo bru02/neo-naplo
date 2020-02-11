@@ -45,7 +45,7 @@ class AuthActions extends Actions<
     return api
       .login(username, password, school, rme)
       .then(res => {
-        if (res.data && res.data.access_token) {
+        if (res.data?.access_token) {
           this.commit('updateToken', res.data.access_token);
           return res;
         }
@@ -55,11 +55,9 @@ class AuthActions extends Actions<
       });
   }
   async logout() {
-    api.logout().then(() => {
-      this.commit('updateToken', '');
-    });
-
+    api.logout();
     this.api.commit('reset');
+    this.commit('updateToken', '');
   }
   async refreshToken(): Promise<any> {
     const res = await api.refresh();
