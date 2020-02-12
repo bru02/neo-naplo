@@ -7,12 +7,11 @@
     <!-- <v-layout align-center justify-center>
       <v-flex xs12> -->
     <v-card-title primary-title>
-      <!-- <div class="text-xs-right"> -->
-      <!-- <h1 class="display-1"> -->
-      {{ absences.items.length }} db
-      <!-- </h1> -->
-
-      <!-- </div> -->
+      {{
+        absences.items.length === 1
+          ? absences.items[0].subject
+          : `${absences.items.length} db`
+      }}
     </v-card-title>
     <v-card-subtitle>
       <!-- <div> -->

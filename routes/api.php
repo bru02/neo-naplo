@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 /*
@@ -13,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::group(['middleware' => 'jwt.auth'], function(){
+Route::group(['middleware' => 'jwt.auth'], function() {
     Route::any('/general', 'eFilcController@generalApi');
     Route::any('/timetable', 'eFilcController@timetableApi');
 });
@@ -21,8 +20,8 @@ Route::group(['middleware' => 'jwt.auth'], function(){
 Route::post('/refresh', function () {
     try {
         return response()->json(['access_token' => auth()->refresh()]);
-    } catch (JWTException $e) {
-        throw new UnauthorizedHttpException('jwt-auth', $e->getMessage(), $e, $e->getCode());
+    } catch (JWTException $exception) {
+        throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
     }
 });
 Route::post('/login', 'AuthController@login')->middleware('api');

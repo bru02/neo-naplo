@@ -13,7 +13,3 @@
 Route::get('/{any}', function () {
     return view('index');
 })->where('any', '.*');
-
-
-//Route::view('/timetable-skeleton-dev', 'skeleton');
-// Route::any('manifest', 'eFilcController@manifest');

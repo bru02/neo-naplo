@@ -1,14 +1,15 @@
 <?php
 namespace App;
 
-use GuzzleHttp\Client as Client;
+use GuzzleHttp\Client;
+use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Str;
 
 date_default_timezone_set('Europe/Budapest');
 
 function _group_by($array, $key, $kv = true) {
-    $return = array();
+    $return = [];
     foreach($array as $val) {
         if($kv) {
             $return[$val->{$key}][] = $val;
@@ -23,7 +24,8 @@ function _group_by($array, $key, $kv = true) {
     return $return;
 }
 
-class KretaApi {
+class KretaApi
+{
     public static $jar;
     private static function client($base_uri) {
         return new Client([
@@ -45,7 +47,7 @@ class KretaApi {
         $options = [
             'verify' => false,
             'headers' => [
-                 'User-Agent' => "Kreta.Ellenorzo/2.9.4.2019101401 (Android; POT-LX1 0.0)"
+                'User-Agent' => "Kreta.Ellenorzo/2.9.4.2019101401 (Android; POT-LX1 0.0)"
             ],
         ];
         if($endpoint == 'Token') {
@@ -81,10 +83,10 @@ class KretaApi {
         $sch = json_decode($response);
         $out = [];
         foreach ($sch as $school) {
-            $out[] = array(
+            $out[] = [
                 'name' => $school->Name,
                 'code' => $school->InstituteCode
-            );
+            ];
         }
         file_put_contents("../public/datas.json", json_encode($out, JSON_UNESCAPED_UNICODE));
         return $out;
@@ -102,8 +104,7 @@ class KretaApi {
             $response = '{"error":true}';
         }
 
-        $response = json_decode($response);
-        return $response;
+        return json_decode($response);
     }
 
     public static function getToken($school, $rt)
@@ -118,9 +119,8 @@ class KretaApi {
         $out = json_decode($out);
         if (isset($out) && is_object($out)) {
             return self::wrapApi($out);
-        } else {
-            return false;
-        }
+        } 
+        return false;
     }
 
     public static function getEvents($school, $tok)
@@ -131,11 +131,84 @@ class KretaApi {
 
     public static function getStudent($school, $tok)
     {
+        $eventsPromise = new Promise(function () use ($school, $tok, &$eventsPromise) {
+            $eventsPromise->resolve(self::getEvents($school, $tok));
+        });
+        $classAveragePromise = new Promise(function () use ($school, $tok, &$classAveragePromise) {
+            $ret = self::send($school, 'Student?fromDate=1970-01-01&toDate=1970-01-01', $tok);
+            $classAveragePromise->resolve(json_decode($ret)->SubjectAverages);
+        });
+
+        $hirdetmenyekPromise = null;
+
         $out = json_decode(
             self::send($school, 'StudentAmi', $tok)
         );
-        $out->events = self::getEvents($school, $tok);
         $out = self::wrapApi($out);
+
+        if ($school == 'klik035220001') {
+            $hirdetmenyekPromise = new Promise(function () use ($out, &$hirdetmenyekPromise) {
+                $toldyClassCode = explode('.',
+                    collect($out->osztalyCsoportok)->firstWhere('osztalyCsoportTipus', 'Osztaly')->nev
+                );
+                $toldyClassCode = (date('Y') - $toldyClassCode[0] + (date('m') < 13 && date('m') > 8 ? 7 : 6)) . $toldyClassCode[1];
+                $htmlinput = self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody();
+                $doc = new \DOMDocument();
+                @$doc->loadHTML($htmlinput);
+                $xpath = new \DOMXpath($doc);
+                $conts = $xpath->query("//article[contains(@class, 'cleara')]");
+                $hirdetmenyek = [];
+                foreach ($conts as $container) {
+                    $arr = $container->getElementsByTagName("a");
+                    foreach ($arr as $item) {
+                        if ($item->parentNode->tagName == "h3") {
+                            $con = $item->textContent;
+                            $url = $item->getAttribute('href');
+                            $id = explode('/', $url);
+                            $id = array_pop($id);
+                        }
+
+                        if ($item->parentNode->tagName == "p") {
+                            $author = $item->textContent;
+                        }
+                    }
+
+                    $arr = $container->getElementsByTagName("h3");
+                    foreach ($arr as $item) {
+                        if ($item->parentNode->tagName == "article") {
+                            $date = self::parseToldyDate($item->textContent);
+                            $nxt = $xpath->query("following-sibling::*[1]", $item)->item(0);
+                            $title = substr(join(', ', explode('▼', trim(preg_replace("/\s+/", " ", $nxt->textContent)))), 0, -4);
+                        }
+                    }
+                    $endDate = self::client(null)->get($url)->getBody();
+                    $doc2 = new \DOMDocument();
+                    @$doc2->loadHTML($endDate);
+                    $xpath2 = new \DOMXpath($doc2);
+                    $endDate = $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0];
+                    $endDate = self::parseToldyDate(explode(': ', $endDate->textContent)[1]);
+                    $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
+                    $attachments = [];
+                    foreach($links as $link) {
+                        $attachments[] = [
+                            'title' => $link->textContent,
+                            'url' => $link->getAttribute('href')
+                        ];
+                    }
+                    $hirdetmenyek[] = [
+                        'date' => $date,
+                        'content' => trim(ucwords($title)) . ": $con",
+                        'teacher' => $author,
+                        'attachments' => $attachments,
+                        'id' => "tld$id",
+                        'endDate' => $endDate
+                    ];
+                }
+                $hirdetmenyekPromise->resolve($hirdetmenyek);
+            });
+        }
+
+
         $evals = [];
         $groupedEvals = [];
         foreach ($out->evaluations as $eval) {
@@ -144,13 +217,13 @@ class KretaApi {
                 case 'Deportment':
                     $eval->subject = "Magatartás";
                     $eval->id .= 'e';
-                break;
+                    break;
 
                 case 'Diligence':
                     $eval->subject = "Szorgalom";
                     $eval->id .= 'i';
 
-                break;
+                    break;
                 case 'Mark':
                     $eval->value = explode('(', $eval->value)[0];
                     $newVal = $eval->numberValue;
@@ -204,11 +277,12 @@ class KretaApi {
 
         foreach ($groupedEvals as $group) {
             if (count($group) > 1) {
-                for ($i = 0; $i < count($group); $i++) {
-                    if (isset($group[$i + 1]) && $group[$i]->date == $group[$i + 1]->date && $group[$i]->type == $group[$i + 1]->type && $group[$i]->weight == $group[$i + 1]->weight && $group[$i]->subject == $group[$i + 1]->subject) {
+                $length = sizeof($group);
+                for ($i = 0; $i < $length; $i++) {
+                    if (isset($group[$i + 1]) && $group[$i]->date === $group[$i + 1]->date && $group[$i]->type === $group[$i + 1]->type && $group[$i]->weight === $group[$i + 1]->weight && $group[$i]->subject === $group[$i + 1]->subject) {
                         $a = $group[$i];
                         $b = $group[$i + 1];
-                        if (abs($a->numberValue - $b->numberValue) == 1) {
+                        if (abs($a->numberValue - $b->numberValue) === 1) {
                             $w = str_replace('%', '', $a->weight) * 2;
                             if ($w <= 200) {
                                 $a->weight = "$w%";
@@ -236,7 +310,7 @@ class KretaApi {
         $ids = array_column($out->absences, 'id');
 
         $out->absences = array_filter(
-            array_map(function($abs){
+            array_map(function($abs) {
                 $abs->date = $abs->lessonStartTime;
                 unset($abs->lessonStartTime);
                 return $abs;
@@ -263,69 +337,11 @@ class KretaApi {
             }
         );
 
-        if ($school == 'klik035220001') {
-            $toldyClassCode = explode('.',
-                collect($out->osztalyCsoportok)->firstWhere('osztalyCsoportTipus', 'Osztaly')->nev
-            );
-            $toldyClassCode = (date('Y') - $toldyClassCode[0] + ((date('m') < 13 && date('m') > 8) ? 7 : 6)) . $toldyClassCode[1];
-            $htmlinput = self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody();
-            $doc = new \DOMDocument();
-            @$doc->loadHTML($htmlinput);
-            $xpath = new \DOMXpath($doc);
-            $conts = $xpath->query("//article[contains(@class, 'cleara')]");
-            $hirdetmenyek = [];
-            foreach ($conts as $container) {
-                $arr = $container->getElementsByTagName("a");
-                foreach ($arr as $item) {
-                    if ($item->parentNode->tagName == "h3") {
-                        $con = $item->textContent;
-                        $url = $item->getAttribute('href');
-                        $id = explode('/', $url);
-                        $id = array_pop($id);
-                    }
-
-                    if ($item->parentNode->tagName == "p") {
-                        $author = $item->textContent;
-                    }
-                }
-
-                $arr = $container->getElementsByTagName("h3");
-                foreach ($arr as $item) {
-                    if ($item->parentNode->tagName == "article") {
-                        $date = self::parseToldyDate($item->textContent);
-                        $nxt = $xpath->query("following-sibling::*[1]", $item)->item(0);
-                        $title = substr(join(', ', explode('▼', trim(preg_replace("/\s+/", " ", $nxt->textContent)))), 0, -4);
-                    }
-                }
-                $endDate = self::client(null)->get($url)->getBody();
-                $doc2 = new \DOMDocument();
-                @$doc2->loadHTML($endDate);
-                $xpath2 = new \DOMXpath($doc2);
-                $endDate = $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0];
-                $endDate = self::parseToldyDate(explode(': ', $endDate->textContent)[1]);
-                $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
-                $attachments = [];
-                foreach($links as $link) {
-                    $attachments[] = [
-                        'title' => $link->textContent,
-                        'url' => $link->getAttribute('href')
-                    ];
-                }
-                $hirdetmenyek[] = [
-                    'date' => $date,
-                    'content' => trim(ucwords($title)) . ": $con",
-                    'teacher' => $author,
-                    'attachments' => $attachments,
-                    'id' => "tld$id",
-                    'endDate' => $endDate
-                ];
-            }
-
-            $out->events = array_merge($out->events, $hirdetmenyek);
-        }
         $out->classAverages = array_map(function ($a) {
             return ['subject' => $a->Subject, 'value' => $a->ClassValue];
-        },json_decode(self::send($school, 'Student?fromDate=1970-01-01&toDate=1970-01-01', $tok))->SubjectAverages);
+        }, $classAveragePromise->wait());
+        $out->events = array_merge($eventsPromise->wait(), isset($hirdetmenyekPromise) ? $hirdetmenyekPromise->wait() : []);
+
         unset($out->lessons, $out->formTeacher);
         return $out;
     }
@@ -351,8 +367,8 @@ class KretaApi {
 
     public static function getHomeWork($school, $tok, $id)
     {
-        $ret = self::send($school, "HaziFeladat/TanuloHaziFeladatLista/$id",$tok);
-        if (!$ret || empty($ret)) {
+        $ret = self::send($school, "HaziFeladat/TanuloHaziFeladatLista/$id", $tok);
+        if (! $ret || empty($ret)) {
             return [];
         }
 
@@ -404,25 +420,25 @@ class KretaApi {
         return self::wrapApi(
             json_decode($out)
         );
-    } 
+    }
 
     public static function getAttachment($tok, $id) {
         $out = self::send('eugyintezes', "/dokumentumok/uzenetek/$id", $tok);
-        if (!$out || empty($out)) {
+        if (! isset($out)) {
             return [];
         }
 
         return self::wrapApi(
             json_decode($out)
         );
-    } 
+    }
 
     public static function getExams($school, $tok, $from, $to) {
         $ret = self::send($school, 'BejelentettSzamonkeres?' . http_build_query([
             'DatumTol' => date('Y-m-d', $from),
             'DatumIg' => date('Y-m-d', $to)
         ]), $tok);
-        if (!$ret || empty($ret)) {
+        if (! isset($ret)) {
             return [];
         }
 
@@ -448,7 +464,7 @@ class KretaApi {
                 }
             }
             if (Str::endsWith($key, 'Id')) {
-                $newKey = $key == 'SchoolYearId' ? 'schoolYearId' : 'id';
+                $newKey = $key === 'SchoolYearId' ? 'schoolYearId' : 'id';
             } elseif ($key === 'Teacher') {
                 if (Str::contains($val, 'Helyettesítő: ')) {
                     $newVal = '';
@@ -476,7 +492,7 @@ class KretaApi {
             $year = date('Y');
         }
 
-        return strtotime("$year-$month-$day");
+        return strtotime("${year}-${month}-${day}");
     }
     private static $months = [
         'szeptember' => 9,

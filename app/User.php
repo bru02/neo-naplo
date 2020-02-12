@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -19,9 +20,9 @@ class User extends Model implements Authenticatable, JWTSubject
     protected $hash;
 
     public $school;
-    public $data;
-    public $id;
-    public $timetable;
+    // private $data;
+    private $id;
+    private $timetable;
 
     private $tokenData;
 
@@ -33,7 +34,7 @@ class User extends Model implements Authenticatable, JWTSubject
             $this->tokenData = $this->decompileToken();
             $this->school = $this->tokenData->{'kreta:institute_code'};
             $this->id = $this->tokenData->{'kreta:institute_user_id'};
-            $this->timetable = (object)[];
+            $this->timetable = (object) [];
         }
         if(isset($keys)) {
             $this->hash = $keys['hash'];
@@ -92,8 +93,8 @@ class User extends Model implements Authenticatable, JWTSubject
     public function setRememberToken($value)
     {
         DB::table('tokens')
-        ->where($this->getAuthIdentifierName(), $this->getAuthIdentifier())
-        ->update([$this->getRememberTokenName() => $value]);
+            ->where($this->getAuthIdentifierName(), $this->getAuthIdentifier())
+            ->update([$this->getRememberTokenName() => $value]);
     }
     public function getRememberTokenName()
     {
@@ -108,7 +109,7 @@ class User extends Model implements Authenticatable, JWTSubject
             'timetable',
             'tokenData',
             'access_token',
-            'refresh_token'
+            'refresh_token',
         ];
         $ret = [];
         foreach ($attrs as $value) {
@@ -121,10 +122,11 @@ class User extends Model implements Authenticatable, JWTSubject
     public function load($string) {
         $data = json_decode($string);
         foreach ($data as $key => $value) {
-            if($key == 'cookies')
+            if($key === 'cookies') {
                 KretaApi::cookies($value);
-            else
+            } else {
                 $this->{$key} = $value;
+            }
         }
     }
 
@@ -136,7 +138,7 @@ class User extends Model implements Authenticatable, JWTSubject
 
     public function getTimetable($from, $to, $group = true) {
         $ret = KretaApi::timetable($this->school, $this->getToken(), $from, $to, $group);
-        $this->timetable->{"$from-$to-$group"} = $ret;
+        $this->timetable->{"${from}-${to}-${group}"} = $ret;
         return $ret;
     }
 
@@ -149,22 +151,23 @@ class User extends Model implements Authenticatable, JWTSubject
     }
 
     public function getToken() {
-        if($this->doRefreshToken())
+        if($this->doRefreshToken()) {
             $this->refreshToken();
+        }
         return $this->access_token;
     }
 
     private function encrypt($string) {
 
-        $enc =  new Encrypter($this->encryptionKey, config('app.cipher'));
+        $enc = new Encrypter($this->encryptionKey, config('app.cipher'));
         return $enc->encrypt( $string );
-    } 
+    }
 
     private function refreshToken() {
         try {
             $result = KretaApi::getToken($this->school, $this->refresh_token);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
-            Log::debug("exp: {$this->tokenData->exp}; \r\n rt: $this->refresh_token");
+            Log::debug("exp: {$this->tokenData->exp}; \r\n rt: {$this->refresh_token}");
             auth()->logout();
         }
         $this->access_token = $result->access_token;
@@ -181,7 +184,7 @@ class User extends Model implements Authenticatable, JWTSubject
 
     public function getJWTIdentifier()
     {
-      return ['hash' => $this->hash, 'key' => 'base64:'.base64_encode($this->encryptionKey), 'id' => $this->getAuthIdentifier()];
+        return ['hash' => $this->hash, 'key' => 'base64:'.base64_encode($this->encryptionKey), 'id' => $this->getAuthIdentifier()];
     }
 
     public function getJWTCustomClaims()
@@ -194,7 +197,8 @@ class User extends Model implements Authenticatable, JWTSubject
       ];
     }
 
-    public function save() {
+    public function save()
+    {
         Session::put('user', $this->stringify());
     }
 }

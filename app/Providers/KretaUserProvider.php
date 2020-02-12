@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Providers;
+
 use App\User;
 use Illuminate\Contracts\Auth\UserProvider as IlluminateUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
@@ -25,20 +26,21 @@ class KretaUserProvider implements IlluminateUserProvider
     {
         $user = DB::table('tokens')->select('*')->where([
             ['kreta_id', $identifier->id],
-            ['remember_token', $identifier->hash]])->first();
-        if(!isset($user)) {
+            ['remember_token', $identifier->hash]
+        ])->first();
+        if(! isset($user)) {
             return null;
         }
         if (Str::startsWith($key = $identifier->key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
         }
         $enc = new Encrypter($key, config('app.cipher'));
-        return new User((object)[
-            'access_token' => $enc->decrypt( $user->access_token),
-            'refresh_token' => $enc->decrypt($user->refresh_token)
+        return new User((object) [
+            'access_token' => $enc->decrypt($user->access_token),
+            'refresh_token' => $enc->decrypt($user->refresh_token),
         ], [
             'hash' =>$identifier->hash,
-            'key' => $key
+            'key' => $key,
         ]);
     }
 
@@ -74,7 +76,7 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if (empty($credentials) ||
+        if (!isset($credentials) ||
            (count($credentials) === 1 &&
             array_key_exists('password', $credentials))) {
             return;

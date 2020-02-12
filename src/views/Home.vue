@@ -4,7 +4,7 @@
       <NextLessonCard
         :timetable="timetable"
         v-model="selectedLessons"
-        :packed="bag.length == bagData.length"
+        :packed="pack.length == packData.length"
       ></NextLessonCard>
       <ChangedLessonCard
         v-for="lesson in changedLessons"
@@ -59,27 +59,28 @@
       />
     </Dialog>
     <Dialog title="Órák" v-model="selectedLessons">
-      <template
-        v-slot:toolbar
-        v-if="selectedLessons && selectedLessons[0].startTime * 1000 > time"
-      >
-        <!-- <v-btn icon :href='getDirections(selectedLessons[0].startTime * 1000)' target='_blank'>
+      <template v-slot:toolbar v-if="lessonButtons">
+        <v-btn
+          icon
+          :href="getDirections(selectedLessons && selectedLessons[0].startTime)"
+          target="_blank"
+        >
           <v-icon>
             mdi-directions
           </v-icon>
-        </v-btn> -->
-        <v-btn icon @click="bagDialog = true">
+        </v-btn>
+        <v-btn icon @click="packDialog = true">
           <v-icon>
-            mdi-bag-personal{{ bag.length == bagData.length ? '' : '-off' }}
+            mdi-bag-personal{{ pack.length == packData.length ? '' : '-off' }}
           </v-icon>
         </v-btn>
       </template>
       <LessonList :lessons="selectedLessons || []" v-model="selectedLesson" />
     </Dialog>
-    <Dialog title="Bepakolás" v-model="bagDialog">
+    <Dialog title="Bepakolás" v-model="packDialog">
       <v-list>
         <v-list-item
-          v-for="subject in bagData"
+          v-for="subject in packData"
           :key="subject.name"
           :value="subject.name"
           v-ripple
@@ -87,7 +88,7 @@
         >
           <v-list-item-action>
             <v-checkbox
-              v-model="bag"
+              v-model="pack"
               color="primary"
               :value="subject.name"
               :indeterminate="subject.indeterminate"
@@ -164,12 +165,23 @@ export default class HomeComponent extends mixins(Mixin) {
   date!: Date;
   loading!: boolean;
   instituteName!: string;
-  bagDialog = false;
-  bagData: { name: string; indeterminate: boolean }[] = [];
-  bag: string[] = [];
+  packDialog = false;
+  packData: { name: string; indeterminate: boolean }[] = [];
+  pack: string[] = [];
   mounted() {
     this.obtain('general');
-    this.obtain('timetable').then(tt => (this.timetable = tt));
+    this.obtain('timetable').then(tt => {
+      this.timetable = tt;
+      if (this.lessonButtons) {
+        this.onPackDialogChange(true);
+      }
+    });
+  }
+  get lessonButtons() {
+    return this.firstLessonTomorrow?.startTime * 1000 > +this.time;
+  }
+  get firstLessonTomorrow() {
+    return this.timetable[+this.date / 1000 + 24 * 60 * 60]?.[0] ?? undefined;
   }
   get changedLessons() {
     const lessons: Lesson[] = [];
@@ -184,9 +196,9 @@ export default class HomeComponent extends mixins(Mixin) {
         l.endTime * 1000 > +this.time
     );
   }
-  @Watch('bagDialog')
-  onBagDialogChange(value) {
-    const timetableKey = this.selectedLessons[0].date;
+  @Watch('packDialog')
+  onPackDialogChange(value) {
+    const timetableKey = this.firstLessonTomorrow.date;
 
     if (value) {
       const lessons = this.timetable[timetableKey];
@@ -195,37 +207,41 @@ export default class HomeComponent extends mixins(Mixin) {
       ).map(l => {
         return l.subject;
       });
-      this.bag =
-        JSON.parse(localStorage.getItem('bagData') || '{}')[timetableKey] || [];
-      this.bagData = lessons
+      this.pack =
+        JSON.parse(localStorage.getItem('packData') || '{}')[timetableKey] ||
+        [];
+      this.packData = lessons
         .filter((e, i, a) => {
-          return a.indexOf(e) == i && e.state != 'Missed';
+          return e.state != 'Missed';
         })
-        .map(({ subject }) => {
+        .map(({ subject }) => subject)
+        .filter((e, i, a) => {
+          return a.indexOf(e) == i;
+        })
+        .map(subject => {
           return {
             name: subject,
             indeterminate: lessonsBefore.includes(subject)
           };
-        });
+        })
+        .sort((a, b) => +!b.indeterminate - +!a.indeterminate);
     } else {
       localStorage.setItem(
-        'bagData',
-        JSON.stringify({ [timetableKey]: this.bag })
+        'packData',
+        JSON.stringify({ [timetableKey]: this.pack })
       );
     }
   }
   toggle(subject) {
-    if (this.bag.includes(subject)) {
-      this.bag.splice(this.bag.indexOf(subject), 1);
+    if (this.pack.includes(subject)) {
+      this.pack.splice(this.pack.indexOf(subject), 1);
     } else {
-      this.bag.push(subject);
+      this.pack.push(subject);
     }
   }
-  // getDirections(startTime) {
-  //   const parts = new Date(startTime + 3000000).toJSON().split('T') // 10p
-  //   const dateParts = parts[0].split('-')
-  //   return `https://www.google.com/maps/?daddr=${this.instituteName}&date=${dateParts[1]}/${dateParts[2]}/${dateParts[0]}&time=${parts[1].substr(0, 5)}&ttype=arr&dirflg=r`
-  // }
+  getDirections(startTime) {
+    return `https://www.google.com/maps/dir//${this.instituteName}/data=!4m6!4m5!2m3!6e1!7e2!8j${startTime}!3e3`;
+  }
   metaInfo = {
     title: 'Faliújság'
   };

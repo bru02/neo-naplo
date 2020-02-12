@@ -21,6 +21,7 @@ class DeleteTokens
         $user = $event->$user;
         DB::table('tokens')->select('*')->where([
             ['kreta_id', $user->hash],
-            ['remember_token', $user->tokenData->{'idp:user_id'}]])->delete();
+            ['remember_token', $user->tokenData->{'idp:user_id'}]
+        ])->delete();
     }
 }
