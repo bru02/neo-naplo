@@ -42,6 +42,7 @@ export default class EvaluationsComponent extends mixins(Mixin) {
   selectedEvaluation: Evaluation | boolean = false;
   mounted() {
     this.obtain('general');
+    this.obtain('classAverages');
   }
   metaInfo = {
     title: 'Jegyek'

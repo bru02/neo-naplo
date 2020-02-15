@@ -1,15 +1,23 @@
 import Vue from 'vue';
 import VueMeta from 'vue-meta';
 
-import Notes from '@/views/Notes.vue';
-import Absences from '@/views/Absences.vue';
+import Login from '@/views/Login.vue';
 import Home from '@/views/Home.vue';
 import Timetable from '@/views/Timetable.vue';
-import Evaluations from '@/views/Evaluations.vue';
-import Statistics from '@/views/Statistics.vue';
-import Profile from '@/views/Profile.vue';
-import Login from '@/views/Login.vue';
 import NotFound from '@/views/NotFound.vue';
+
+const Notes = () =>
+  import(
+    /* webpackChunkName: "views" */ /* webpackPrefetch: true */ '@/views/Notes.vue'
+  );
+const Absences = () =>
+  import(/* webpackChunkName: "views" */ '@/views/Absences.vue');
+const Profile = () =>
+  import(/* webpackChunkName: "views" */ '@/views/Profile.vue');
+const Statistics = () =>
+  import(/* webpackChunkName: "views" */ '@/views/Statistics.vue');
+const Evaluations = () =>
+  import(/* webpackChunkName: "views" */ '@/views/Evaluations.vue');
 
 const routes = [
   {
@@ -102,7 +110,14 @@ Vue.use(VueMeta);
 const router = new VueRouter({
   routes,
   mode: 'history',
-  base: process.env.BASE_URL
+  base: process.env.BASE_URL,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { x: 0, y: 0 };
+    }
+  }
 });
 
 (Vue as any).router = router;

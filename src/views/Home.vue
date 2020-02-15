@@ -131,7 +131,6 @@ import {
 @Component({
   computed: {
     ...apiMapper.mapState({
-      events: state => state.general.data.events,
       loading: state => state.general.loading,
       instituteName: state => state.general.data.instituteName
     }),
@@ -169,7 +168,11 @@ export default class HomeComponent extends mixins(Mixin) {
   packData: { name: string; indeterminate: boolean }[] = [];
   pack: string[] = [];
   mounted() {
-    this.obtain('general');
+    this.obtain('general').then(d => {
+      if (d.instituteCode == 'klik035220001') this.obtain('hirdetmenyek');
+    });
+    this.obtain('events');
+
     this.obtain('timetable').then(tt => {
       this.timetable = tt;
       if (this.lessonButtons) {

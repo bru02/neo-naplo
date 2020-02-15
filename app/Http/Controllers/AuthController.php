@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -102,6 +104,13 @@ class AuthController extends Controller
         ]);
     }
 
+    public function refreshToken() {
+        try {
+            return response()->json(['access_token' => auth()->refresh()]);
+        } catch (JWTException $exception) {
+            throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
+        }
+    }
     public function logout()
     {
         Auth::logout();

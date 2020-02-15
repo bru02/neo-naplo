@@ -1,2 +1,2 @@
 web: vendor/bin/heroku-php-nginx -C nginx.conf public/
-release: php artisan config:cache
+release: php artisan optimize

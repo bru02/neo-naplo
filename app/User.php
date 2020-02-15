@@ -20,9 +20,9 @@ class User extends Model implements Authenticatable, JWTSubject
     protected $hash;
 
     public $school;
-    // private $data;
     private $id;
     private $timetable;
+
 
     private $tokenData;
 
@@ -104,7 +104,6 @@ class User extends Model implements Authenticatable, JWTSubject
     public function stringify() {
         $attrs = [
             'id',
-            'data',
             'school',
             'timetable',
             'tokenData',
@@ -130,10 +129,20 @@ class User extends Model implements Authenticatable, JWTSubject
         }
     }
 
+    public function loadHirdetmenyek($class) {
+        return KretaApi::getHirdetmenyek($class);
+    }
+
+    public function loadClassAverages() {
+        return KretaApi::getClassAverages($this->school, $this->getToken());
+    }
+
+    public function loadEvents() {
+        return KretaApi::getEvents($this->school, $this->getToken());
+    }
+
     public function loadData() {
-        $data = KretaApi::getStudent($this->school, $this->getToken());
-        $this->data = $data;
-        return $data;
+        return KretaApi::getStudent($this->school, $this->getToken());
     }
 
     public function getTimetable($from, $to, $group = true) {

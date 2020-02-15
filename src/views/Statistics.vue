@@ -127,7 +127,7 @@
             <v-list>
               <v-list-item
                 v-for="item in currentSubject.evaluations"
-                :key="item.creatingTime"
+                :key="item.id"
                 @click="selectedEvaluation = item"
               >
                 <v-list-item-avatar>
@@ -378,6 +378,7 @@ export default class Statistics extends mixins(Mixin) {
   loading = true;
   mounted() {
     this.obtain('general').then(() => (this.loading = false));
+    this.obtain('classAverages');
   }
 
   get values() {

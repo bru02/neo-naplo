@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use GuzzleHttp\TransferStats;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Cookie\CookieJar;
@@ -73,7 +74,7 @@ class KretaApi
 
     public static function schools()
     {
-        $response = self::client('https://kretaglobalmobileapi.ekreta.hu')->get('/api/v2/Institute', [
+        $response = self::client('https://kretaglobalmobileapi2.ekreta.hu')->get('/api/v2/Institute', [
             'headers' => [
                 'apiKey' => '7856d350-1fda-45f5-822d-e1a2f3f1acf0'
             ],
@@ -129,109 +130,104 @@ class KretaApi
         return json_decode($out);
     }
 
+    public static function getClassAverages($school, $tok) {
+        $ret = self::send($school, 'Student?fromDate=1970-01-01&toDate=1970-01-01', $tok);
+        return array_map(function ($a) {
+            return ['subject' => $a->Subject, 'value' => $a->ClassValue];
+        }, json_decode($ret)->SubjectAverages);
+    }
+
+    public static function getHirdetmenyek($class) {
+        $toldyClassCode = explode('.',
+            $class
+        );
+        $toldyClassCode = (date('Y') - $toldyClassCode[0] + (date('m') < 13 && date('m') > 8 ? 7 : 6)) . $toldyClassCode[1];
+        $htmlinput = self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody();
+        $doc = new \DOMDocument();
+        @$doc->loadHTML($htmlinput);
+        $xpath = new \DOMXpath($doc);
+        $conts = $xpath->query("//article[contains(@class, 'cleara')]");
+        $hirdetmenyek = [];
+        foreach ($conts as $container) {
+            $arr = $container->getElementsByTagName("a");
+            foreach ($arr as $item) {
+                if ($item->parentNode->tagName == "h3") {
+                    $con = $item->textContent;
+                    $url = $item->getAttribute('href');
+                    $id = explode('/', $url);
+                    $id = array_pop($id);
+                }
+
+                if ($item->parentNode->tagName == "p") {
+                    $author = $item->textContent;
+                }
+            }
+
+            $arr = $container->getElementsByTagName("h3");
+            foreach ($arr as $item) {
+                if ($item->parentNode->tagName == "article") {
+                    $date = self::parseToldyDate($item->textContent);
+                    $nxt = $xpath->query("following-sibling::*[1]", $item)->item(0);
+                    $title = substr(join(', ', explode('▼', trim(preg_replace("/\s+/", " ", $nxt->textContent)))), 0, -4);
+                }
+            }
+            $endDate = self::client(null)->get($url)->getBody();
+            $doc2 = new \DOMDocument();
+            @$doc2->loadHTML($endDate);
+            $xpath2 = new \DOMXpath($doc2);
+            $endDate = $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0];
+            $endDate = self::parseToldyDate(explode(': ', $endDate->textContent)[1]);
+            $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
+            $attachments = [];
+            foreach($links as $link) {
+                $attachments[] = [
+                    'title' => $link->textContent,
+                    'url' => $link->getAttribute('href')
+                ];
+            }
+            $hirdetmenyek[] = [
+                'date' => $date,
+                'title' => trim(ucwords($title)) . ": $con",
+                'content' => '',
+                'teacher' => $author,
+                'attachments' => $attachments,
+                'id' => "tld$id",
+                'endDate' => $endDate
+            ];
+        }
+        return $hirdetmenyek;
+    }
+
     public static function getStudent($school, $tok)
     {
-        $eventsPromise = new Promise(function () use ($school, $tok, &$eventsPromise) {
-            $eventsPromise->resolve(self::getEvents($school, $tok));
-        });
-        $classAveragePromise = new Promise(function () use ($school, $tok, &$classAveragePromise) {
-            $ret = self::send($school, 'Student?fromDate=1970-01-01&toDate=1970-01-01', $tok);
-            $classAveragePromise->resolve(json_decode($ret)->SubjectAverages);
-        });
-
-        $hirdetmenyekPromise = null;
-
         $out = json_decode(
             self::send($school, 'StudentAmi', $tok)
         );
-        $out = self::wrapApi($out);
-
-        if ($school == 'klik035220001') {
-            $hirdetmenyekPromise = new Promise(function () use ($out, &$hirdetmenyekPromise) {
-                $toldyClassCode = explode('.',
-                    collect($out->osztalyCsoportok)->firstWhere('osztalyCsoportTipus', 'Osztaly')->nev
-                );
-                $toldyClassCode = (date('Y') - $toldyClassCode[0] + (date('m') < 13 && date('m') > 8 ? 7 : 6)) . $toldyClassCode[1];
-                $htmlinput = self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody();
-                $doc = new \DOMDocument();
-                @$doc->loadHTML($htmlinput);
-                $xpath = new \DOMXpath($doc);
-                $conts = $xpath->query("//article[contains(@class, 'cleara')]");
-                $hirdetmenyek = [];
-                foreach ($conts as $container) {
-                    $arr = $container->getElementsByTagName("a");
-                    foreach ($arr as $item) {
-                        if ($item->parentNode->tagName == "h3") {
-                            $con = $item->textContent;
-                            $url = $item->getAttribute('href');
-                            $id = explode('/', $url);
-                            $id = array_pop($id);
-                        }
-
-                        if ($item->parentNode->tagName == "p") {
-                            $author = $item->textContent;
-                        }
-                    }
-
-                    $arr = $container->getElementsByTagName("h3");
-                    foreach ($arr as $item) {
-                        if ($item->parentNode->tagName == "article") {
-                            $date = self::parseToldyDate($item->textContent);
-                            $nxt = $xpath->query("following-sibling::*[1]", $item)->item(0);
-                            $title = substr(join(', ', explode('▼', trim(preg_replace("/\s+/", " ", $nxt->textContent)))), 0, -4);
-                        }
-                    }
-                    $endDate = self::client(null)->get($url)->getBody();
-                    $doc2 = new \DOMDocument();
-                    @$doc2->loadHTML($endDate);
-                    $xpath2 = new \DOMXpath($doc2);
-                    $endDate = $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0];
-                    $endDate = self::parseToldyDate(explode(': ', $endDate->textContent)[1]);
-                    $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
-                    $attachments = [];
-                    foreach($links as $link) {
-                        $attachments[] = [
-                            'title' => $link->textContent,
-                            'url' => $link->getAttribute('href')
-                        ];
-                    }
-                    $hirdetmenyek[] = [
-                        'date' => $date,
-                        'content' => trim(ucwords($title)) . ": $con",
-                        'teacher' => $author,
-                        'attachments' => $attachments,
-                        'id' => "tld$id",
-                        'endDate' => $endDate
-                    ];
-                }
-                $hirdetmenyekPromise->resolve($hirdetmenyek);
-            });
-        }
-
+        unset($out->Lessons, $out->FormTeacher, $out->SchoolYearId);
 
         $evals = [];
         $groupedEvals = [];
-        foreach ($out->evaluations as $eval) {
-            $newVal = ucfirst($eval->value);
-            switch ($eval->form) {
+        foreach ($out->Evaluations as $eval) {
+            $newVal = ucfirst($eval->Value);
+            switch ($eval->Form) {
                 case 'Deportment':
-                    $eval->subject = "Magatartás";
-                    $eval->id .= 'e';
+                    $eval->Subject = "Magatartás";
+                    $eval->EvaluationId .= 'e';
                     break;
 
                 case 'Diligence':
-                    $eval->subject = "Szorgalom";
-                    $eval->id .= 'i';
+                    $eval->Subject = "Szorgalom";
+                    $eval->EvaluationId .= 'i';
 
                     break;
                 case 'Mark':
-                    $eval->value = explode('(', $eval->value)[0];
-                    $newVal = $eval->numberValue;
+                    $eval->Value = explode('(', $eval->Value)[0];
+                    $newVal = $eval->NumberValue;
                     break;
             }
             
 
-            switch (ucfirst($eval->value)) {
+            switch (ucfirst($eval->Value)) {
                 case "Példás":
                 case "Megfelelt":
                     $newVal = 5;
@@ -259,10 +255,10 @@ class KretaApi
                     break;
 
             }
-            $eval->numberValue = $newVal;
-            unset($eval->formName, $eval->subjectCategory, $eval->jelleg, $eval->ertekFajta);
-            $eval->typeName = explode('/', $eval->typeName)[0];
-
+            $eval->NumberValue = $newVal;
+            unset($eval->FormName, $eval->SubjectCategory, $eval->Jelleg, $eval->ErtekFajta);
+            $eval->TypeName = explode('/', $eval->TypeName)[0];
+            $eval = self::wrapApi($eval);
             $theme = $eval->theme;
             if (empty($theme)) {
                 $evals[] = $eval;
@@ -274,10 +270,12 @@ class KretaApi
 
             $groupedEvals[$theme][] = $eval;
         }
+        unset($out->Evaluations);
+        $out = self::wrapApi($out);
 
         foreach ($groupedEvals as $group) {
             if (count($group) > 1) {
-                $length = sizeof($group);
+                $length = count($group);
                 for ($i = 0; $i < $length; $i++) {
                     if (isset($group[$i + 1]) && $group[$i]->date === $group[$i + 1]->date && $group[$i]->type === $group[$i + 1]->type && $group[$i]->weight === $group[$i + 1]->weight && $group[$i]->subject === $group[$i + 1]->subject) {
                         $a = $group[$i];
@@ -337,12 +335,6 @@ class KretaApi
             }
         );
 
-        $out->classAverages = array_map(function ($a) {
-            return ['subject' => $a->Subject, 'value' => $a->ClassValue];
-        }, $classAveragePromise->wait());
-        $out->events = array_merge($eventsPromise->wait(), isset($hirdetmenyekPromise) ? $hirdetmenyekPromise->wait() : []);
-
-        unset($out->lessons, $out->formTeacher);
         return $out;
     }
 
@@ -456,7 +448,7 @@ class KretaApi
             if (is_object($val) || is_array($val)) {
                 $newVal = self::wrapApi($val);
             } else {
-                if (Str::endsWith($key, ['UTC', 'Utc', 'Date', 'Time'])) {
+                if (Str::endsWith($key, ['UTC', 'Utc', 'Time']) || $key === "Date") {
                     $newVal = strtotime($val);
                     $newKey = str_replace(['Utc', 'UTC'], '', $newKey);
                 } else {

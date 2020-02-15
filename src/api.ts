@@ -4,6 +4,18 @@ export default {
     const r = await Vue.axios.get('general');
     return r.data;
   },
+  async getEvents() {
+    const r = await Vue.axios.get('events');
+    return r.data;
+  },
+  async getClassAverages() {
+    const r = await Vue.axios.get('classAverages');
+    return r.data;
+  },
+  async getHirdetmenyek(className: string) {
+    const r = await Vue.axios.get(`hirdetmenyek/${className}`);
+    return r.data;
+  },
   async getHomeworks() {
     const r = await Vue.axios.get('homework');
     return r.data;

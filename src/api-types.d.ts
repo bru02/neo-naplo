@@ -1,6 +1,5 @@
 export interface GeneralAPI {
   id: number;
-  schoolYearId: number;
   name: string;
   nameOfBirth: string;
   placeOfBirth: string;

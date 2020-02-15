@@ -1,7 +1,6 @@
 <?php
 
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -15,15 +14,13 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 Route::group(['middleware' => 'jwt.auth'], function() {
     Route::any('/general', 'eFilcController@generalApi');
     Route::any('/timetable', 'eFilcController@timetableApi');
+    Route::any('/events', 'eFilcController@eventsApi');
+    Route::any('/classAverages', 'eFilcController@classAveragesApi');
+    Route::any('/hirdetmenyek/{class}', 'eFilcController@hirdetmenyekApi');
+
 });
 
-Route::post('/refresh', function () {
-    try {
-        return response()->json(['access_token' => auth()->refresh()]);
-    } catch (JWTException $exception) {
-        throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
-    }
-});
+Route::post('/refresh', 'AuthController@refreshToken');
 Route::post('/login', 'AuthController@login')->middleware('api');
 Route::any('/logout', 'AuthController@logout')->middleware('api');
 

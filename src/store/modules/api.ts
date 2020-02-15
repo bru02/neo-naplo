@@ -7,30 +7,46 @@ import api from '@/api';
 import group from '@/utils';
 Vue.use(Vuex);
 
-declare type resource<T> = {
-  data: T | any;
-  loading: boolean;
-};
+class Resource<T> {
+  data: T;
+  default: any;
+  loading = false;
+  loaded = false;
+  constructor(data) {
+    this.data = data;
+    this.default = data;
+  }
+  update(data: T) {
+    this.loaded = true;
+    this.loading = false;
+    Vue.set(this, 'data', data);
+  }
+  reset() {
+    this.data = this.default;
+    this.loaded = false;
+  }
+  load() {
+    this.loading = true;
+  }
+}
 
 export class ApiState {
-  general: resource<GeneralAPI> = {
-    loading: false,
-    data: {
-      absences: [],
-      events: [],
-      evaluations: [],
-      notes: [],
-      classAverages: []
-    }
-  };
-  homework = [];
-  timetable: { [key: string]: resource<TimetableAPI> } = {};
+  general = new Resource<GeneralAPI>({
+    absences: [],
+    evaluations: [],
+    notes: []
+  });
+  homework = new Resource<any[]>([]);
+  events = new Resource<Event[]>([]);
+  hirdetmenyek = new Resource<Event[]>([]);
+  classAverages = new Resource<ClassAverage[]>([]);
+  timetable: { [key: string]: Resource<TimetableAPI> } = {};
 }
 
 class ApiGetters extends Getters<ApiState> {
   get cards() {
     let cards: any[] = [];
-    for (let type of ['absences', 'notes', 'evaluations', 'events']) {
+    for (let type of ['absences', 'notes', 'evaluations']) {
       cards.push(
         ...this.state.general.data[type].map(e => {
           e.category = type;
@@ -38,6 +54,12 @@ class ApiGetters extends Getters<ApiState> {
         })
       );
     }
+    cards.push(
+      ...this.getters.events.map(e => {
+        (e as any).category = 'events';
+        return e;
+      })
+    );
     return cards.sort((a, b) => {
       return _sortValue(b) - _sortValue(a);
     });
@@ -46,12 +68,12 @@ class ApiGetters extends Getters<ApiState> {
     return this.state.general.data.absences;
   }
 
-  get evaluations() {
-    return this.state.general.data.evaluations;
+  get events() {
+    return [...this.state.events.data, ...this.state.hirdetmenyek.data];
   }
 
-  get classAverages() {
-    return this.state.general.data.classAverages;
+  get evaluations() {
+    return this.state.general.data.evaluations;
   }
 
   get groupedEvaluations(): { [k: string]: Evaluation[] } {
@@ -59,17 +81,25 @@ class ApiGetters extends Getters<ApiState> {
   }
 
   get groupedClassAverages(): { [k: string]: ClassAverage[] } {
-    return group(this.getters.classAverages, 'subject');
+    return group(this.state.classAverages.data, 'subject');
   }
 }
 
 class ApiMutations extends Mutations<ApiState> {
   updateGeneral(data: GeneralAPI) {
-    this.state.general.data = data;
-    this.state.general.loading = false;
+    this.state.general.update(data);
+  }
+  updateEvents(data: Event[]) {
+    this.state.events.update(data);
+  }
+  updateHirdetmenyek(data: Event[]) {
+    this.state.hirdetmenyek.update(data);
+  }
+  updateClassAverages(data: ClassAverage[]) {
+    this.state.classAverages.update(data);
   }
   updateHomeworks(data) {
-    this.state.homework = data;
+    this.state.homework.update(data);
   }
   updateTimetable(data: { range: string; response: TimetableAPI }) {
     Vue.set(this.state.timetable[data.range], 'data', data.response);
@@ -77,14 +107,11 @@ class ApiMutations extends Mutations<ApiState> {
   }
   reset() {
     this.state.timetable = {};
-    this.state.general.data = {
-      absences: [],
-      events: [],
-      evaluations: [],
-      notes: [],
-      classAverages: []
-    };
-    this.state.homework = [];
+    this.state.general.reset();
+    this.state.events.reset();
+    this.state.hirdetmenyek.reset();
+    this.state.classAverages.reset();
+    this.state.homework.reset();
   }
 }
 
@@ -95,7 +122,7 @@ class ApiActions extends Actions<
   ApiActions
 > {
   pullGeneral(): Promise<GeneralAPI> {
-    this.state.general.loading = true;
+    this.state.general.load();
     return api.getGeneral().then(response => {
       if (response) {
         this.commit('updateGeneral', response);
@@ -104,7 +131,38 @@ class ApiActions extends Actions<
       return this.state.general.data;
     });
   }
+  pullEvents(): Promise<Event[]> {
+    this.state.events.load();
+    return api.getEvents().then(response => {
+      if (response) {
+        this.commit('updateEvents', response);
+        return response;
+      }
+      return this.state.events.data;
+    });
+  }
+  pullHirdetmenyek(className: string): Promise<GeneralAPI> {
+    this.state.hirdetmenyek.load();
+    return api.getHirdetmenyek(className).then(response => {
+      if (response) {
+        this.commit('updateHirdetmenyek', response);
+        return response;
+      }
+      return this.state.hirdetmenyek.data;
+    });
+  }
+  pullClassAverages(): Promise<GeneralAPI> {
+    this.state.classAverages.load();
+    return api.getClassAverages().then(response => {
+      if (response) {
+        this.commit('updateClassAverages', response);
+        return response;
+      }
+      return this.state.classAverages.data;
+    });
+  }
   pullHomeworks() {
+    this.state.homework.load();
     return api.getHomeworks().then(response => {
       this.commit('updateHomeworks', response);
       return response;

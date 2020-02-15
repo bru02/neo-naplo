@@ -5,8 +5,10 @@ import vuetify from './plugins/vuetify';
 import './plugins/axios';
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import '@mdi/font/css/materialdesignicons.css';
-
+import './registerServiceWorker';
 import App from './App.vue';
+
+let refreshTokenPromise: Promise<string> | null = null;
 
 export default new Vue({
   el: '#app',
@@ -26,9 +28,13 @@ export default new Vue({
             config.url != '/refresh' &&
             config.url != '/logout'
           ) {
-            token = await this.$store.dispatch('auth/refreshToken');
+            token = await (refreshTokenPromise ||
+              (refreshTokenPromise = this.$store.dispatch(
+                'auth/refreshToken'
+              )));
+            refreshTokenPromise = null;
           }
-          config.headers['Authorization'] = `Bearer ${token}`;
+          config.headers['authorization'] = `bearer ${token}`;
         }
         return config;
       },

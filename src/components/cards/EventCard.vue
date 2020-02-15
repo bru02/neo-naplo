@@ -1,10 +1,11 @@
 <template>
   <v-card color="blue lighten-1" dark @click.native="$emit('input', event)">
     <v-card-title primary-title>
-      {{ event.content }}
+      {{ event.title }}
     </v-card-title>
     <v-card-subtitle>
-      {{ event.teacher }}
+      <div>{{ event.content }}</div>
+      <div class="font-weight-thin">{{ event.teacher }}</div>
     </v-card-subtitle>
     <v-divider light></v-divider>
     <v-card-actions class="pa-3">

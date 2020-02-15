@@ -1,6 +1,6 @@
 import { ApiState } from '@/store/modules/api';
 
-import { Lesson } from './api-types.d';
+import { Lesson, OktatasNevelesiFeladat } from './api-types.d';
 import Vue from 'vue';
 import { apiMapper, timeMapper } from '@/store';
 import Component from 'vue-class-component';
@@ -187,8 +187,9 @@ export default class Mixin extends Vue {
       }
     };
   }
-  eventValues({ content, date, endDate, attachments = [] }) {
+  eventValues({ title, content, date, endDate, attachments = [] }) {
     return Object.fromEntries([
+      ['Cím', title],
       ['Tartalom', content.replace(/\n/gm, '<br/>')],
       ['Dátum', this.formatDate(date)],
       ['Utoljára látható', this.formatDate(endDate)],
@@ -229,24 +230,27 @@ export default class Mixin extends Vue {
     return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
   }
 
-  async obtain(what: 'general' | 'timetable', w = 0) {
+  async obtain(
+    what: 'general' | 'timetable' | 'events' | 'hirdetmenyek' | 'classAverages',
+    w = 0
+  ) {
     let resource = this.state[what],
-      week: any;
+      arg: any;
     if (what == 'timetable') {
-      week = this.getWeek(w);
-      resource = this.state.timetable[`${week.from}-${week.to}`];
+      arg = this.getWeek(w);
+      // @ts-ignore
+      resource = this.state.timetable[`${arg.from}-${arg.to}`];
+    } else if (what == 'hirdetmenyek') {
+      arg = await this.obtain('general').then(
+        d =>
+          d.osztalyCsoportok.find(o => o.osztalyCsoportTipus === 'Osztaly').nev
+      );
     }
-    if (
-      resource &&
-      !resource.loading &&
-      resource.data &&
-      (what == 'general' ? !!resource.data.id : true)
-    )
-      return resource.data;
+    if (resource && !resource.loading && resource.loaded) return resource.data;
 
     return this.$store.dispatch(
       `api/pull${what.charAt(0).toUpperCase() + what.slice(1)}`,
-      week
+      arg
     );
   }
 
