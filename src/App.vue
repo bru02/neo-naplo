@@ -111,6 +111,10 @@ export default class App extends mixins(Mixin) {
             };
             break;
           case 401:
+            this.error = {
+              icon: 'mdi-account-alert',
+              text: 'Azonosítási hiba'
+            };
             break;
           case 500:
             this.error = {
@@ -151,6 +155,7 @@ export default class App extends mixins(Mixin) {
 }
 </script>
 <style>
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap;');
 .v-list-item__title,
 .v-list-item__subtitle {
   text-overflow: clip;
