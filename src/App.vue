@@ -155,7 +155,7 @@ export default class App extends mixins(Mixin) {
 }
 </script>
 <style>
-@import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap;');
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
 .v-list-item__title,
 .v-list-item__subtitle {
   text-overflow: clip;

@@ -58,10 +58,6 @@ module.exports = {
     name: 'Filc Napló',
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
-    workboxPluginMode: 'InjectManifest',
-    workboxOptions: {
-      swSrc: 'src/registerServiceWorker.ts'
-    },
     manifestOptions: {
       background_color: '#ffffff'
     }
