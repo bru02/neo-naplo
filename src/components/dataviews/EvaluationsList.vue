@@ -2,17 +2,18 @@
   <v-container>
     <v-data-iterator
       disable-pagination
-      :sort-by="view"
+      :sort-by="view.slice(5)"
+      v-show="view.slice(0, 4) == 'sort'"
       sort-desc
       hide-default-footer
-      :items="evaluations"
+      :items="evaluationsByType.MidYear"
     >
       <template v-slot:default="props">
         <v-list two-line subheader>
           <template v-for="(item, i) in props.items">
             <v-subheader
               v-if="
-                view == 'subject' &&
+                view == 'sort:subject' &&
                   (i == 0 || props.items[i - 1].subject != item.subject)
               "
               :key="item.subject"
@@ -52,8 +53,31 @@
         </v-list>
       </template>
     </v-data-iterator>
+    <v-list v-show="view.slice(0, 4) == 'type'">
+      <v-list-item
+        @click="$emit('input', item)"
+        v-for="item in evaluationsByType[view.slice(5)]"
+        :key="item.id"
+      >
+        <v-list-item-avatar>
+          {{ item.numberValue }}
+        </v-list-item-avatar>
+
+        <v-list-item-content>
+          <v-list-item-title v-text="item.subject"></v-list-item-title>
+          <v-list-item-subtitle v-text="item.theme"></v-list-item-subtitle>
+        </v-list-item-content>
+
+        <v-list-item-action>
+          <v-list-item-action-text>
+            {{ formatDate(item.date) }}
+          </v-list-item-action-text>
+        </v-list-item-action>
+      </v-list-item>
+      <v-list-item></v-list-item>
+    </v-list>
     <v-bottom-navigation fixed v-model="view" dark shift>
-      <v-btn v-for="flag in sortFlags" :key="flag.id" :value="flag.id">
+      <v-btn v-for="flag in views" :key="flag.id" :value="flag.id">
         <span>{{ flag.text }}</span>
         <v-icon>{{ flag.icon }}</v-icon>
       </v-btn>
@@ -71,28 +95,41 @@ export default class EvaluationList extends mixins(Mixin) {
   @Prop() readonly evaluations!: Evaluation[];
   @Prop() readonly groupedEvaluations!: { [k: string]: Evaluation[] };
 
+  get evaluationsByType() {
+    return this.group(this.evaluations, 'type');
+  }
+
   view = 'date';
-  sortFlags = [
-    {
-      id: 'date',
-      text: 'Dátum',
-      icon: 'mdi-timeline-text'
-    },
-    {
-      id: 'creatingTime',
-      text: 'Beírás',
-      icon: 'mdi-timeline-plus'
-    },
-    {
-      id: 'subject',
-      text: 'Tárgy',
-      icon: 'mdi-format-list-bulleted-square'
-    },
-    {
-      id: 'numberValue',
-      text: 'Értékelés',
-      icon: 'mdi-format-list-bulleted-type'
-    }
-  ];
+  get views() {
+    return [
+      {
+        id: 'sort:date',
+        text: 'Dátum',
+        icon: 'mdi-timeline-text'
+      },
+      {
+        id: 'sort:creatingTime',
+        text: 'Beírás',
+        icon: 'mdi-timeline-plus'
+      },
+      {
+        id: 'sort:subject',
+        text: 'Tárgy',
+        icon: 'mdi-format-list-bulleted-square'
+      },
+      {
+        id: 'sort:numberValue',
+        text: 'Értékelés',
+        icon: 'mdi-format-list-bulleted-type'
+      },
+      ...Object.keys(this.evaluationsByType)
+        .filter(k => k !== 'MidYear')
+        .map(k => ({
+          id: `type:${k}`,
+          text: this.getEvaluationTypeName(k as any),
+          icon: 'mdi-timeline'
+        }))
+    ];
+  }
 }
 </script>

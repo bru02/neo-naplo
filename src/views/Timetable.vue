@@ -85,7 +85,7 @@ export default class TimetableComponent extends mixins(Mixin) {
   onCWeekChanged() {
     this.timetable = {};
     this.obtain('timetable', this.cweek).then((v: TimetableAPI) => {
-      this.timetable = v;
+      this.timetable = v ?? {};
       if (+this.date / 1000 in v) {
         this.active = Object.keys(v).indexOf(`${+this.date / 1000}`);
       }

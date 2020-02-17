@@ -1,11 +1,17 @@
 import { ApiState } from '@/store/modules/api';
 
-import { Lesson, OktatasNevelesiFeladat } from './api-types.d';
 import Vue from 'vue';
 import { apiMapper, timeMapper } from '@/store';
 import Component from 'vue-class-component';
 import { toldyLink, formatDate, day, formatTime, utc2date } from './helpers';
-import { JustificationState, Note, Evaluation, Absence } from './api-types';
+import {
+  JustificationState,
+  Note,
+  Evaluation,
+  Absence,
+  Lesson,
+  EvaluationType
+} from './api-types';
 import group from '@/utils';
 @Component({
   computed: {
@@ -110,7 +116,7 @@ export default class Mixin extends Vue {
         100;
       ret[haa] = `<span class="${
         impact == 0 ? '' : impact > 0 ? 'green--text' : 'red--text'
-      }"> ${impact}`;
+      }"> ${impact}</span>`;
     } else {
       delete ret[haa];
     }
@@ -132,9 +138,8 @@ export default class Mixin extends Vue {
   }: Lesson) {
     return {
       Időpont: `${count}. óra, ${this.formatDate(date)}; ${this.formatTime(
-        startTime,
-        false
-      )} - ${this.formatTime(endTime, false)}`,
+        startTime
+      )} - ${this.formatTime(endTime)}`,
       Tantárgy: subject,
       Téma: theme,
       Tanár: this.toldyLink(
@@ -228,6 +233,15 @@ export default class Mixin extends Vue {
     }
     if (!classGroup) return '';
     return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
+  }
+
+  getEvaluationTypeName(type: EvaluationType) {
+    return {
+      EndYear: 'Évvégi',
+      HalfYear: 'Félévi',
+      IQuarterEvaluation: 'Negyedéves',
+      IIIQuarterEvaluation: 'Negyedéves'
+    }[type];
   }
 
   async obtain(

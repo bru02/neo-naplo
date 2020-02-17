@@ -16,9 +16,8 @@
               ><span
                 :class="[`${getEvaluationColor(item.average)}--text`]"
                 v-if="item.average"
-                >{{ item.average
-                }}{{ item.absencesCount.text && ' &mdash; ' }}</span
-              >
+                >{{ item.average }}</span
+              >{{ item.absencesCount.text && ' &mdash; ' }}
               <span :class="[`${item.absencesCount.color}--text`]">{{
                 item.absencesCount.text
               }}</span></v-list-item-subtitle
@@ -34,7 +33,13 @@
       :loading="loading"
       type="card, list-item-avatar-three-line, list-item-avatar-two-line,list-item-avatar-two-line"
     >
-      <v-card class="mx-auto" loading>
+      <v-card
+        class="mx-auto"
+        loading
+        v-touch="{
+          right: () => $router.go(-1)
+        }"
+      >
         <template v-slot:progress>
           <div class="stacked-bar-graph v-progress-linear">
             <span
@@ -341,6 +346,7 @@ import { Prop } from 'vue-property-decorator';
 import DataViewer from '@/components/DataViewer.vue';
 import Vue from 'vue';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
+import VTouch from 'vuetify/lib/directives/touch';
 
 interface Stat {
   evaluations: Evaluation[];
@@ -352,6 +358,7 @@ interface Stat {
   subjectCategoryName: string;
 }
 @Component({
+  directives: { touch: VTouch },
   computed: apiMapper.mapGetters([
     'evaluations',
     'groupedEvaluations',
@@ -388,8 +395,8 @@ export default class Statistics extends mixins(Mixin) {
     ].filter((e, i, a) => a.indexOf(e) == i);
     const ret: Stat[] = [];
     for (const subject of subjects) {
-      const absences = this.groupedAbsences[subject] || [],
-        evaluations = this.groupedEvaluations[subject] || [];
+      const absences = this.groupedAbsences[subject] ?? [],
+        evaluations = this.groupedEvaluations[subject] ?? [];
       ret.push({
         absences,
         evaluations,

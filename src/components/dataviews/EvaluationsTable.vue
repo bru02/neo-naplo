@@ -87,12 +87,7 @@ export default class EvaluationsTable extends mixins(Mixin) {
         if (evaluation.type == 'MidYear') {
           key = `0${utc2date(evaluation.date).getMonth() + 1}`.slice(-2);
         } else {
-          key = {
-            EndYear: 'Évvégi',
-            HalfYear: 'Félévi',
-            IQuarterEvaluation: 'Negyedéves',
-            IIIQuarterEvaluation: 'Negyedéves'
-          }[evaluation.type];
+          key = this.getEvaluationTypeName(evaluation.type);
         }
 
         if (!(key in grouped)) {

@@ -104,6 +104,7 @@ class ApiMutations extends Mutations<ApiState> {
   updateTimetable(data: { range: string; response: TimetableAPI }) {
     Vue.set(this.state.timetable[data.range], 'data', data.response);
     this.state.timetable[data.range].loading = false;
+    this.state.timetable[data.range].loaded = true;
   }
   reset() {
     this.state.timetable = {};
@@ -171,7 +172,11 @@ class ApiActions extends Actions<
   pullTimetable({ from, to }): Promise<TimetableAPI> {
     let range = `${from}-${to}`;
     if (!(range in this.state.timetable)) {
-      Vue.set(this.state.timetable, range, { data: {}, loading: true });
+      Vue.set(this.state.timetable, range, {
+        data: {},
+        loading: true,
+        loaded: false
+      });
     } else this.state.timetable[range].loading = true;
     return api.getTimetable(from, to).then(response => {
       if (response) {

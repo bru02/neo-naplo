@@ -135,7 +135,12 @@ export default class App extends mixins(Mixin) {
     );
     if (this.$store.getters['auth/isAuthenticated']) {
       const w = this.getWeek(0);
-      for (const key in ['general', `timetable?from=${w.from}&to=${w.to}`]) {
+      for (const key in [
+        'general',
+        `timetable?from=${w.from}&to=${w.to}`,
+        'events',
+        'classAverages'
+      ]) {
         const cachedResponse = await caches.match(`/api/${key}`);
         let a = key.split('?')[0];
         if (cachedResponse)

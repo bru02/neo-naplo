@@ -3,8 +3,8 @@
     <v-row dense justify="center">
       <NextLessonCard
         :timetable="timetable"
-        v-model="selectedLessons"
-        :packed="pack.length == packData.length"
+        :instituteName="instituteName"
+        v-model="selectedLesson"
       ></NextLessonCard>
       <ChangedLessonCard
         v-for="lesson in changedLessons"
@@ -31,7 +31,8 @@
           <AbsencesCard
             :absences="card"
             v-else-if="card.category == 'absences'"
-            v-model="selectedAbsenceGroup"/>
+            v-model="selectedAbsenceGroup"
+            v-on:lesson="a => (selectedAbsence = a)"/>
           <EventCard
             :event="card"
             v-else-if="card.category == 'events'"
@@ -58,56 +59,12 @@
         v-model="selectedAbsence"
       />
     </Dialog>
-    <Dialog title="Órák" v-model="selectedLessons">
-      <template v-slot:toolbar v-if="lessonButtons">
-        <v-btn
-          icon
-          :href="getDirections(selectedLessons && selectedLessons[0].startTime)"
-          target="_blank"
-        >
-          <v-icon>
-            mdi-directions
-          </v-icon>
-        </v-btn>
-        <v-btn icon @click="packDialog = true">
-          <v-icon>
-            mdi-bag-personal{{ pack.length == packData.length ? '' : '-off' }}
-          </v-icon>
-        </v-btn>
-      </template>
-      <LessonList :lessons="selectedLessons || []" v-model="selectedLesson" />
-    </Dialog>
-    <Dialog title="Bepakolás" v-model="packDialog">
-      <v-list>
-        <v-list-item
-          v-for="subject in packData"
-          :key="subject.name"
-          :value="subject.name"
-          v-ripple
-          @click.capture.stop="toggle(subject.name)"
-        >
-          <v-list-item-action>
-            <v-checkbox
-              v-model="pack"
-              color="primary"
-              :value="subject.name"
-              :indeterminate="subject.indeterminate"
-            ></v-checkbox>
-          </v-list-item-action>
-
-          <v-list-item-content>
-            <v-list-item-title> {{ subject.name }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </Dialog>
   </v-container>
 </template>
 <script lang="ts">
 import Mixin from '@/mixins';
 import { apiMapper, timeMapper } from '@/store';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
-import LessonList from '@/components/dataviews/LessonsList.vue';
 import DataViewer from '@/components/DataViewer.vue';
 import AbsencesCard from '@/components/cards/AbsencesCard.vue';
 import EvaluationCard from '@/components/cards/EvaluationCard.vue';
@@ -139,7 +96,6 @@ import {
   },
   components: {
     AbsencesList,
-    LessonList,
     DataViewer,
     AbsencesCard,
     EvaluationCard,
@@ -164,9 +120,7 @@ export default class HomeComponent extends mixins(Mixin) {
   date!: Date;
   loading!: boolean;
   instituteName!: string;
-  packDialog = false;
-  packData: { name: string; indeterminate: boolean }[] = [];
-  pack: string[] = [];
+
   mounted() {
     this.obtain('general').then(d => {
       if (d.instituteCode == 'klik035220001') this.obtain('hirdetmenyek');
@@ -175,17 +129,9 @@ export default class HomeComponent extends mixins(Mixin) {
 
     this.obtain('timetable').then(tt => {
       this.timetable = tt;
-      if (this.lessonButtons) {
-        this.onPackDialogChange(true);
-      }
     });
   }
-  get lessonButtons() {
-    return this.firstLessonTomorrow?.startTime * 1000 > +this.time;
-  }
-  get firstLessonTomorrow() {
-    return this.timetable[+this.date / 1000 + 24 * 60 * 60]?.[0] ?? undefined;
-  }
+
   get changedLessons() {
     const lessons: Lesson[] = [];
     for (const [key, ls] of Object.entries(this.timetable)) {
@@ -199,52 +145,7 @@ export default class HomeComponent extends mixins(Mixin) {
         l.endTime * 1000 > +this.time
     );
   }
-  @Watch('packDialog')
-  onPackDialogChange(value) {
-    const timetableKey = this.firstLessonTomorrow.date;
 
-    if (value) {
-      const lessons = this.timetable[timetableKey];
-      const lessonsBefore = (
-        this.timetable[timetableKey - 24 * 60 * 60] || []
-      ).map(l => {
-        return l.subject;
-      });
-      this.pack =
-        JSON.parse(localStorage.getItem('packData') || '{}')[timetableKey] ||
-        [];
-      this.packData = lessons
-        .filter((e, i, a) => {
-          return e.state != 'Missed';
-        })
-        .map(({ subject }) => subject)
-        .filter((e, i, a) => {
-          return a.indexOf(e) == i;
-        })
-        .map(subject => {
-          return {
-            name: subject,
-            indeterminate: lessonsBefore.includes(subject)
-          };
-        })
-        .sort((a, b) => +!b.indeterminate - +!a.indeterminate);
-    } else {
-      localStorage.setItem(
-        'packData',
-        JSON.stringify({ [timetableKey]: this.pack })
-      );
-    }
-  }
-  toggle(subject) {
-    if (this.pack.includes(subject)) {
-      this.pack.splice(this.pack.indexOf(subject), 1);
-    } else {
-      this.pack.push(subject);
-    }
-  }
-  getDirections(startTime) {
-    return `https://www.google.com/maps/dir//${this.instituteName}/data=!4m6!4m5!2m3!6e1!7e2!8j${startTime}!3e3`;
-  }
   metaInfo = {
     title: 'Faliújság'
   };
