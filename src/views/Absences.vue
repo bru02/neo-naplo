@@ -1,17 +1,45 @@
 <template>
   <v-container>
-    <v-expansion-panels>
-      <v-progress-linear
-        v-show="false"
-        :indeterminate="false"
-      ></v-progress-linear>
-      <v-expansion-panel v-for="entry in absences" :key="entry.date">
-        <v-expansion-panel-header v-ripple>
-          <div>
-            {{ entry.items[0].typeName }} ({{ entry.items.length }} db óra)
-            <span style="float: right">{{ entry.date | formatDate }}</span>
-          </div>
-          <template v-slot:actions>
+    <v-list>
+      <template v-for="entry in absences">
+        <v-list-item
+          v-if="entry.items.length === 1"
+          :key="entry.date"
+          v-ripple
+          @click="selectedAbsence = entry.items[0]"
+        >
+          <v-list-item-avatar>
+            <v-icon
+              :class="[
+                `${getAbsenceColor(entry.items[0].justificationState)}--text`
+              ]"
+              >{{
+                {
+                  Justified: 'mdi-check',
+                  BeJustified: 'mdi-help-circle-outline',
+                  UnJustified: 'mdi-close'
+                }[entry.items[0].justificationState]
+              }}</v-icon
+            >
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ entry.items[0].subject }}</v-list-item-title>
+            <v-list-item-subtitle
+              v-bind:class="[
+                `${getAbsenceColor(entry.items[0].justificationState)}--text`
+              ]"
+              >{{ entry.items[0].justificationStateName }}</v-list-item-subtitle
+            >
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-list-item-action-text>
+              {{ entry.items[0].date | formatDate }}
+            </v-list-item-action-text>
+            {{ entry.items[0].numberOfLessons }}.óra
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-group :key="entry.date" v-else no-action>
+          <template v-slot:prependIcon>
             <v-icon
               :class="[
                 `${getAbsenceColor(entry.items[0].justificationState)}--text`
@@ -25,12 +53,43 @@
               }}</v-icon
             >
           </template>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <AbsencesList :absences="entry.items" v-model="selectedAbsence" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title
+                >{{ entry.items[0].typeName }} ({{ entry.items.length }} db
+                óra)</v-list-item-title
+              >
+            </v-list-item-content>
+
+            <v-list-item-action>
+              <v-list-item-action-text>
+                {{ entry.date | formatDate }}
+              </v-list-item-action-text>
+            </v-list-item-action>
+          </template>
+
+          <v-list-item
+            v-for="abs in entry.items"
+            :key="abs.id"
+            v-ripple
+            @click="selectedAbsence = abs"
+          >
+            <v-list-item-content>
+              <v-list-item-title>{{ abs.subject }}</v-list-item-title>
+              <v-list-item-subtitle
+                v-bind:class="[
+                  `${getAbsenceColor(abs.justificationState)}--text`
+                ]"
+                >{{ abs.justificationStateName }}</v-list-item-subtitle
+              >
+            </v-list-item-content>
+            <v-list-item-action>
+              {{ abs.numberOfLessons }}.óra
+            </v-list-item-action>
+          </v-list-item>
+        </v-list-group>
+      </template>
+    </v-list>
     <v-alert
       :value="true"
       type="info"

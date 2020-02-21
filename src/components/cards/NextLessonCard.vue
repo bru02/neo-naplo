@@ -33,7 +33,7 @@
       </div>
       <v-divider light></v-divider>
       <v-card-actions class="pa-3" v-if="mode == 'today'">
-        {{ nextLesson.count }} / {{ lessons.length }}
+        {{ nextLesson.count }} / {{ lessons[lessons.length - 1].count }}
         <v-spacer></v-spacer>
         {{ nextLesson.classRoom }}
       </v-card-actions>

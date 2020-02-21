@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\KretaApi;
+use Illuminate\Support\Facades\Cache;
 
 class eFilcController extends Controller
 {
@@ -43,21 +44,10 @@ class eFilcController extends Controller
     }
 
     public function schoolsApi() {
-        return response()->file('datas.json');
+        return response()->json(
+            Cache::remember('schools', strtotime('1 month', 0), function () {
+                return KretaApi::schools();
+            })
+        );
     }
-
-    // public function manifest() {
-    //    return response()->json([
-    //         "name"=> config('app.name'),
-    //         "short_name" => "Filc",
-    //         "theme_color" => "#303f9f",
-    //         "background_color" => "#ffffff",
-    //         "display" => "standalone",
-    //         "lang" => "hu-HU",
-    //         "scope"=> config('app.url') . '/',
-    //         "start_url"=> config('app.url') . '/?utm_source=a2hs',
-    //         "gcm_sender_id"=> config('webpush.gcm.sender_id') . '',
-    //    ]);
-          
-    // }
 }

@@ -2,7 +2,11 @@
   <v-card
     :color="getAbsenceColor(absences.items[0].justificationState)"
     dark
-    @click.native="$emit('input', absences)"
+    @click.native="
+      absences.items.length === 1
+        ? $emit('lesson', absences.items[0])
+        : $emit('input', absences)
+    "
   >
     <!-- <v-layout align-center justify-center>
       <v-flex xs12> -->

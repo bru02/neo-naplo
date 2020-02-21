@@ -81,15 +81,16 @@ class KretaApi
             'verify' => false,
 
         ])->getBody();
-        $sch = json_decode($response);
+        $schools = json_decode($response);
         $out = [];
-        foreach ($sch as $school) {
+        $len = count($schools);
+        for ($i=0;$i < $len;$i++) {
+            $school = $schools[$i];
             $out[] = [
                 'name' => $school->Name,
                 'code' => $school->InstituteCode
             ];
         }
-        file_put_contents("../public/datas.json", json_encode($out, JSON_UNESCAPED_UNICODE));
         return $out;
     }
 

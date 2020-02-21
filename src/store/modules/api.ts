@@ -113,6 +113,7 @@ class ApiMutations extends Mutations<ApiState> {
     this.state.hirdetmenyek.reset();
     this.state.classAverages.reset();
     this.state.homework.reset();
+    localStorage.setItem('packData', '');
   }
 }
 

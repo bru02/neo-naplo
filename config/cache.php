@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Str;
 
+$redisUrl = parse_url(env('REDIS_URL'));
+
+
 return [
 
     /*
@@ -72,8 +75,16 @@ return [
         ],
 
         'redis' => [
-            'driver' => 'redis',
-            'connection' => 'cache',
+
+            'client' => 'predis',
+    
+            'default' => [
+                'host' => $redisUrl['host'] ?? '',
+                'password' => $redisUrl['pass'] ?? '',
+                'port' => $redisUrl['port'] ?? '',
+                'database' => 0
+            ],
+    
         ],
 
         'dynamodb' => [

@@ -4,11 +4,7 @@
       v-for="abs in absences"
       v-ripple
       :key="abs.id"
-      @click="
-        abs.items.length === 1
-          ? $emit('lesson', abs.items[0])
-          : $emit('input', abs)
-      "
+      @click="$emit('input', abs)"
     >
       <v-list-item-content>
         <v-list-item-title>{{ abs.subject }}</v-list-item-title>

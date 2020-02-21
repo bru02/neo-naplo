@@ -17,7 +17,9 @@
                 :class="[`${getEvaluationColor(item.average)}--text`]"
                 v-if="item.average"
                 >{{ item.average }}</span
-              >{{ item.absencesCount.text && ' &mdash; ' }}
+              >{{
+                !!(item.average && item.absencesCount.text) ? ' &mdash; ' : ''
+              }}
               <span :class="[`${item.absencesCount.color}--text`]">{{
                 item.absencesCount.text
               }}</span></v-list-item-subtitle
