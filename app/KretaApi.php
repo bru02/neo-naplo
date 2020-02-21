@@ -87,8 +87,8 @@ class KretaApi
         for ($i=0;$i < $len;$i++) {
             $school = $schools[$i];
             $out[] = [
-                'name' => $school->Name,
-                'code' => $school->InstituteCode
+                'name' => $school->name,
+                'code' => $school->instituteCode
             ];
         }
         return $out;
