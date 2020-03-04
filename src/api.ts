@@ -47,5 +47,11 @@ export default {
   },
   async refresh() {
     return await Vue.axios.post('/refresh');
+  },
+  async sendToken(token) {
+    return await Vue.axios.put('/notifications/token', { token });
+  },
+  async deleteToken() {
+    return await Vue.axios.delete('/notifications/token');
   }
 };

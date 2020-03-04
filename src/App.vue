@@ -3,15 +3,12 @@
     <v-navigation-drawer fixed app v-model="drawer">
       <v-list dense>
         <v-list-item
-          v-for="(item, i) in this.routes"
-          v-show="item.meta ? item.meta.auth == isAuthenticated : !!item.name"
-          :to="
-            item.name == 'Órarend'
-              ? '/timetable'
-              : item.name == 'Statisztikák'
-              ? '/statistics'
-              : item.path
+          v-for="(item, i) in routes"
+          v-show="
+            (item.meta ? item.meta.auth == isAuthenticated : true) &&
+              !!item.icon
           "
+          :to="`/${item.path.split('/').find(u => !!u && u[0] !== ':') || ''}`"
           :key="i"
         >
           <v-list-item-action>
@@ -82,7 +79,11 @@ import Component, { mixins } from 'vue-class-component';
 import { formatDate } from './helpers';
 import { authMapper } from '@/store';
 @Component({
-  computed: authMapper.mapGetters(['isAuthenticated'])
+  computed: authMapper.mapGetters(['isAuthenticated']),
+  metaInfo: {
+    title: '...',
+    titleTemplate: '%s | Filc Napló'
+  }
 })
 export default class App extends mixins(Mixin) {
   drawer = false;
@@ -153,10 +154,6 @@ export default class App extends mixins(Mixin) {
       this.$router.push('/login');
     }
   }
-  metaInfo = {
-    title: '...',
-    titleTemplate: '%s | Filc Napló'
-  };
 }
 </script>
 <style>
@@ -168,5 +165,8 @@ export default class App extends mixins(Mixin) {
 }
 .v-bottom-navigation {
   overflow-y: auto;
+}
+.v-application {
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

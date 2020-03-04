@@ -29,23 +29,44 @@ import EvaluationsList from '@/components/dataviews/EvaluationsList.vue';
 import DataViewer from '@/components/DataViewer.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Evaluation } from '../api-types';
+import { Watch } from 'vue-property-decorator';
+
 @Component({
   computed: apiMapper.mapGetters([
     'evaluations',
     'groupedClassAverages',
     'groupedEvaluations'
   ]),
-  components: { EvaluationsTable, EvaluationsList, DataViewer }
+  components: { EvaluationsTable, EvaluationsList, DataViewer },
+  metaInfo: {
+    title: 'Jegyek'
+  }
 })
 export default class EvaluationsComponent extends mixins(Mixin) {
-  name = 'Jegyek';
   selectedEvaluation: Evaluation | boolean = false;
+  evaluations!: Evaluation[];
   mounted() {
     this.obtain('general');
     this.obtain('classAverages');
   }
-  metaInfo = {
-    title: 'Jegyek'
-  };
+  @Watch('selectedEvaluation')
+  onselectedEvalChange(value) {
+    if (value) {
+      if (!this.$route.params.type)
+        this.$router.push(`/evaluations/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/evaluations`);
+    }
+  }
+  @Watch('$route')
+  onRouteChange() {
+    const { id } = this.$route.params;
+    if (id) {
+      this.selectedEvaluation =
+        this.evaluations.find(e => e.id === +id) ?? false;
+    } else {
+      this.selectedEvaluation = false;
+    }
+  }
 }
 </script>

@@ -14,15 +14,20 @@
             <v-list-item-title>{{ item.subject }}</v-list-item-title>
             <v-list-item-subtitle
               ><span
-                :class="[`${getEvaluationColor(item.average)}--text`]"
+                :style="{
+                  color: getEvaluationColor(item.average)
+                }"
                 v-if="item.average"
                 >{{ item.average }}</span
               >{{
                 !!(item.average && item.absencesCount.text) ? ' &mdash; ' : ''
               }}
-              <span :class="[`${item.absencesCount.color}--text`]">{{
-                item.absencesCount.text
-              }}</span></v-list-item-subtitle
+              <span
+                :style="{
+                  color: item.absencesCount.color
+                }"
+                >{{ item.absencesCount.text }}</span
+              ></v-list-item-subtitle
             >
           </v-list-item-content>
         </v-list-item>
@@ -45,28 +50,12 @@
         <template v-slot:progress>
           <div class="stacked-bar-graph v-progress-linear">
             <span
-              :style="{ width: `${(bars['darken-1 green'] || 0) * 100}%` }"
-              class="darken-1 green"
-            ></span>
-            <span
+              v-for="(c, i) in $store.state.settings.evaluationColors"
+              :key="i"
               :style="{
-                width: `${(bars['darken-1 light-green'] || 0) * 100}%`
+                width: `${(bars[c] || 0) * 100}%`,
+                background: c
               }"
-              class="darken-1 light-green"
-            ></span>
-            <span
-              :style="{ width: `${(bars['darken-2 lime'] || 0) * 100}%` }"
-              class="darken-2 lime"
-            ></span>
-            <span
-              :style="{ width: `${(bars['darken-3 amber'] || 0) * 100}%` }"
-              class="darken-3 amber"
-            ></span>
-            <span
-              :style="{
-                width: `${(bars['darken-4 deep-orange'] || 0) * 100}%`
-              }"
-              class="darken-4 deep-orange"
             ></span>
           </div>
         </template>
@@ -98,9 +87,10 @@
                 <div v-if="currentSubject.average">
                   Átlag:
                   <span
-                    :class="[
-                      `${getEvaluationColor(currentSubject.average)}--text`
-                    ]"
+                    class="avr"
+                    :style="{
+                      color: getEvaluationColor(currentSubject.average)
+                    }"
                     >{{
                       getAverage([
                         ...currentSubject.evaluations,
@@ -112,9 +102,10 @@
                 <div v-if="currentSubject.classAverage">
                   Osztály átlag:
                   <span
-                    :class="[
-                      `${getEvaluationColor(currentSubject.classAverage)}--text`
-                    ]"
+                    class="avr"
+                    :style="{
+                      color: getEvaluationColor(currentSubject.classAverage)
+                    }"
                     >{{ currentSubject.classAverage }}</span
                   >
                 </div>
@@ -132,28 +123,13 @@
             v-if="currentSubject && currentSubject.evaluations.length"
           >
             <v-list>
-              <v-list-item
+              <EvaluationListItem
                 v-for="item in currentSubject.evaluations"
                 :key="item.id"
-                @click="selectedEvaluation = item"
-              >
-                <v-list-item-avatar>
-                  {{ item.numberValue }}
-                </v-list-item-avatar>
+                :eval="item"
+                v-on:input="selectedEvaluation = $event"
+              />
 
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.subject"></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-text="item.theme"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>
-
-                <v-list-item-action>
-                  <v-list-item-action-text>
-                    {{ formatDate(item.date) }}
-                  </v-list-item-action-text>
-                </v-list-item-action>
-              </v-list-item>
               <v-list-item
                 v-for="(item, i) in added[subject] || []"
                 :key="item.id"
@@ -180,7 +156,7 @@
                 <v-list-item-content>
                   <v-list-item-title>{{ evals.length }} db</v-list-item-title>
                   <v-list-item-subtitle
-                    v-bind:class="[`${getEvaluationColor(nv)}--text`]"
+                    :style="{ color: getEvaluationColor(nv) }"
                     >{{ evals[0].value }}</v-list-item-subtitle
                   >
                 </v-list-item-content>
@@ -199,9 +175,9 @@
                 <v-list-item-content>
                   <v-list-item-title>{{ abs.subject }}</v-list-item-title>
                   <v-list-item-subtitle
-                    v-bind:class="[
-                      `${getAbsenceColor(abs.justificationState)}--text`
-                    ]"
+                    :style="{
+                      color: getAbsenceColor(abs.justificationState)
+                    }"
                     >{{ abs.justificationStateName }}</v-list-item-subtitle
                   >
                 </v-list-item-content>
@@ -223,7 +199,9 @@
                     >{{ absences.length }} db</v-list-item-title
                   >
                   <v-list-item-subtitle
-                    v-bind:class="[`${getAbsenceColor(type)}--text`]"
+                    :style="{
+                      color: getAbsenceColor(type)
+                    }"
                     >{{
                       absences[0].justificationStateName
                     }}</v-list-item-subtitle
@@ -234,13 +212,11 @@
               <v-list-item>
                 <v-list-item-content>
                   <v-list-item-title
-                    >{{
-                      currentSubject.absences.filter(e => e.type == 'Absence')
-                        .length
-                    }}
-                    óra{{ delayText }}</v-list-item-title
+                    >{{ sumAbsences }} óra{{ delayText }}</v-list-item-title
                   >
-                  <v-list-item-subtitle>Összes hiányzás</v-list-item-subtitle>
+                  <v-list-item-subtitle :style="{ color: sumAbsencesColor }"
+                    >Összes hiányzás</v-list-item-subtitle
+                  >
                 </v-list-item-content>
               </v-list-item>
               <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
@@ -348,7 +324,9 @@ import { Prop } from 'vue-property-decorator';
 import DataViewer from '@/components/DataViewer.vue';
 import Vue from 'vue';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
+import EvaluationListItem from '@/components/listItems/EvaluationListItem.vue';
 import VTouch from 'vuetify/lib/directives/touch';
+import { Watch } from 'vue-property-decorator';
 
 interface Stat {
   evaluations: Evaluation[];
@@ -365,18 +343,21 @@ interface Stat {
     'evaluations',
     'groupedEvaluations',
     'absences',
-    'groupedClassAverages'
+    'groupedClassAverages',
+    'flatAbsences'
   ]),
-  components: { DataViewer, AbsencesList }
+  components: { DataViewer, AbsencesList, EvaluationListItem },
+  metaInfo: {
+    title: 'Statisztikák'
+  }
 })
 export default class Statistics extends mixins(Mixin) {
-  name = 'Statisztikák';
   @Prop({ default: false }) subject!: string;
   evaluations!: Evaluation[];
   absences!: AbsenceGroup[];
   groupedClassAverages!: { [k: string]: ClassAverage[] };
   groupedEvaluations!: { [k: string]: Evaluation[] };
-
+  flatAbsences!: Absence[];
   active = 0;
   added = {};
   numberValue = 5;
@@ -413,11 +394,11 @@ export default class Statistics extends mixins(Mixin) {
       });
     }
     ret.push({
-      absences: this.absencesList,
+      absences: this.flatAbsences,
       evaluations: this.evaluations,
       average: this.getAverage(this.evaluations),
       classAverage: null,
-      absencesCount: this.getAbsencesCount(this.absencesList),
+      absencesCount: this.getAbsencesCount(this.flatAbsences),
       subject: 'Összes tantárgy',
       subjectCategoryName: 'Összes tantárgy'
     });
@@ -459,11 +440,7 @@ export default class Statistics extends mixins(Mixin) {
   }
 
   get groupedAbsences(): { [k: string]: Absence[] } {
-    return this.group(this.absencesList, 'subject');
-  }
-
-  get absencesList() {
-    return this.absences.map(ag => ag.items).flatMap(a => a);
+    return this.group(this.flatAbsences, 'subject');
   }
 
   get csebv() {
@@ -541,6 +518,21 @@ export default class Statistics extends mixins(Mixin) {
     return ret;
   }
 
+  get sumAbsences() {
+    return (
+      this.currentSubject?.absences.filter(e => e.type == 'Absence').length ?? 0
+    );
+  }
+
+  get sumAbsencesColor() {
+    const R = Math.min(200, (this.sumAbsences / 125) * 200);
+    const G = Math.min(
+      200,
+      Math.max(0, 200 - ((this.sumAbsences - 125) / 125) * 200)
+    );
+    return `rgb(${R}, ${G}, 0)`;
+  }
+
   get delayText() {
     const MILLISECONDS_MINUTE = 60 * 1000;
     const MILLISECONDS_HOUR = 60 * MILLISECONDS_MINUTE;
@@ -561,9 +553,64 @@ export default class Statistics extends mixins(Mixin) {
       (delaySum % MILLISECONDS_HOUR) / MILLISECONDS_MINUTE
     )} perc késés`;
   }
-  metaInfo = {
-    title: 'Statisztikák'
-  };
+  @Watch('selectedEvaluation')
+  onselectedEvalChange(value) {
+    if (value) {
+      if (!this.$route.params.id)
+        this.$router.push(`/statistics/${this.subject}/evaluation/${value.id}`);
+    } else {
+      if (this.$route.params.type)
+        this.$router.push(`/statistics/${this.subject}`);
+    }
+  }
+  @Watch('selectedAbsence')
+  onselectedAbsenceChange(value) {
+    if (value) {
+      if (!this.$route.params.id)
+        this.$router.push(`/statistics/${this.subject}/absence/${value.id}`);
+    } else {
+      if (this.$route.params.type)
+        this.$router.push(`/statistics/${this.subject}`);
+    }
+  }
+  @Watch('dialog')
+  onDialogChange(value) {
+    if (value) {
+      if (!this.$route.params.type)
+        this.$router.push(`/statistics/${this.subject}/add`);
+    } else {
+      if (this.$route.params.type)
+        this.$router.push(`/statistics/${this.subject}`);
+    }
+  }
+  @Watch('$route')
+  onRouteChange() {
+    const { type, id } = this.$route.params;
+    switch (type) {
+      case 'evaluation':
+        if (!this.selectedEvaluation)
+          this.selectedEvaluation =
+            (this.currentSubject?.evaluations ?? []).find(e => e.id === +id) ??
+            false;
+        break;
+      case 'absence':
+        if (!this.selectedAbsence)
+          this.selectedAbsence =
+            (this.currentSubject?.absences ?? []).find(e => e.id === +id) ??
+            false;
+        break;
+
+      case 'add':
+        this.dialog = true;
+        break;
+
+      default:
+        this.selectedAbsence = false;
+        this.selectedEvaluation = false;
+        this.dialog = false;
+        break;
+    }
+  }
 }
 </script>
 <style lang="scss">
@@ -576,5 +623,21 @@ export default class Statistics extends mixins(Mixin) {
     transition: width 0.4s ease-in-out;
     float: left;
   }
+}
+.avr::after {
+  background-color: #565656;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 4px;
+  opacity: 0.4;
+  height: 100%;
+  z-index: -1;
+  margin: 3px;
+}
+.avr {
+  position: relative;
 }
 </style>

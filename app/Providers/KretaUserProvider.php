@@ -8,6 +8,8 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
+use Session;
+
 
 class KretaUserProvider implements IlluminateUserProvider
 {
@@ -24,6 +26,13 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveById($identifier)
     {
+        if(!is_object($identifier)) {
+            if(Session::has('user')) {
+                $user = new User();
+                $user->load(Session::get('user'));
+                return $user;
+            }
+        };
         $user = DB::table('tokens')->select('*')->where([
             ['kreta_id', $identifier->id],
             ['remember_token', $identifier->hash]
@@ -31,15 +40,19 @@ class KretaUserProvider implements IlluminateUserProvider
         if(! isset($user)) {
             return null;
         }
-        if (Str::startsWith($key = $identifier->key, 'base64:')) {
+        return self::retrieveByTokens($user->access_token, $user->refresh_token, $identifier->key, $identifier->hash);
+    }
+
+    public static function retrieveByTokens($access_token, $refresh_token, $key, $hash = null) {
+        if (Str::startsWith($key = $key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
         }
         $enc = new Encrypter($key, config('app.cipher'));
         return new User((object) [
-            'access_token' => $enc->decrypt($user->access_token),
-            'refresh_token' => $enc->decrypt($user->refresh_token),
+            'access_token' => $enc->decrypt($access_token),
+            'refresh_token' => $enc->decrypt($refresh_token),
         ], [
-            'hash' =>$identifier->hash,
+            'hash' => $hash,
             'key' => $key,
         ]);
     }
@@ -84,7 +97,8 @@ class KretaUserProvider implements IlluminateUserProvider
         return User::fromCredentials(
             $credentials['school'],
             $credentials['username'],
-            $credentials['password']
+            $credentials['password'],
+            $credentials['rme']
         );
     }
 

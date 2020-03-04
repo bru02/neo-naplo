@@ -3,8 +3,11 @@ import store from './store';
 import router from './plugins/router';
 import vuetify from './plugins/vuetify';
 import './plugins/axios';
-import '@mdi/font/css/materialdesignicons.css';
+import './plugins/sentry';
+import './plugins/firebase';
 import './registerServiceWorker';
+import '@mdi/font/css/materialdesignicons.css';
+
 import App from './App.vue';
 
 let refreshTokenPromise: Promise<string> | null = null;
@@ -22,7 +25,7 @@ export default new Vue({
         if (this.$store.getters['auth/isAuthenticated']) {
           let token = this.$store.state.auth.token;
           if (
-            this.$store.getters['auth/tokenData'].exp - 240 <=
+            (this.$store.getters['auth/tokenData'].exp ?? Infinity) - 240 <=
               Date.now() / 1000 &&
             config.url != '/refresh' &&
             config.url != '/logout'
@@ -78,41 +81,6 @@ export default new Vue({
     });
   }
 });
-
-import * as Sentry from '@sentry/browser';
-import { Vue as VueIntegration } from '@sentry/integrations';
-
-if (
-  process.env.NODE_ENV === 'production' &&
-  process.env.VUE_APP_SENTRY_LARAVEL_DSN
-) {
-  Sentry.init({
-    dsn: process.env.VUE_APP_SENTRY_LARAVEL_DSN,
-    integrations: [new VueIntegration({ Vue, attachProps: true })],
-    release: 'filc@' + process.env.VUE_APP_SHA
-  });
-}
-
-import * as firebase from 'firebase/app';
-import 'firebase/analytics';
-import 'firebase/performance';
-
-if (process.env.NODE_ENV === 'production') {
-  const firebaseConfig = {
-    apiKey: 'AIzaSyBS6oHXLZJJbCeVHTGoX15JhNI_tMuT7Hk',
-    authDomain: 'efilc-239813.firebaseapp.com',
-    databaseURL: 'https://efilc-239813.firebaseio.com',
-    projectId: 'efilc-239813',
-    storageBucket: 'efilc-239813.appspot.com',
-    messagingSenderId: '189077601555',
-    appId: '1:189077601555:web:318300dfc3a2d300',
-    measurementId: 'G-YMDKBPFV5P'
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  const perf = firebase.performance();
-  const analytics = firebase.analytics();
-}
 
 import * as helpers from './helpers';
 for (const [name, helper] of Object.entries(helpers)) {

@@ -4,9 +4,9 @@
       <v-list-item
         v-for="(val, key) in values"
         :key="key"
-        :ripple="!!(val && val.cb)"
-        :inactive="val ? !val.cb : true"
-        @click="val && val.cb && val.cb(val.arg)"
+        :ripple="!!(val && val.to)"
+        :inactive="val ? !val.to : true"
+        :to="val && val.to"
       >
         <v-list-item-content>
           <v-list-item-title
@@ -38,17 +38,14 @@ export default class DataViewer extends mixins(Mixin) {
   onVC(val) {
     if (val !== false) {
       this.values = this.fn(val);
-      this.open = true;
     }
+    this.open = !!val;
   }
   @Watch('open')
   onOC(val) {
     if (!val) {
       this.$emit('input', false);
     }
-  }
-  attr(val) {
-    return val.cb ? '@click' : '';
   }
 }
 </script>

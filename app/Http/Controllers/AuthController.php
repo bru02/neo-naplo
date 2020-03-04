@@ -104,12 +104,15 @@ class AuthController extends Controller
         ]);
     }
 
-    public function refreshToken() {
-        try {
-            return response()->json(['access_token' => auth()->refresh()]);
-        } catch (JWTException $exception) {
-            throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
-        }
+    public function refreshToken(Request $request) {
+        // try {
+            return response()->json(['access_token' => auth()->setRequest($request)
+            ->parseToken()
+            ->refresh()
+        ]);
+        // } catch (JWTException $exception) {
+        //     throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
+        // }
     }
     public function logout()
     {

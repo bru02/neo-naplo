@@ -20,9 +20,9 @@ class User extends Model implements Authenticatable, JWTSubject
     protected $hash;
 
     public $school;
-    private $id;
+    public $id;
     private $timetable;
-
+    private $rme;
 
     private $tokenData;
 
@@ -36,23 +36,27 @@ class User extends Model implements Authenticatable, JWTSubject
             $this->id = $this->tokenData->{'kreta:institute_user_id'};
             $this->timetable = (object) [];
         }
-        if(isset($keys)) {
+        if(isset($keys['hash'])) {
             $this->hash = $keys['hash'];
             $this->encryptionKey = $keys['key'];
-        } else {
+            $this->rme = true;
+        } else if($keys['rme'] ?? false) {
+            $this->rme = true;
             $this->hash = Str::random(60);
             $this->encryptionKey = Encrypter::generateKey(config('app.cipher'));
             DB::table('tokens')->insert(
                 ['kreta_id' => $this->getAuthIdentifier(), 'remember_token' => $this->hash, 'access_token' => $this->encrypt($this->access_token) , 'refresh_token' => $this->encrypt($this->refresh_token)]
             );
+        } else {
+            $this->rme = false;
         }
     }
 
-    public static function fromCredentials($school, $username, $password) {
+    public static function fromCredentials($school, $username, $password, $rme = false) {
         $response = KretaApi::logIn($school, $username, $password);
         return isset($response->error) ?
                 null :
-                new User($response);
+                new User($response, ['rme' => $rme]);
     }
     /**
      * @return  string
@@ -83,7 +87,8 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function getRememberToken()
     {
-        return DB::table('tokens')->where('kreta_id', $this->getAuthIdentifier())->value('remember_token');
+        if($this->rme)
+            return DB::table('tokens')->where('kreta_id', $this->getAuthIdentifier())->value('remember_token');
     }
 
     /**
@@ -92,9 +97,10 @@ class User extends Model implements Authenticatable, JWTSubject
      */
     public function setRememberToken($value)
     {
-        DB::table('tokens')
-            ->where($this->getAuthIdentifierName(), $this->getAuthIdentifier())
-            ->update([$this->getRememberTokenName() => $value]);
+        if($this->rme)
+            DB::table('tokens')
+                ->where($this->getAuthIdentifierName(), $this->getAuthIdentifier())
+                ->update([$this->getRememberTokenName() => $value]);
     }
     public function getRememberTokenName()
     {
@@ -109,6 +115,7 @@ class User extends Model implements Authenticatable, JWTSubject
             'tokenData',
             'access_token',
             'refresh_token',
+            'rme'
         ];
         $ret = [];
         foreach ($attrs as $value) {
@@ -182,6 +189,7 @@ class User extends Model implements Authenticatable, JWTSubject
         $this->access_token = $result->access_token;
         $this->refresh_token = $result->refresh_token;
         $this->tokenData = $this->decompileToken();
+        if($this->rme)
         DB::table('tokens')
             ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])
             ->update(['access_token' => $this->encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
@@ -193,21 +201,16 @@ class User extends Model implements Authenticatable, JWTSubject
 
     public function getJWTIdentifier()
     {
-        return ['hash' => $this->hash, 'key' => 'base64:'.base64_encode($this->encryptionKey), 'id' => $this->getAuthIdentifier()];
+        return $this->rme ? ['hash' => $this->hash, 'key' => 'base64:'.base64_encode($this->encryptionKey), 'id' => $this->getAuthIdentifier()] : $this->getAuthIdentifier();
     }
 
     public function getJWTCustomClaims()
     {
-      return [
-        //   'usr' => [
-        //       'id' => $this->tokenData->{'idp:user_id'},
-        //       'role' => $this->tokenData->role
-        //   ]
-      ];
+      return [];
     }
 
     public function save()
     {
-        Session::put('user', $this->stringify());
+        if(!$this->rme) Session::put('user', $this->stringify());
     }
 }

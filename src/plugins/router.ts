@@ -18,8 +18,24 @@ const Statistics = () =>
   import(/* webpackChunkName: "views" */ '@/views/Statistics.vue');
 const Evaluations = () =>
   import(/* webpackChunkName: "views" */ '@/views/Evaluations.vue');
+const Settings = () =>
+  import(/* webpackChunkName: "views" */ '@/views/Settings.vue');
 
 const routes = [
+  {
+    path: '/login',
+    component: Login,
+    meta: {
+      auth: false
+    }
+  },
+  {
+    path: '/:type(evaluation|note|absence|event)/:id?',
+    component: Home,
+    meta: {
+      auth: true
+    }
+  },
   {
     path: '/',
     component: Home,
@@ -30,7 +46,7 @@ const routes = [
     }
   },
   {
-    path: '/absences',
+    path: '/absences/:id?',
     component: Absences,
     name: 'Hiányzások',
     icon: 'mdi-block-helper',
@@ -39,7 +55,7 @@ const routes = [
     }
   },
   {
-    path: '/notes',
+    path: '/notes/:id?',
     component: Notes,
     name: 'Feljegyzések',
     icon: 'mdi-comment-processing-outline',
@@ -62,7 +78,7 @@ const routes = [
     redirect: '/timetable/0'
   },
   {
-    path: '/evaluations',
+    path: '/evaluations/:id?',
     component: Evaluations,
     name: 'Jegyek',
     icon: 'mdi-calendar-check-outline',
@@ -71,7 +87,7 @@ const routes = [
     }
   },
   {
-    path: '/statistics/:subject?',
+    path: '/statistics/:subject?/:type?/:id?',
     component: Statistics,
     name: 'Statisztikák',
     icon: 'mdi-calendar-check-outline',
@@ -80,13 +96,7 @@ const routes = [
     },
     props: true
   },
-  {
-    path: '/login',
-    component: Login,
-    meta: {
-      auth: false
-    }
-  },
+
   {
     path: '/profile',
     name: 'Profil',
@@ -96,6 +106,16 @@ const routes = [
       auth: true
     }
   },
+  {
+    path: '/settings/:dialog?',
+    name: 'Beállítások',
+    icon: 'mdi-settings',
+    component: Settings,
+    meta: {
+      auth: true
+    }
+  },
+
   {
     path: '*',
     component: NotFound
@@ -114,7 +134,7 @@ const router = new VueRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition;
-    } else {
+    } else if (to.name != from.name) {
       return { x: 0, y: 0 };
     }
   }

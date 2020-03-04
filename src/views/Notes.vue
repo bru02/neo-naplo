@@ -58,17 +58,21 @@ import { apiMapper } from '@/store';
 import Component, { mixins } from 'vue-class-component';
 import { Note } from '../api-types';
 import DataViewer from '@/components/DataViewer.vue';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
   computed: apiMapper.mapState({
     notes: state => state.general.data.notes,
     loading: state => state.general.loading
   }),
-  components: { DataViewer }
+  components: { DataViewer },
+  metaInfo: {
+    title: 'Feljegyzések'
+  }
 })
 export default class NotesComponent extends mixins(Mixin) {
-  name = 'Feljegyzések';
   selectedNote: Note | boolean = false;
+  notes!: Note[];
   headers = [
     {
       text: 'Dátum',
@@ -82,15 +86,23 @@ export default class NotesComponent extends mixins(Mixin) {
   mounted() {
     this.obtain('general');
   }
-  metaInfo = {
-    title: 'Feljegyzések'
-  };
+  @Watch('selectedNote')
+  onselectedNoteChange(value) {
+    if (value) {
+      if (!this.$route.params.id) this.$router.push(`/notes/${value.id}`);
+    } else {
+      if (this.$route.params.id) this.$router.push(`/notes`);
+    }
+  }
+  @Watch('$route')
+  onRouteChange() {
+    const { id } = this.$route.params;
+    if (id) {
+      if (!this.selectedNote)
+        this.selectedNote = this.notes.find(e => e.id === +id) ?? false;
+    } else {
+      this.selectedNote = false;
+    }
+  }
 }
-
-// $ adb shell pm list packages
-// adb shell pm path hu.ekreta.naplo
-// package:com.google.android.talk
-// package:com.twitter.android
-// ...
-// $ adb pull /data/app/com.twitter.android-1.apk
 </script>

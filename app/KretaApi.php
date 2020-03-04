@@ -1,9 +1,7 @@
 <?php
 namespace App;
 
-use GuzzleHttp\TransferStats;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Str;
 
@@ -440,30 +438,30 @@ class KretaApi
         );
     }
 
-    private static function wrapApi($obj)
+    public static function wrapApi($obj)
     {
         $isObj = is_object($obj);
         $ret = $isObj ? (object) [] : [];
         foreach ($obj as $key => $val) {
             $newKey = lcfirst($key);
+            $newVal = $val;
             if (is_object($val) || is_array($val)) {
                 $newVal = self::wrapApi($val);
             } else {
                 if (Str::endsWith($key, ['UTC', 'Utc', 'Time']) || $key === "Date") {
+
                     $newVal = strtotime($val);
                     $newKey = str_replace(['Utc', 'UTC'], '', $newKey);
-                } else {
-                    $newVal = $val;
+                } elseif (Str::endsWith($key, 'Id')) {
+                    $newKey = ($key === 'SchoolYearId' || $key === 'TeacherHomeworkId') ? $newVal : 'id';
+                } elseif ($key === 'Teacher') {
+                    if (Str::contains($val, 'Helyettesítő: ')) {
+                        $newVal = '';
+                        $ret->deputyTeacher = str_replace('Helyettesítő: ', '', $val);
+                    }
                 }
             }
-            if (Str::endsWith($key, 'Id')) {
-                $newKey = $key === 'SchoolYearId' ? 'schoolYearId' : 'id';
-            } elseif ($key === 'Teacher') {
-                if (Str::contains($val, 'Helyettesítő: ')) {
-                    $newVal = '';
-                    $ret->deputyTeacher = str_replace('Helyettesítő: ', '', $val);
-                }
-            }
+            
             if ($isObj) {
                 $ret->{$newKey} = $newVal;
             } else {

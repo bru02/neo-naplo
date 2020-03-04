@@ -76,9 +76,12 @@
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-@Component
+@Component({
+  metaInfo: {
+    title: 'Belépés'
+  }
+})
 export default class LoginComponent extends mixins(Mixin) {
-  name = 'Belépés';
   @Prop(String) readonly csrf: string | undefined;
   @Prop(Array) readonly errors: any;
   public $refs!: {
@@ -131,8 +134,5 @@ export default class LoginComponent extends mixins(Mixin) {
   clear() {
     this.$refs.form.reset();
   }
-  metaInfo = {
-    title: 'Belépés'
-  };
 }
 </script>

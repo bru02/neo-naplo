@@ -68,6 +68,10 @@ class ApiGetters extends Getters<ApiState> {
     return this.state.general.data.absences;
   }
 
+  get flatAbsences() {
+    return this.state.general.data.absences.map(a => a.items).flatMap(a => a);
+  }
+
   get events() {
     return [...this.state.events.data, ...this.state.hirdetmenyek.data];
   }

@@ -45,9 +45,7 @@ export default class Dialog extends mixins(Mixin) {
 
   @Watch('value')
   onVC(val) {
-    if (val !== false) {
-      this.dialog = true;
-    }
+    this.dialog = !!val;
   }
   @Watch('dialog')
   onDC(val) {

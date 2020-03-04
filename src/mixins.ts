@@ -3,7 +3,7 @@ import { ApiState } from '@/store/modules/api';
 import Vue from 'vue';
 import { apiMapper, timeMapper } from '@/store';
 import Component from 'vue-class-component';
-import { toldyLink, formatDate, day, formatTime, utc2date } from './helpers';
+import { formatDate, day, formatTime, utc2date } from './helpers';
 import {
   JustificationState,
   Note,
@@ -26,12 +26,31 @@ export default class Mixin extends Vue {
   time!: Date;
   date!: Date;
 
-  getEvaluationColor(nv: number) {
-    if (nv >= 4.5) return 'darken-1 green';
-    if (nv >= 3.5) return 'darken-1 light-green';
-    if (nv >= 2.5) return 'darken-2 lime';
-    if (nv >= 1.5) return 'darken-3 amber';
-    return 'darken-4 deep-orange';
+  getEvaluationColor(nv: number | null) {
+    const colors = this.$store.state.settings.evaluationColors;
+    if (!nv) return colors.default;
+    for (let i = 4.5; i > 0; i -= 1) {
+      if (nv >= i) {
+        return colors[i + 0.5];
+      }
+    }
+    return colors.default;
+  }
+
+  isDark(bgColor: string) {
+    const color = bgColor.charAt(0) === '#' ? bgColor.substring(1, 7) : bgColor,
+      r = parseInt(color.substring(0, 2), 16), // hexToR
+      g = parseInt(color.substring(2, 4), 16), // hexToG
+      b = parseInt(color.substring(4, 6), 16), // hexToB
+      uicolors = [r / 255, g / 255, b / 255],
+      c = uicolors.map(col => {
+        if (col <= 0.03928) {
+          return col / 12.92;
+        }
+        return Math.pow((col + 0.055) / 1.055, 2.4);
+      });
+    const L = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    return L < 0.5; // 179
   }
 
   getAverage(evaluations: Evaluation[]) {
@@ -49,10 +68,12 @@ export default class Mixin extends Vue {
   }
 
   getAbsenceColor(justificationState: JustificationState) {
+    const colors = this.$store.state.settings.evaluationColors;
+
     return {
-      Justified: 'darken-1 green',
-      BeJustified: 'darken-3 amber',
-      UnJustified: 'darken-4 deep-orange'
+      Justified: colors[5],
+      BeJustified: colors[2],
+      UnJustified: colors[1]
     }[justificationState];
   }
   getKey(item) {
@@ -72,7 +93,7 @@ export default class Mixin extends Vue {
       Típus: type,
       Cím: title,
       Dátum: this.formatDate(date),
-      Tanár: this.toldyLink(teacher),
+      Tanár: teacher,
       'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
         creatingTime
       )}`,
@@ -97,11 +118,11 @@ export default class Mixin extends Vue {
       Jegy: `${value} ${weight && weight != '-' ? `(${weight})` : ''}`,
       [haa]: '',
       Téma: theme,
-      Tantárgy: subject,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
       Mód: mode,
       Típus: typeName,
       Dátum: this.formatDate(date),
-      Tanár: this.toldyLink(teacher),
+      Tanár: teacher,
       'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
         creatingTime
       )}`,
@@ -140,11 +161,9 @@ export default class Mixin extends Vue {
       Időpont: `${count}. óra, ${this.formatDate(date)}; ${this.formatTime(
         startTime
       )} - ${this.formatTime(endTime)}`,
-      Tantárgy: subject,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
       Téma: theme,
-      Tanár: this.toldyLink(
-        deputyTeacher ? `Helyettesítő: ${deputyTeacher}` : teacher
-      ),
+      Tanár: deputyTeacher ? `Helyettesítő: ${deputyTeacher}` : teacher,
       Terem: classRoom,
       Házi: homework,
       Jelenlét: presenceTypeName,
@@ -163,32 +182,28 @@ export default class Mixin extends Vue {
     numberOfLessons,
     osztalyCsoportUid
   }: Absence) {
+    const getMonday = utc => {
+      const d = new Date(utc);
+      const day = d.getDay(),
+        diff = d.getDate() - day + (day == 0 ? -6 : 1);
+      return +new Date(d.setDate(diff));
+    };
+    const to = `/timetable/${Math.round(
+      (getMonday(date * 1000) - getMonday(this.date)) / 604800000
+    )}/${date}:${numberOfLessons}`;
     return {
       Típus: typeName + (type == 'Delay' ? `(${delayTimeMinutes} perc)` : ''),
-      Tantárgy: subject,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
       Dátum: `${this.formatDate(date)}; ${numberOfLessons}. óra`,
       'Igazolás típusa': justificationTypeName,
-      Tanár: this.toldyLink(teacher),
+      Tanár: teacher,
       'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
         creatingTime
       )}`,
       Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid),
       '': {
         title: 'Óra megtekintése',
-        arg: { date, numberOfLessons },
-        cb: ({ date, numberOfLessons }) => {
-          const getMonday = utc => {
-            const d = new Date(utc);
-            const day = d.getDay(),
-              diff = d.getDate() - day + (day == 0 ? -6 : 1);
-            return +new Date(d.setDate(diff));
-          };
-          this.$router.push(
-            `/timetable/${Math.round(
-              (getMonday(date * 1000) - getMonday(this.date)) / 604800000
-            )}/${date}:${numberOfLessons}`
-          );
-        }
+        to
       }
     };
   }
@@ -267,8 +282,6 @@ export default class Mixin extends Vue {
       arg
     );
   }
-
-  toldyLink = toldyLink;
   formatDate = formatDate;
   formatTime = formatTime;
   utc2date = utc2date;

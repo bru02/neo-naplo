@@ -67,10 +67,12 @@ import { timeMapper } from '@/store';
 
 @Component({
   components: { LessonsList, DataViewer },
-  computed: timeMapper.mapGetters(['date'])
+  computed: timeMapper.mapGetters(['date']),
+  metaInfo: {
+    title: 'Órarend'
+  }
 })
 export default class TimetableComponent extends mixins(Mixin) {
-  name = 'Órarend';
   date!: Date;
 
   active = 0;
@@ -90,13 +92,7 @@ export default class TimetableComponent extends mixins(Mixin) {
         this.active = Object.keys(v).indexOf(`${+this.date / 1000}`);
       }
       if (this.lessonHash) {
-        const [date, nol] = this.lessonHash.split(':');
-        for (const l of v[date]) {
-          if (l.count == nol) {
-            this.selectedLesson = l;
-            break;
-          }
-        }
+        this.onLessonHashChange(this.lessonHash);
       }
       if (this.mobile == false) {
         const counts = Object.values(v)
@@ -119,15 +115,37 @@ export default class TimetableComponent extends mixins(Mixin) {
       }
     });
   }
-
+  @Watch('selectedLesson')
+  onLessonHashChange(value) {
+    if (value) {
+      if (!this.lessonHash)
+        this.$router.push(
+          `/timetable/${this.cweek}/${value.date}:${value.count}`
+        );
+    } else {
+      if (this.lessonHash) this.$router.push(`/timetable/${this.cweek}`);
+    }
+  }
+  @Watch('$route')
+  onRouteChange() {
+    if (this.lessonHash) {
+      if (this.selectedLesson) return;
+      const [date, nol] = this.lessonHash.split(':');
+      for (const l of this.timetable[date]) {
+        if (l.count == nol) {
+          this.selectedLesson = l;
+          break;
+        }
+      }
+    } else {
+      this.selectedLesson = false;
+    }
+  }
   mounted() {
     this.onCWeekChanged();
   }
   get week() {
     return this.getWeek(this.cweek);
   }
-  metaInfo = {
-    title: 'Órarend'
-  };
 }
 </script>

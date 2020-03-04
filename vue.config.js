@@ -58,6 +58,12 @@ module.exports = {
     name: 'Filc Napló',
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
+    workboxPluginMode: 'InjectManifest',
+    workboxOptions: {
+      include: ['resources/views/index.blade.php'],
+      exclude: ['index.html'],
+      swSrc: './src/sw.js'
+    },
     manifestOptions: {
       background_color: '#ffffff'
     }

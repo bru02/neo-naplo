@@ -19,34 +19,20 @@
               :key="item.subject"
               >{{ item.subject }} &#10240; &mdash; &#10240;
               <span
-                :class="[
-                  `${getEvaluationColor(
+                :style="{
+                  color: getEvaluationColor(
                     getAverage(groupedEvaluations[item.subject])
-                  )}--text`
-                ]"
+                  )
+                }"
               >
                 {{ getAverage(groupedEvaluations[item.subject]) || '-' }}</span
               >
             </v-subheader>
             <v-lazy min-height="50px" :key="item.id">
-              <v-list-item @click="$emit('input', item)">
-                <v-list-item-avatar>
-                  {{ item.numberValue }}
-                </v-list-item-avatar>
-
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.subject"></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-text="item.theme"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>
-
-                <v-list-item-action>
-                  <v-list-item-action-text>
-                    {{ formatDate(item.date) }}
-                  </v-list-item-action-text>
-                </v-list-item-action>
-              </v-list-item>
+              <EvaluationListItem
+                v-on:input="$emit('input', $event)"
+                :eval="item"
+              />
             </v-lazy>
           </template>
           <v-list-item></v-list-item>
@@ -54,26 +40,13 @@
       </template>
     </v-data-iterator>
     <v-list v-show="view.slice(0, 4) == 'type'">
-      <v-list-item
-        @click="$emit('input', item)"
+      <EvaluationListItem
+        v-on:input="$emit('input', $event)"
         v-for="item in evaluationsByType[view.slice(5)]"
         :key="item.id"
-      >
-        <v-list-item-avatar>
-          {{ item.numberValue }}
-        </v-list-item-avatar>
+        :eval="item"
+      />
 
-        <v-list-item-content>
-          <v-list-item-title v-text="item.subject"></v-list-item-title>
-          <v-list-item-subtitle v-text="item.theme"></v-list-item-subtitle>
-        </v-list-item-content>
-
-        <v-list-item-action>
-          <v-list-item-action-text>
-            {{ formatDate(item.date) }}
-          </v-list-item-action-text>
-        </v-list-item-action>
-      </v-list-item>
       <v-list-item></v-list-item>
     </v-list>
     <v-bottom-navigation fixed v-model="view" dark shift>
@@ -90,7 +63,10 @@ import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Evaluation, ClassAverage } from '../../api-types';
-@Component
+import EvaluationListItem from '@/components/listItems/EvaluationListItem.vue';
+@Component({
+  components: { EvaluationListItem }
+})
 export default class EvaluationList extends mixins(Mixin) {
   @Prop() readonly evaluations!: Evaluation[];
   @Prop() readonly groupedEvaluations!: { [k: string]: Evaluation[] };

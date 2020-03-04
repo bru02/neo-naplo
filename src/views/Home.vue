@@ -62,6 +62,7 @@
   </v-container>
 </template>
 <script lang="ts">
+import Vue from 'vue';
 import Mixin from '@/mixins';
 import { apiMapper, timeMapper } from '@/store';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
@@ -89,9 +90,13 @@ import {
   computed: {
     ...apiMapper.mapState({
       loading: state => state.general.loading,
-      instituteName: state => state.general.data.instituteName
+      instituteName: state => state.general.data.instituteName,
+      evaluations: state => state.general.data.evaluations,
+      events: state => state.events.data,
+
+      notes: state => state.general.data.notes
     }),
-    ...apiMapper.mapGetters(['cards']),
+    ...apiMapper.mapGetters(['cards', 'flatAbsences']),
     ...timeMapper.mapGetters(['date', 'time'])
   },
   components: {
@@ -104,15 +109,16 @@ import {
     NextLessonCard,
     ChangedLessonCard,
     Dialog
+  },
+  metaInfo: {
+    title: 'Faliújság'
   }
 })
 export default class HomeComponent extends mixins(Mixin) {
-  name = 'Kezdőlap';
   selectedNote: Note | boolean = false;
   selectedAbsence: Absence | boolean = false;
   selectedEval: Evaluation | boolean = false;
   selectedLesson: Lesson | boolean = false;
-  selectedLessons: Lesson[] | boolean = false;
   selectedEvent: Event | boolean = false;
   selectedAbsenceGroup: AbsenceGroup | boolean = false;
   timetable: TimetableAPI = {};
@@ -120,6 +126,11 @@ export default class HomeComponent extends mixins(Mixin) {
   date!: Date;
   loading!: boolean;
   instituteName!: string;
+
+  evaluations!: Evaluation[];
+  flatAbsences!: Absence[];
+  notes!: Note[];
+  events!: Event[];
 
   mounted() {
     this.obtain('general').then(d => {
@@ -132,6 +143,70 @@ export default class HomeComponent extends mixins(Mixin) {
     });
   }
 
+  @Watch('$route')
+  onRouteChange() {
+    if (this.$route.params.type) {
+      const { type, id } = this.$route.params;
+      switch (type) {
+        case 'evaluation':
+          if (!this.selectedEval)
+            this.selectedEval =
+              this.evaluations.find(e => e.id === +id) ?? false;
+          break;
+        case 'absence':
+          if (!this.selectedAbsence)
+            this.selectedAbsence =
+              this.flatAbsences.find(e => e.id === +id) ?? false;
+          break;
+        case 'note':
+          if (!this.selectedNote)
+            this.selectedNote = this.notes.find(e => e.id === +id) ?? false;
+          break;
+        case 'event':
+          if (!this.selectedEvent)
+            this.selectedEvent = this.events.find(e => e.id === id) ?? false;
+          break;
+      }
+    } else {
+      ['Eval', 'Absence', 'Note', 'Event'].forEach(e =>
+        Vue.set(this, `selected${e}`, false)
+      );
+    }
+  }
+
+  @Watch('selectedEval')
+  onselectedEvalChange(value) {
+    if (value) {
+      if (!this.$route.params.type)
+        this.$router.push(`/evaluation/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/`);
+    }
+  }
+  @Watch('selectedAbsence')
+  onselectedAbsenceChange(value) {
+    if (value) {
+      if (!this.$route.params.type) this.$router.push(`/absence/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/`);
+    }
+  }
+  @Watch('selectedNote')
+  onselectedNoteChange(value) {
+    if (value) {
+      if (!this.$route.params.type) this.$router.push(`/note/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/`);
+    }
+  }
+  @Watch('selectedEvent')
+  onselectedEventChange(value) {
+    if (value) {
+      if (!this.$route.params.type) this.$router.push(`/event/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/`);
+    }
+  }
   get changedLessons() {
     const lessons: Lesson[] = [];
     for (const [key, ls] of Object.entries(this.timetable)) {
@@ -145,9 +220,5 @@ export default class HomeComponent extends mixins(Mixin) {
         l.endTime * 1000 > +this.time
     );
   }
-
-  metaInfo = {
-    title: 'Faliújság'
-  };
 }
 </script>

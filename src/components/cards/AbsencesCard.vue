@@ -1,7 +1,7 @@
 <template>
   <v-card
     :color="getAbsenceColor(absences.items[0].justificationState)"
-    dark
+    :dark="isDark(getAbsenceColor(absences.items[0].justificationState))"
     @click.native="
       absences.items.length === 1
         ? $emit('lesson', absences.items[0])

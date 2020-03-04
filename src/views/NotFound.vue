@@ -4,11 +4,10 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import Mixin from '@/mixins';
-@Component
-export default class NotFoundComponent extends mixins(Mixin) {
-  name = '404';
-  metaInfo = {
+@Component({
+  metaInfo: {
     title: '404'
-  };
-}
+  }
+})
+export default class NotFoundComponent extends mixins(Mixin) {}
 </script>

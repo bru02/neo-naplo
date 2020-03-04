@@ -1,6 +1,5 @@
 import Vue from 'vue';
-// eslint-disable-next-line
-import Vuetify from "vuetify/lib/framework";
+import Vuetify from 'vuetify/lib/framework';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 
@@ -16,5 +15,8 @@ export default new Vuetify({
   lang: {
     locales: { hu, en },
     current: 'hu'
+  },
+  theme: {
+    dark: localStorage.getItem('dark_theme') === 'true'
   }
 });

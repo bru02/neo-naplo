@@ -10,24 +10,16 @@
         >
           <v-list-item-avatar>
             <v-icon
-              :class="[
-                `${getAbsenceColor(entry.items[0].justificationState)}--text`
-              ]"
-              >{{
-                {
-                  Justified: 'mdi-check',
-                  BeJustified: 'mdi-help-circle-outline',
-                  UnJustified: 'mdi-close'
-                }[entry.items[0].justificationState]
-              }}</v-icon
+              :color="getAbsenceColor(entry.items[0].justificationState)"
+              >{{ getIcon(entry) }}</v-icon
             >
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>{{ entry.items[0].subject }}</v-list-item-title>
             <v-list-item-subtitle
-              v-bind:class="[
-                `${getAbsenceColor(entry.items[0].justificationState)}--text`
-              ]"
+              :style="{
+                color: getAbsenceColor(entry.items[0].justificationState)
+              }"
               >{{ entry.items[0].justificationStateName }}</v-list-item-subtitle
             >
           </v-list-item-content>
@@ -41,16 +33,8 @@
         <v-list-group :key="entry.date" v-else no-action>
           <template v-slot:prependIcon>
             <v-icon
-              :class="[
-                `${getAbsenceColor(entry.items[0].justificationState)}--text`
-              ]"
-              >{{
-                {
-                  Justified: 'mdi-check',
-                  BeJustified: 'mdi-help-circle-outline',
-                  UnJustified: 'mdi-close'
-                }[entry.items[0].justificationState]
-              }}</v-icon
+              :color="getAbsenceColor(entry.items[0].justificationState)"
+              >{{ getIcon(entry) }}</v-icon
             >
           </template>
           <template v-slot:activator>
@@ -77,9 +61,7 @@
             <v-list-item-content>
               <v-list-item-title>{{ abs.subject }}</v-list-item-title>
               <v-list-item-subtitle
-                v-bind:class="[
-                  `${getAbsenceColor(abs.justificationState)}--text`
-                ]"
+                :style="{ color: getAbsenceColor(abs.justificationState) }"
                 >{{ abs.justificationStateName }}</v-list-item-subtitle
               >
             </v-list-item-content>
@@ -109,27 +91,53 @@
 import { apiMapper } from '@/store';
 import Mixin from '@/mixins';
 import DataViewer from '@/components/DataViewer.vue';
-import AbsencesList from '@/components/dataviews/AbsencesList.vue';
+import { Watch } from 'vue-property-decorator';
 
 import Component, { mixins } from 'vue-class-component';
 import { Absence } from '../api-types';
 @Component({
   computed: {
-    ...apiMapper.mapGetters(['absences']),
+    ...apiMapper.mapGetters(['absences', 'flatAbsences']),
     ...apiMapper.mapState({
       loading: state => state.general.loading
     })
   },
-  components: { AbsencesList, DataViewer }
+  components: { DataViewer },
+  metaInfo: {
+    title: 'Hiányzások'
+  }
 })
 export default class AbsencesComponent extends mixins(Mixin) {
-  name = 'Hiányzások';
   selectedAbsence: Absence | boolean = false;
+  flatAbsences!: Absence[];
   mounted() {
     this.obtain('general');
   }
-  metaInfo = {
-    title: 'Hiányzások'
-  };
+  getIcon(entry) {
+    return {
+      Justified: 'mdi-check',
+      BeJustified: 'mdi-help-circle-outline',
+      UnJustified: 'mdi-close'
+    }[entry.items[0].justificationState];
+  }
+  @Watch('selectedAbsence')
+  onselectedNoteChange(value) {
+    if (value) {
+      if (!this.$route.params.id) this.$router.push(`/absences/${value.id}`);
+    } else {
+      if (this.$route.params.id) this.$router.push(`/absences`);
+    }
+  }
+  @Watch('$route')
+  onRouteChange() {
+    const { id } = this.$route.params;
+    if (id) {
+      if (!this.selectedAbsence)
+        this.selectedAbsence =
+          this.flatAbsences.find(e => e.id === +id) ?? false;
+    } else {
+      this.selectedAbsence = false;
+    }
+  }
 }
 </script>

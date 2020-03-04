@@ -186,10 +186,12 @@ import { GeneralAPI, OsztalyCsoport, Tutelary } from '../api-types';
 @Component({
   computed: apiMapper.mapState({
     general: state => state.general.data
-  })
+  }),
+  metaInfo: {
+    title: 'Profil'
+  }
 })
 export default class Profile extends mixins(Mixin) {
-  name = 'Profil';
   general!: GeneralAPI;
   loading = true;
   mounted() {
@@ -226,8 +228,5 @@ export default class Profile extends mixins(Mixin) {
     if (!classGroup) return '';
     return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
   }
-  metaInfo = {
-    title: 'Profil'
-  };
 }
 </script>

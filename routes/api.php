@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\SendNotifications;
+use App\KretaApi;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +19,32 @@ Route::group(['middleware' => 'jwt.auth'], function() {
     Route::any('/events', 'eFilcController@eventsApi');
     Route::any('/classAverages', 'eFilcController@classAveragesApi');
     Route::any('/hirdetmenyek/{class}', 'eFilcController@hirdetmenyekApi');
+    Route::put('/notifications/token', 'eFilcController@updateToken');
+    Route::delete('/notifications/token', 'eFilcController@deleteToken');
+    Route::any('/test', function () {
+        $user = request()->user('api');
 
+        $data = isset($user->data) ? $user->data : $user->loadData();
+
+        return response()->json([
+            'events' => SendNotifications::events(
+                $user->loadEvents(),
+                $user->school,
+                $data->osztalyCsoportok
+            ),
+            'changed_lessons' =>SendNotifications::changedLessons(
+                $user->getTimeTable(
+                    strtotime('last sunday'),
+                    strtotime('next saturday'),
+                    false
+                )
+            ),
+            'absences_bejustified' =>SendNotifications::absencesBejustified(
+                $data->absences
+            ),
+
+        ]);
+    });
 });
 
 Route::post('/refresh', 'AuthController@refreshToken');
