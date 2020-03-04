@@ -20,6 +20,6 @@ messaging.usePublicVapidKey(
   'BMBWunap5uu6T3JMHFwjn-qJRmAC-tTw9_AwCQbUCCXJ69r9KkWxmJymYV2ytB3ySXupkuNN1wvkpXRtPgjpxBc'
 );
 messaging.onMessage(payload => {
-  console.log('Message received. ', payload);
+  // console.log('Message received. ', payload);
   // ...
 });
