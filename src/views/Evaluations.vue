@@ -52,10 +52,9 @@ export default class EvaluationsComponent extends mixins(Mixin) {
   @Watch('selectedEvaluation')
   onselectedEvalChange(value) {
     if (value) {
-      if (!this.$route.params.type)
-        this.$router.push(`/evaluations/${value.id}`);
+      if (!this.$route.params.id) this.$router.push(`/evaluations/${value.id}`);
     } else {
-      if (this.$route.params.type) this.$router.push(`/evaluations`);
+      if (this.$route.params.id) this.$router.push(`/evaluations`);
     }
   }
   @Watch('$route')

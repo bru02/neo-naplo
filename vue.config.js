@@ -1,8 +1,3 @@
-// const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
-// const WebpackDeepScopeAnalysisPlugin = require("webpack-deep-scope-plugin")
-//   .default;
-// const PurgecssPlugin = require("purgecss-webpack-plugin");
-// const glob = require("glob-all");
 const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
   .default;
 
@@ -18,31 +13,6 @@ module.exports = {
     process.env.NODE_ENV === 'production'
       ? '../resources/views/index.blade.php'
       : 'index.html',
-  // configureWebpack: {
-  //   plugins: [
-  //     new VuetifyLoaderPlugin({
-  //       match(originalTag, { camelTag }) {
-  //         components = new Map(
-  //           glob.sync(["./**/*.vue"]).map(c => {
-  //             return [
-  //               c
-  //                 .split("/")
-  //                 .pop()
-  //                 .replace(".vue", ""),
-  //               c.replace("src/", "")
-  //             ];
-  //           })
-  //         );
-  //         if (components.has(camelTag)) {
-  //           return [
-  //             originalTag,
-  //             `import ${camelTag} from '@/${components.get(camelTag)}'`
-  //           ];
-  //         }
-  //       }
-  //     }),
-  //     new WebpackDeepScopeAnalysisPlugin()
-  //   ],
   chainWebpack: config => {
     if (process.env.NODE_ENV === 'production') {
       config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
@@ -60,8 +30,6 @@ module.exports = {
     appleMobileWebAppStatusBarStyle: 'black',
     workboxPluginMode: 'InjectManifest',
     workboxOptions: {
-      include: ['resources/views/index.blade.php'],
-      exclude: ['index.html'],
       swSrc: './src/sw.js'
     },
     manifestOptions: {

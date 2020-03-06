@@ -135,7 +135,7 @@ export default class SettingsComponent extends mixins(Mixin) {
     if (value) {
       if (!this.$route.params.id) this.$router.push(`/settings/colorsDialog`);
     } else {
-      if (this.$route.params.type) this.$router.push(`/settings`);
+      if (this.$route.params.id) this.$router.push(`/settings`);
     }
   }
   @Watch('$route')

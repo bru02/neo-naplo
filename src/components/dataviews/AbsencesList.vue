@@ -9,7 +9,7 @@
       <v-list-item-content>
         <v-list-item-title>{{ abs.subject }}</v-list-item-title>
         <v-list-item-subtitle
-          v-bind:class="[`${getAbsenceColor(abs.justificationState)}--text`]"
+          :style="{ color: getAbsenceColor(abs.justificationState) }"
           >{{ abs.justificationStateName }}</v-list-item-subtitle
         >
       </v-list-item-content>

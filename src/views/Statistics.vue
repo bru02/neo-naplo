@@ -120,7 +120,11 @@
         </v-tabs>
         <v-tabs-items v-model="active">
           <v-tab-item
-            v-if="currentSubject && currentSubject.evaluations.length"
+            v-if="
+              currentSubject &&
+                currentSubject.evaluations &&
+                currentSubject.evaluations.length
+            "
           >
             <v-list>
               <EvaluationListItem
@@ -628,9 +632,9 @@ export default class Statistics extends mixins(Mixin) {
   background-color: #565656;
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
+  top: -3px;
+  left: -5px;
+  width: 110%;
   border-radius: 4px;
   opacity: 0.4;
   height: 100%;
