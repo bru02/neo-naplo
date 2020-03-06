@@ -32,6 +32,8 @@ const routes = [
   {
     path: '/:type(evaluation|note|absence|event)/:id?',
     component: Home,
+    name: 'Faliújság',
+
     meta: {
       auth: true
     }

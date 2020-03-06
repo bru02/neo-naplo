@@ -4,6 +4,8 @@ namespace App;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Str;
+use Spatie\Async\Pool;
+
 
 date_default_timezone_set('Europe/Budapest');
 
@@ -141,59 +143,71 @@ class KretaApi
             $class
         );
         $toldyClassCode = (date('Y') - $toldyClassCode[0] + (date('m') < 13 && date('m') > 8 ? 7 : 6)) . $toldyClassCode[1];
-        $htmlinput = self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody();
         $doc = new \DOMDocument();
-        @$doc->loadHTML($htmlinput);
+        @$doc->loadHTML(
+            self::client('http://toldygimnazium.hu')->get("/cimke/$toldyClassCode")->getBody()
+        );
         $xpath = new \DOMXpath($doc);
-        $conts = $xpath->query("//article[contains(@class, 'cleara')]");
+        $articles = $xpath->query("//article[contains(@class, 'cleara')]");
+
+        $pool = Pool::create();
         $hirdetmenyek = [];
-        foreach ($conts as $container) {
-            $arr = $container->getElementsByTagName("a");
-            foreach ($arr as $item) {
-                if ($item->parentNode->tagName == "h3") {
-                    $con = $item->textContent;
-                    $url = $item->getAttribute('href');
-                    $id = explode('/', $url);
-                    $id = array_pop($id);
-                }
 
-                if ($item->parentNode->tagName == "p") {
-                    $author = $item->textContent;
-                }
-            }
-
-            $arr = $container->getElementsByTagName("h3");
-            foreach ($arr as $item) {
-                if ($item->parentNode->tagName == "article") {
-                    $date = self::parseToldyDate($item->textContent);
-                    $nxt = $xpath->query("following-sibling::*[1]", $item)->item(0);
-                    $title = substr(join(', ', explode('▼', trim(preg_replace("/\s+/", " ", $nxt->textContent)))), 0, -4);
-                }
-            }
-            $endDate = self::client(null)->get($url)->getBody();
-            $doc2 = new \DOMDocument();
-            @$doc2->loadHTML($endDate);
-            $xpath2 = new \DOMXpath($doc2);
-            $endDate = $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0];
-            $endDate = self::parseToldyDate(explode(': ', $endDate->textContent)[1]);
-            $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
-            $attachments = [];
-            foreach($links as $link) {
-                $attachments[] = [
-                    'title' => $link->textContent,
-                    'url' => $link->getAttribute('href')
+        foreach ($articles as $article) {
+            $pool->add(function () use ($article, $xpath) {
+                $date = self::parseToldyDate(
+                    $xpath->query('./h3', $article)->item(0)->textContent
+                );
+    
+                $link = $xpath->query('.//h3/a', $article)->item(0);
+                $title = $link->textContent;
+                $url = $link->getAttribute('href');
+                $boom = explode('/', $url);
+                $id = array_pop(
+                    $boom
+                );
+                
+                $author = $xpath->query('.//p/a', $article)->item(0)->textContent;
+    
+                $type = explode('▼',
+                    $xpath->query('//div[contains(@class, "tinfo-category-label")]', $article)
+                        ->item(0)
+                        ->textContent
+                )[0];
+    
+                $doc = new \DOMDocument();
+                @$doc->loadHTML(
+                    self::client(null)->get($url)->getBody()
+                );
+                $xpath2 = new \DOMXpath($doc);
+    
+                $endDate = self::parseToldyDate(
+                    explode(': ',
+                        $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0]->textContent
+                    )[1]
+                );
+                $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
+    
+                return (object)[
+                    'date' => $date,
+                    'title' => trim(ucwords($type)) . ": $title",
+                    'content' => '',
+                    'teacher' => $author,
+                    'attachments' => collect($links)->map(function ($link) {
+                        return [
+                            'title' => $link->textContent,
+                            'url' => $link->getAttribute('href')
+                        ];
+                    }),
+                    'id' => "t$id",
+                    'endDate' => $endDate
                 ];
-            }
-            $hirdetmenyek[] = [
-                'date' => $date,
-                'title' => trim(ucwords($title)) . ": $con",
-                'content' => '',
-                'teacher' => $author,
-                'attachments' => $attachments,
-                'id' => "tld$id",
-                'endDate' => $endDate
-            ];
+
+            })->then(function($hirdetmeny) use ($hirdetmenyek) {
+                $hirdetmenyek[] = $hirdetmeny;
+            });
         }
+        $pool->wait();
         return $hirdetmenyek;
     }
 

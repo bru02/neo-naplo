@@ -11,3 +11,4 @@
 |
 */
 Route::view('/{any}', 'index')->where('any', '.*');
+Route::view('/index.html', 'index');

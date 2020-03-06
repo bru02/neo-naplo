@@ -6,101 +6,125 @@ use App\Providers\KretaUserProvider;
 use Illuminate\Support\Facades\DB;
 use FCM;
 use FCMGroup;
+use InvalidArgumentException;
 use LaravelFCM\Message\OptionsBuilder;
 use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
+use LogicException;
+use Spatie\Async\Pool;
+
            // $new_absences_bejustified = self::absencesBejustified(
             //     $data->absences
             // )->diff(
             //     json_decode($row->absences_bejustified)
             // );
 class SendNotifications {
+    const dayMap = [
+        'Vasárnap',
+        'Hétfő',
+        'Kedd',
+        'Szerda',
+        'Csütörtök',
+        'Péntek',
+        'Szombat'
+    ];
     public function __invoke()
     {
-        $rows = DB::table('fcm_groups')->dump()->get();
+        $rows = DB::table('fcm_groups')->get();
+
+        $pool = Pool::create();
+
         foreach($rows as $row) {
+            $pool->add(function () use ($row) {            
             $user = $this->getUser($row->user_id);
+
             if(!isset($user)) {
                 DB::table('fcm_groups')->where('user_id', $row->user_id)->delete();
-                continue;
+                throw new InvalidArgumentException('Bad credentials');
             }
+
             $data = $user->loadData();
-            $hirdetmenyek = self::loadHirdetmenyek($user->school,
-            $data->osztalyCsoportok);
-            $events = $user->loadEvents();
-            $eph = collect($events)->concat($hirdetmenyek);
-            $new_events =  self::events(
-               $events,
-                $hirdetmenyek
-            )->diff(
+
+            $storedEvents = collect(
                 json_decode($row->events)
-            )->map(function ($e) use ($eph) {
-                return $eph->firstWhere('id', $e);
+            );
+            $events =  self::events(
+                $user->loadEvents(),
+                $user->school,
+                $data->osztalyCsoportok
+            );
+            dump($events);
+            $newEvents = $events->filter( function ($event) use ($storedEvents) {
+                return !$storedEvents->has($event->id);
             });
+
             $notificationKey = $row->notification_key;
-            foreach($new_events as $event) {
-                $this->sendNotification($notificationKey, $event->title, $event->body, "/event/$event->id", 'event');
+            
+            foreach($newEvents as $event) {
+                $this->sendNotification($notificationKey, $event->title, $event->content, "/event/$event->id", 'event');
             }
-            $lessons = collect($user->getTimeTable(
-                strtotime('last sunday'),
-                strtotime('next saturday'),
-                false
-            ));
-            $new_changed_lessons = self::changedLessons(
-                $lessons
-                )->diff(
-                    json_decode($row->changed_lessons)
-                )->map(function ($l) use ($lessons) {
-                    return $lessons->firstWhere('id', $l);
-                });
-            foreach($new_changed_lessons as $lesson) {
-                $day = [
-                    'Vasárnap',
-                    'Hétfő',
-                    'Kedd',
-                    'Szerda',
-                    'Csütörtök',
-                    'Péntek',
-                    'Szombat'
-                ][date('w', $lesson->date)];
+
+            $storedLessons = collect(
+                json_decode(
+                    $row->changed_lessons
+                )
+            );
+            $changedLessons = self::changedLessons(
+                    $user->getTimeTable(
+                        strtotime('last sunday'),
+                        strtotime('next saturday'),
+                        false
+                    )   
+            )->filter( function ($lesson) use ($storedLessons) {
+                return !$storedLessons->has($lesson->id);
+            });
+
+            foreach($changedLessons as $lesson) {
+                $day = self::dayMap[
+                    date('w', $lesson->date)
+                ];
                 $isJustification = !empty($lesson->deputyTeacher);
-                $s = $isJustification ? 'ban' : '';
+                $s = $isJustification ? 'ában' : 'a';
                 $t = $isJustification ? "$lesson->deputyTeacher fog helyettesíteni" : "elmarad";
-                $title = "$day $lesson->count. óra$s ($lesson->subject) $t";
+                $title = "$day $lesson->count. ór$s ($lesson->subject) $t";
                 $this->sendNotification($notificationKey, $title, '', "/timetable/0/$lesson->date:$lesson->count", 'changedLesson');
             }
-            $evaluation_creating_time = strtotime($row->evaluation_creating_time);
 
-            $new_evaluations = array_filter($data->evaluations, function ($eval) use ($evaluation_creating_time)  {
-                return $eval->creatingTime > $evaluation_creating_time;
+
+            $evaluationCT = strtotime($row->evaluation_creating_time);
+
+            $newEvaluations = array_filter($data->evaluations, function ($eval) use ($evaluationCT)  {
+                return $eval->creatingTime > $evaluationCT;
             });
-            foreach($new_evaluations as $eval) {
+
+            foreach($newEvaluations as $eval) {
                 $this->sendNotification($notificationKey, "$eval->subject: $eval->value", "$eval->weight - $eval->theme", "/evaluation/$eval->id", 'evaluation');
             }
-            $absence_creating_time = strtotime($row->absence_creating_time);
-            $new_absences = collect($data->absences)->transform(function($a) {
+
+
+            $absenceCT = strtotime($row->absence_creating_time);
+            $newAbsences = collect($data->absences)->transform(function($a) {
                 return $a->items;
-            })->collapse()->filter(function ($abs) use ($absence_creating_time) {
-                return $abs->creatingTime > $absence_creating_time;
+            })->collapse()->filter(function ($abs) use ($absenceCT) {
+                return $abs->creatingTime > $absenceCT;
             });
-            foreach($new_absences as $abs) {
-                $this->sendNotification($notificationKey, "$abs->subject: $abs->typeName", "$abs->date - $eval->justificationStateName", "/absence/$abs->id", 'absence');
+            foreach($newAbsences as $abs) {
+                $this->sendNotification($notificationKey, "$abs->subject: $abs->typeName", "$abs->date - $abs->justificationStateName", "/absence/$abs->id", 'absence');
             }
-            $note_creating_time = strtotime($row->note_creating_time);
-            $new_notes = array_filter($data->evaluations, function ($note) use ($note_creating_time)  {
-                return $note->creatingTime > $note_creating_time;
+            $noteCT = strtotime($row->note_creating_time);
+            $new_notes = array_filter($data->evaluations, function ($note) use ($noteCT)  {
+                return $note->creatingTime > $noteCT;
             });
             foreach($new_notes as $note) {
-                $this->sendNotification($notificationKey, "$note->title", "$note->content #&bullet; $note->teacher","/$note->id", 'note');
+                $this->sendNotification($notificationKey, "$note->title", "$note->content - $note->teacher","/$note->id", 'note');
             } 
-            dump([
-                'ev' => $new_events,
-                'cl' => $new_changed_lessons,
-                'a' => $new_absences,
-                'e' => $new_evaluations,
-                'n' => $new_notes
-            ]);
+        })->catch(function (LogicException $e) {
+
+        })->catch(function (InvalidArgumentException $e) {
+            
+        });
         }
+        $pool->wait();
     }
 
     private function getUser($id) {
@@ -145,29 +169,24 @@ class SendNotifications {
             return $a->items;
         })->collapse()->filter(function ($value, $key) {
             return $value->justificationState === 'BeJustified';
-        })->pluck('id');
+        });
     }
-    public static function loadHirdetmenyek($school, $classGroups) {
-        if($school === 'klik035220001') {
 
-        return KretaApi::getHirdetmenyek(
-            collect($classGroups)->firstWhere('osztalyCsoportTipus', 'Osztaly')->nev
-        );
-    }
-    return [];
-    }
-    public static function events($events, $hirdetmenyek) {
+    public static function events($events, $school, $classGroups) {
         $events = collect($events);
-        $events = $events->concat(
-            $hirdetmenyek
-        );
-        
-        return  $events->pluck('id');
+         if($school === 'klik035220001') {
+            $events = $events->concat(
+                KretaApi::getHirdetmenyek(
+                    collect($classGroups)->firstWhere('osztalyCsoportTipus', 'Osztaly')->nev
+                )
+            );
+        } 
+        return  $events;
     }
     public static function changedLessons($lessons) {
         return collect($lessons)->filter(function ($value, $key) {
             return (!empty($value->deputyTeacher) || $value->state === 'Missed') && $value->startTime > time();
-        })->pluck('id');
+        });
     }
     private function sendNotification($notificationKey, $title, $body, $url, $collapseKey = 'filc') {
         $optionBuilder = new OptionsBuilder();
@@ -184,6 +203,10 @@ class SendNotifications {
         $data = $dataBuilder->build();
         $groupResponse = FCM::sendToGroup($notificationKey, $option, $notification, $data);
         dump($groupResponse);
+        if($groupResponse->numberSuccess() + $groupResponse->numberFailure() === 0) {
+            DB::table('fcm_groups')->where('notification_key', $notificationKey)->delete();
+            throw new LogicException('No tokens in notification group');
+        }
         $failed = $groupResponse->tokensFailed();
         foreach($failed as $token) {
             DB::table('fcm_tokens')->where('token', $token)->delete();

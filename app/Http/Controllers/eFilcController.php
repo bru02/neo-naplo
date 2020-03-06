@@ -83,18 +83,19 @@ class eFilcController extends Controller
                 'user_id' => $uid,
                 'events' => SendNotifications::events(
                     $user->loadEvents(),
-                    SendNotifications::loadHirdetmenyek($user->school, $data->osztalyCsoportok)
-                ),
+                    $user->school,
+                    $data->osztalyCsoportok
+                )->pluck('id'),
                 'changed_lessons' => SendNotifications::changedLessons(
                     $user->getTimeTable(
                         strtotime('last sunday'),
                         strtotime('next saturday'),
                         false
                     )
-                ),
-                'absences_bejustified' =>SendNotifications::absencesBejustified(
+                )->pluck('id'),
+                'absences_bejustified' => SendNotifications::absencesBejustified(
                     $data->absences
-                )
+                )->pluck('id')
             ]);
         }
         $rowId = DB::table('tokens')->select('id')->where([
@@ -115,7 +116,7 @@ class eFilcController extends Controller
                 ]
             ]);
         }
-        return response()->json([], 200);
+        return response()->json(['message' => 'Success.'], 200);
     }
     public function deleteToken() {
         $user = request()->user('api');
@@ -125,7 +126,7 @@ class eFilcController extends Controller
             ['remember_token', $sub['hash']]
         ])->first()->id;
         SendNotifications::deleteByRowID($rowId);
-        return response()->json([], 200);
+        return response()->json(['message' => 'Success.'], 200);
 
     }
 }
