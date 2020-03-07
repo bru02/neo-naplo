@@ -221,7 +221,9 @@ class KretaApi
         $evals = [];
         $groupedEvals = [];
         foreach ($out->Evaluations as $eval) {
-            $newVal = ucfirst($eval->Value);
+
+            $newVal = $eval->Value === 'Nem írt' ? '-' : null;
+
             switch ($eval->Form) {
                 case 'Deportment':
                     $eval->Subject = "Magatartás";

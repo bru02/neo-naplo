@@ -53,7 +53,7 @@
       </template>
       <v-container>
         <v-sheet
-          color="white"
+          color="transparent"
           :elevation="0"
           width="100%"
           :height="20"
@@ -99,7 +99,7 @@ export default class SettingsComponent extends mixins(Mixin) {
   tokenData!: any;
   loading = false;
   colorsDialog = false;
-  color = '#ddffdd';
+  color = '#8ebc63';
   @Watch('$vuetify.theme.dark')
   onThemeChange(val) {
     localStorage.setItem('dark_theme', val);
@@ -133,15 +133,16 @@ export default class SettingsComponent extends mixins(Mixin) {
   @Watch('colorsDialog')
   onDialogChange(value) {
     if (value) {
-      if (!this.$route.params.id) this.$router.push(`/settings/colorsDialog`);
+      if (!this.$route.params.dialog)
+        this.$router.push(`/settings/colorsDialog`);
     } else {
-      if (this.$route.params.id) this.$router.push(`/settings`);
+      if (this.$route.params.dialog) this.$router.push(`/settings`);
     }
   }
   @Watch('$route')
   onRouteChange() {
-    const { id } = this.$route.params;
-    this.colorsDialog = !!id;
+    const { dialog } = this.$route.params;
+    this.colorsDialog = dialog === 'colorsDialog';
   }
 }
 </script>

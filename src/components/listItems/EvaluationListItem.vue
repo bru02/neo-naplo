@@ -7,8 +7,13 @@
     </v-list-item-avatar>
 
     <v-list-item-content>
-      <v-list-item-title v-text="eval.subject"></v-list-item-title>
-      <v-list-item-subtitle v-text="eval.theme"></v-list-item-subtitle>
+      <v-list-item-title>{{ eval.subject }}</v-list-item-title>
+      <v-list-item-subtitle>
+        <span v-if="eval.type != 'MidYear'"
+          >{{ eval.typeName }} {{ eval.theme && '-' }}</span
+        >
+        {{ eval.theme }}
+      </v-list-item-subtitle>
     </v-list-item-content>
 
     <v-list-item-action>

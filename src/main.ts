@@ -1,11 +1,11 @@
 import Vue from 'vue';
+import './registerServiceWorker';
 import store from './store';
 import router from './plugins/router';
 import vuetify from './plugins/vuetify';
 import './plugins/axios';
 import './plugins/sentry';
 import './plugins/firebase';
-import './registerServiceWorker';
 import '@mdi/font/css/materialdesignicons.css';
 
 import App from './App.vue';

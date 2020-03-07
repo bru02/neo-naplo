@@ -185,6 +185,7 @@ class User extends Model implements Authenticatable, JWTSubject
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             Log::debug("exp: {$this->tokenData->exp}; \r\n rt: {$this->refresh_token}");
             auth()->logout();
+            return null;
         }
         $this->access_token = $result->access_token;
         $this->refresh_token = $result->refresh_token;

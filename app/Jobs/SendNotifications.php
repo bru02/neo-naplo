@@ -12,6 +12,7 @@ use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
 use LogicException;
 use Spatie\Async\Pool;
+use GuzzleHttp\Exception\ClientException;
 
            // $new_absences_bejustified = self::absencesBejustified(
             //     $data->absences
@@ -155,8 +156,18 @@ class SendNotifications {
             $id = $row->user_id;
             $token = $row->token;
             $notification_key = DB::table('fcm_groups')->where('user_id', $id)->value('notification_key');
-            
-            $key = FCMGroup::removeFromGroup("$id","$notification_key", [$token]);
+            try {
+                $key = FCMGroup::removeFromGroup("$id","$notification_key", [$token]);
+            } catch (ClientException $e) {
+                $response = json_decode(
+                    $e->getResponse()->getBody()->getContents() ?? '{}'
+                );
+                if($response->error === 'notification_key not found') {
+                    unset($key);
+                } else {
+                    throw $e;
+                }
+            }
             if(!isset($key)) {
                 DB::table('fcm_groups')->where('user_id', $id)->delete();
             }
