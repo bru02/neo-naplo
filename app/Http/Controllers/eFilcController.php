@@ -72,7 +72,16 @@ class eFilcController extends Controller
                         'Authorization' => 'key=' . config('fcm.http.server_key')
                     ]
                 ])->getBody())->notification_key;
-                FCMGroup::addToGroup("$uid", $notification_Key, [$token]);
+                try {
+                    FCMGroup::addToGroup("$uid", $notification_key, [$token]);
+                }
+                catch(\GuzzleHttp\Exception\ClientException $e) {
+                    return response()->json(
+                            json_decode(
+                            $e->getResponse()->getBody()->getContents() ?? '{}'
+                            ), 400
+                    );
+                }
             }
             
 

@@ -23,6 +23,7 @@
                   :value="notificationsEnabled"
                   v-on:change="toggle()"
                   :loading="loading"
+                  :input-value="true"
                 ></v-switch>
               </div>
             </template>
@@ -73,6 +74,32 @@
         </v-list>
       </v-container>
     </Dialog>
+    <v-snackbar v-model="toast" color="success">
+      <v-icon>
+        {{
+          notificationsEnabled
+            ? 'mdi-bell-ring-outline'
+            : 'mdi-bell-off-outline'
+        }}
+      </v-icon>
+      Értesítések {{ notificationsEnabled ? 'ki' : 'be' }}kapcsolva!
+      <v-btn icon @click="toast = false">
+        <v-icon>
+          mdi-close
+        </v-icon>
+      </v-btn>
+    </v-snackbar>
+    <v-snackbar v-model="errorToast" color="error">
+      <v-icon>
+        mdi-bell-alert-outline
+      </v-icon>
+      Hiba az értesítések {{ notificationsEnabled ? 'be' : 'ki' }}kapcsolásánál!
+      <v-btn icon @click="toast = false">
+        <v-icon>
+          mdi-close
+        </v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 <script lang="ts">
@@ -100,14 +127,25 @@ export default class SettingsComponent extends mixins(Mixin) {
   loading = false;
   colorsDialog = false;
   color = '#8ebc63';
+  toast = false;
+  errorToast = false;
   @Watch('$vuetify.theme.dark')
   onThemeChange(val) {
     localStorage.setItem('dark_theme', val);
   }
   async toggle() {
     this.loading = true;
-    await this.$store.dispatch('settings/toggle');
-    this.loading = false;
+    this.$store
+      .dispatch('settings/toggle')
+      .then(() => {
+        this.loading = false;
+        this.toast = true;
+      })
+      .catch(e => {
+        this.loading = false;
+        this.errorToast = true;
+        throw e;
+      });
   }
   get supportText() {
     if (typeof this.tokenData.sub === 'string') {

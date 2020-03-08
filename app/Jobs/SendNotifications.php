@@ -164,8 +164,8 @@ class SendNotifications {
                 );
                 if($response->error === 'notification_key not found') {
                     unset($key);
-                } else {
-                    throw $e;
+                } elseif(!$response->error === 'no valid registration ids') {
+                    throw new Exception('Unsubscribing failed', 0, $e);
                 }
             }
             if(!isset($key)) {

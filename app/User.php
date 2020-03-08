@@ -14,8 +14,8 @@ use Illuminate\Support\Str;
 
 class User extends Model implements Authenticatable, JWTSubject
 {
-    protected $refresh_token;
-    protected $access_token;
+    public $refresh_token;
+    public $access_token;
     protected $encryptionKey;
     protected $hash;
 
@@ -29,9 +29,7 @@ class User extends Model implements Authenticatable, JWTSubject
     public function __construct($result = null, $keys = null)
     {
         if(isset($result)) {
-            $this->access_token = $result->access_token;
-            $this->refresh_token = $result->refresh_token;
-            $this->tokenData = $this->decompileToken();
+            $this->setTokens($result);
             $this->school = $this->tokenData->{'kreta:institute_code'};
             $this->id = $this->tokenData->{'kreta:institute_user_id'};
             $this->timetable = (object) [];
@@ -50,6 +48,13 @@ class User extends Model implements Authenticatable, JWTSubject
         } else {
             $this->rme = false;
         }
+    }
+
+    private function setTokens($result) {
+        $this->access_token = $result->access_token;
+        $this->refresh_token = $result->refresh_token;
+        $this->tokenData = $this->decompileToken();
+        $this->save();
     }
 
     public static function fromCredentials($school, $username, $password, $rme = false) {
@@ -184,16 +189,23 @@ class User extends Model implements Authenticatable, JWTSubject
             $result = KretaApi::getToken($this->school, $this->refresh_token);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             Log::debug("exp: {$this->tokenData->exp}; \r\n rt: {$this->refresh_token}");
-            auth()->logout();
-            return null;
+            sleep(0.2);
+            $user = Auth::user();
+            if($user->refresh_token !== $this->refresh_token) {
+                $this->setTokens([
+                    'access_token' => $user->access_token,
+                    'refresh_token' => $user->refresh_token,
+                ]);
+            } else {
+                auth()->logout();
+                return null;
+            }
         }
-        $this->access_token = $result->access_token;
-        $this->refresh_token = $result->refresh_token;
-        $this->tokenData = $this->decompileToken();
+        $this->setTokens($result);
         if($this->rme)
-        DB::table('tokens')
-            ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])
-            ->update(['access_token' => $this->encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
+            DB::table('tokens')
+                ->where([$this->getAuthIdentifierName() => $this->getAuthIdentifier(), 'remember_token' => $this->hash])
+                ->update(['access_token' => $this->encrypt($this->access_token), 'refresh_token' => $this->encrypt($this->refresh_token)]);
     }
 
     private function doRefreshToken() {

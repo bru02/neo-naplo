@@ -487,12 +487,13 @@ class KretaApi
         return $ret;
     }
 
-    private static function parseToldyDate($date) {
+    private static function parseToldyDate($string) {
+        $date = trim($string);
         if($date == 'ma') return date('Y-m-d');
         $date = str_replace('.', '', $date);
         $date = explode(' ', $date);
         $day = array_pop($date);
-        $month = self::$months[array_pop($date)];
+        $month = self::months[array_pop($date)];
         if (isset($date[0])) {
             $year = $date[0];
         } else {
@@ -501,7 +502,7 @@ class KretaApi
 
         return strtotime("${year}-${month}-${day}");
     }
-    private static $months = [
+    const months = [
         'szeptember' => 9,
         'október' => 10,
         'november' => 11,

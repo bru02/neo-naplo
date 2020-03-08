@@ -168,7 +168,13 @@
               <v-list-item v-show="views.length == 2 && mobile"></v-list-item>
             </v-list>
           </v-tab-item>
-          <v-tab-item v-if="currentSubject && currentSubject.absences.length">
+          <v-tab-item
+            v-if="
+              currentSubject &&
+                currentSubject.absences &&
+                currentSubject.absences.length
+            "
+          >
             <v-list two-line>
               <v-list-item
                 v-for="abs in currentSubject.absences"

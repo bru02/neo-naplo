@@ -24,13 +24,25 @@ class SettingsGetters extends Getters<SettingsState> {
 }
 
 class SettingsMutations extends Mutations<SettingsState> {
-  updateToken(token: string | boolean) {
-    this.state.token = token ? token + '' : '';
-    localStorage.setItem('fcm_token', this.state.token);
+  async updateToken(token: string | boolean) {
+    const setToken = (token: string | boolean) => {
+      this.state.token = token ? token + '' : '';
+      localStorage.setItem('fcm_token', this.state.token);
+    };
     if (!!token) {
-      api.sendToken(token);
+      return await api
+        .sendToken(token)
+        .then(() => {
+          setToken(token);
+        })
+        .catch(e => {
+          setToken(false);
+          throw e;
+        });
     } else {
-      api.deleteToken();
+      return await api.deleteToken().then(() => {
+        setToken(false);
+      });
     }
   }
   updateColor({ key, value }) {
@@ -65,26 +77,26 @@ class SettingsActions extends Actions<
     });
   }
   async getToken() {
-    messaging
+    return await messaging
       .getToken()
-      .then(token => {
-        this.mutations.updateToken(token);
-        return token;
+      .then(async token => {
+        return this.mutations.updateToken(token);
       })
-      .catch(err => {
+      .then(() => this.state.token)
+      .catch(async err => {
         this.mutations.updateToken(false);
         throw err;
       });
   }
   async enable() {
-    return await messaging.requestPermission().then(() => {
-      return this.dispatch('getToken');
+    return await messaging.requestPermission().then(async () => {
+      return await this.dispatch('getToken');
     });
   }
   async disable() {
     return await messaging
       .deleteToken(this.state.token)
-      .then(() => {
+      .then(async () => {
         this.mutations.updateToken(false);
         return true;
       })
@@ -94,9 +106,9 @@ class SettingsActions extends Actions<
   }
   async toggle() {
     if (this.getters.notificationsEnabled) {
-      await this.dispatch('disable');
+      return await this.dispatch('disable');
     } else {
-      await this.dispatch('enable');
+      return await this.dispatch('enable');
     }
   }
 }
