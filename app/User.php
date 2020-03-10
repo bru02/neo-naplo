@@ -188,8 +188,7 @@ class User extends Model implements Authenticatable, JWTSubject
         try {
             $result = KretaApi::getToken($this->school, $this->refresh_token);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
-            Log::debug("exp: {$this->tokenData->exp}; \r\n rt: {$this->refresh_token}");
-            sleep(0.2);
+            sleep(0.5);
             $user = Auth::user();
             if($user->refresh_token !== $this->refresh_token) {
                 $this->setTokens([

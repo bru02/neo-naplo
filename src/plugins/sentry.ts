@@ -8,7 +8,13 @@ if (
 ) {
   Sentry.init({
     dsn: process.env.VUE_APP_SENTRY_LARAVEL_DSN,
-    integrations: [new VueIntegration({ Vue, attachProps: true })],
+    integrations: [
+      // @ts-ignore
+      new VueIntegration({
+        Vue,
+        attachProps: true
+      })
+    ],
     release: 'filc@' + process.env.VUE_APP_SHA
   });
 }

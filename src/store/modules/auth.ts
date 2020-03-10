@@ -38,7 +38,6 @@ class AuthActions extends Actions<
 > {
   api!: Context<typeof apiModule>;
   $init(store: Store<any>): void {
-    // Create and retain foo module context
     this.api = apiModule.context(store);
   }
   async login({ username, password, school, rme }) {

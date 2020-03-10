@@ -12,7 +12,7 @@
   "dependencies": {
     "@d0whc3r/vue-auth-plugin": "^1.7.0",
     "@mdi/font": "^3.6.95",
-    "@sentry/browser": "^5.11.2",
+    "@sentry/browser": "^5.13.2",
     "@sentry/integrations": "^5.11.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",

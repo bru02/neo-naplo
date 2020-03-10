@@ -1,4 +1,10 @@
 /* eslint-disable no-console */
+
+workbox.routing.registerRoute(
+  new RegExp('/api/.*'),
+  new workbox.strategies.NetworkFirst()
+);
+
 importScripts('https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/7.8.2/firebase-messaging.js');
 
@@ -12,10 +18,7 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.setBackgroundMessageHandler(function(payload) {
-  console.log(
-    '[firebase-messaging-sw.js] Received background message ',
-    payload
-  );
+  console.log('[sw.js] Received background message ', payload);
 
   return self.registration.showNotification(payload.title, {
     body: payload.body,

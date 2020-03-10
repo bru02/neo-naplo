@@ -23,6 +23,7 @@ const Settings = () =>
 
 const routes = [
   {
+    name: 'Belépés',
     path: '/login',
     component: Login,
     meta: {

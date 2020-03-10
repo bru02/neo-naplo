@@ -24,7 +24,6 @@
                 :rules="schoolRules"
                 required
               ></v-autocomplete>
-              <input type="hidden" v-bind:value="school" name="school" />
               <v-text-field
                 name="username"
                 label="Felhaszálónév"
@@ -108,6 +107,7 @@ export default class LoginComponent extends mixins(Mixin) {
     let self = this;
     this.$http.get('schools').then(response => {
       self.schools = response.data;
+      this.school = `${this.$route.query.school}` ?? '';
       self.loading = false;
     });
   }

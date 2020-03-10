@@ -150,7 +150,7 @@ export default class App extends mixins(Mixin) {
             cachedResponse
           );
       }
-    } else if (this.$route.fullPath != '/login') {
+    } else if (this.$route.name !== 'Belépés') {
       this.$router.push('/login');
     }
   }

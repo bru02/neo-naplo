@@ -51,11 +51,16 @@ export default new Vue({
       (error: any) => {
         const status = error?.response?.status;
         if (status === 401) {
+          const instituteCode = this.$store.state.api.general.data
+            ?.instituteCode;
           if (this.$store.getters['auth/isAuthenticated']) {
             this.$store.dispatch('auth/logout');
           }
-          if (this.$route.fullPath != '/login') {
-            this.$router.push('/login');
+          if (this.$route.name != 'Belépés') {
+            this.$router.push({
+              name: `Belépés`,
+              query: { school: instituteCode }
+            });
           }
         }
         throw error;
@@ -63,13 +68,13 @@ export default new Vue({
     );
     this.$router.beforeEach((to, from, next) => {
       const routes = to.matched
-        .filter(url => url.path !== 'login')
+        .filter(url => url.name !== 'Belépés')
         .filter(match => 'auth' in match.meta)
         .filter(meta => !!meta);
       if (routes && routes.length) {
         if (
           this.$store.getters['auth/isAuthenticated'] ||
-          to.fullPath == '/login'
+          to.name == 'Belépés'
         ) {
           next();
         } else {
