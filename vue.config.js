@@ -1,6 +1,3 @@
-const WebpackDeepScopeAnalysisPlugin = require('webpack-deep-scope-plugin')
-  .default;
-
 process.env.VUE_APP_SHA = process.env.SOURCE_VERSION;
 
 module.exports = {
@@ -14,12 +11,9 @@ module.exports = {
       ? '../resources/views/index.blade.php'
       : 'index.html',
   chainWebpack: config => {
-    if (process.env.NODE_ENV === 'production') {
-      config.plugin('dsa').use(WebpackDeepScopeAnalysisPlugin);
-    }
     config.plugin('VuetifyLoaderPlugin').tap(args => [
       {
-        progressiveImages: process.env.NODE_ENV === 'production'
+        progressiveImages: true
       }
     ]);
   },

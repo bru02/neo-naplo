@@ -4,7 +4,7 @@
       {{ note.title }}
     </v-card-title>
     <v-card-subtitle>
-      <div>{{ note.content }}</div>
+      <div>{{ trimText(note.content) }}</div>
       <div class="font-weight-thin">{{ note.teacher }}</div>
     </v-card-subtitle>
     <v-divider light></v-divider>

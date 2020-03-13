@@ -1,56 +1,61 @@
 <template>
-  <v-list v-if="mobile">
-    <v-list-item
-      v-for="note in notes"
-      :key="note.id"
-      @click="selectedNote = note"
-    >
-      <v-list-item-content>
-        <v-list-item-title>{{ note.title }}</v-list-item-title>
-        <v-list-item-subtitle>
-          <span class="text--primary">{{ note.teacher }}</span> &mdash;
-          {{ note.content.substr(0, 100)
-          }}{{ note.content.length > 100 ? '...' : '' }}
-        </v-list-item-subtitle>
-      </v-list-item-content>
+  <v-container>
+    <v-list v-if="mobile">
+      <v-list-item
+        v-for="note in notes"
+        :key="note.id"
+        @click="selectedNote = note"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{ note.title }}</v-list-item-title>
+          <v-list-item-subtitle>
+            <span class="text--primary">{{ note.teacher }}</span> &mdash;
+            {{ trimText(note.content) }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
 
-      <v-list-item-action>
-        <v-list-item-action-text>
-          {{ note.date | formatDate }}
-        </v-list-item-action-text>
-      </v-list-item-action>
-    </v-list-item>
+        <v-list-item-action>
+          <v-list-item-action-text>
+            {{ note.date | formatDate }}
+          </v-list-item-action-text>
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+    <v-data-table
+      :headers="headers"
+      :items="notes"
+      :loading="loading"
+      disable-pagination
+      must-sort
+      sort-by="date"
+      sort-desc
+      hide-default-footer
+      class="elevation-1"
+      @click:row="selectedNote = $event"
+      v-else
+    >
+      <template v-slot:no-data>
+        <v-alert :value="true" type="info">
+          Még Nincsenek feljegyzéseid
+        </v-alert>
+      </template>
+      <template v-slot:item.title="{ item }">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ item.title }}</span>
+          </template>
+          <span>{{ item.type }}</span>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.content="{ item }">
+        {{ trimText(item.content) }}
+      </template>
+      <template v-slot:item.date="{ item }">
+        {{ formatDate(item.date) }}
+      </template>
+    </v-data-table>
     <DataViewer title="Feljegyzés" :fn="noteValues" v-model="selectedNote" />
-  </v-list>
-  <v-data-table
-    :headers="headers"
-    :items="notes"
-    :loading="loading"
-    disable-pagination
-    must-sort
-    sort-by="date"
-    sort-desc
-    hide-default-footer
-    class="elevation-1"
-    v-else
-  >
-    <template v-slot:no-data>
-      <v-alert :value="true" type="info">
-        Még Nincsenek feljegyzéseid
-      </v-alert>
-    </template>
-    <template v-slot:item.title="{ item }">
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <span v-on="on">{{ item.title }}</span>
-        </template>
-        <span>{{ item.type }}</span>
-      </v-tooltip>
-    </template>
-    <template v-slot:item.date="{ item }">
-      {{ formatDate(item.date) }}
-    </template>
-  </v-data-table>
+  </v-container>
 </template>
 <script lang="ts">
 import Mixin from '@/mixins';

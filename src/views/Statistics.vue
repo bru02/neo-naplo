@@ -63,7 +63,7 @@
           :src="
             require(`@/assets/resized/${getSubjectIcon(
               currentSubject.subjectCategoryName
-            )}-xl.jpg`)
+            )}-xl.jpg?vuetify-preload`)
           "
           :srcset="
             getSrcset(getSubjectIcon(currentSubject.subjectCategoryName))
@@ -263,6 +263,7 @@
           <v-btn
             v-show="
               currentSubject &&
+                currentSubject.evaluations &&
                 currentSubject.evaluations.length > 0 &&
                 active == 0
             "
@@ -517,14 +518,13 @@ export default class Statistics extends mixins(Mixin) {
 
   get views() {
     const ret: { icon: string; name: string }[] = [];
-    if (this.currentSubject) {
-      if (this.currentSubject.evaluations.length) {
-        ret.push({ icon: 'mdi-calendar-check-outline', name: 'Jegyek' });
-      }
-      if (this.currentSubject.absences.length) {
-        ret.push({ icon: 'mdi-block-helper', name: 'Hiányzások' });
-      }
+    if (this.currentSubject?.evaluations?.length) {
+      ret.push({ icon: 'mdi-calendar-check-outline', name: 'Jegyek' });
     }
+    if (this.currentSubject?.absences?.length) {
+      ret.push({ icon: 'mdi-block-helper', name: 'Hiányzások' });
+    }
+
     return ret;
   }
 
@@ -635,7 +635,7 @@ export default class Statistics extends mixins(Mixin) {
   }
 }
 .avr::after {
-  background-color: #565656;
+  background-color: #000;
   content: '';
   position: absolute;
   top: -3px;

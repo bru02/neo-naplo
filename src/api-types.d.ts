@@ -143,6 +143,7 @@ export enum Weight {
 
 export interface Event {
   date: number;
+  title: string;
   content: string;
   teacher: string;
   attachments: Attachment[];

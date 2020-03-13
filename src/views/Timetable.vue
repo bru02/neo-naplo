@@ -92,7 +92,7 @@ export default class TimetableComponent extends mixins(Mixin) {
         this.active = Object.keys(v).indexOf(`${+this.date / 1000}`);
       }
       if (this.lessonHash) {
-        this.onLessonHashChange(this.lessonHash);
+        this.onRouteChange();
       }
       if (this.mobile == false) {
         const counts = Object.values(v)
@@ -116,7 +116,7 @@ export default class TimetableComponent extends mixins(Mixin) {
     });
   }
   @Watch('selectedLesson')
-  onLessonHashChange(value) {
+  onLessonChange(value) {
     if (value) {
       if (!this.lessonHash)
         this.$router.push(

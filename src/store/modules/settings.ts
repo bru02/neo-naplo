@@ -25,25 +25,9 @@ class SettingsGetters extends Getters<SettingsState> {
 
 class SettingsMutations extends Mutations<SettingsState> {
   async updateToken(token: string | boolean) {
-    const setToken = (token: string | boolean) => {
-      this.state.token = token ? token + '' : '';
-      localStorage.setItem('fcm_token', this.state.token);
-    };
-    if (!!token) {
-      return await api
-        .sendToken(token)
-        .then(() => {
-          setToken(token);
-        })
-        .catch(e => {
-          setToken(false);
-          throw e;
-        });
-    } else {
-      return await api.deleteToken().then(() => {
-        setToken(false);
-      });
-    }
+    this.state.token = token ? token + '' : '';
+    localStorage.setItem('fcm_token', this.state.token);
+    return token;
   }
   updateColor({ key, value }) {
     this.state.evaluationColors[key] = value;
@@ -76,17 +60,24 @@ class SettingsActions extends Actions<
       this.getToken();
     });
   }
+  async saveToken(token: string | boolean) {
+    if (!!token) {
+      await api.sendToken(token);
+      return this.commit('updateToken', token);
+    } else {
+      await api.deleteToken();
+      return this.commit('updateToken', false);
+    }
+  }
   async getToken() {
-    return await messaging
-      .getToken()
-      .then(async token => {
-        return this.mutations.updateToken(token);
-      })
-      .then(() => this.state.token)
-      .catch(async err => {
-        this.mutations.updateToken(false);
-        throw err;
-      });
+    try {
+      const token = await messaging.getToken();
+      await this.dispatch('saveToken', token);
+      return token;
+    } catch (err) {
+      await this.dispatch('saveToken', false);
+      throw err;
+    }
   }
   async enable() {
     return await messaging.requestPermission().then(async () => {
@@ -94,15 +85,8 @@ class SettingsActions extends Actions<
     });
   }
   async disable() {
-    return await messaging
-      .deleteToken(this.state.token)
-      .then(async () => {
-        this.mutations.updateToken(false);
-        return true;
-      })
-      .catch(err => {
-        throw err;
-      });
+    await messaging.deleteToken(this.state.token);
+    await this.dispatch('saveToken', false);
   }
   async toggle() {
     if (this.getters.notificationsEnabled) {

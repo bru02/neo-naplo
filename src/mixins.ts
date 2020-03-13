@@ -3,6 +3,7 @@ import { ApiState } from '@/store/modules/api';
 import Vue from 'vue';
 import { apiMapper, timeMapper } from '@/store';
 import Component from 'vue-class-component';
+import linkifyHtml from 'linkifyjs/html';
 import { formatDate, day, formatTime, utc2date } from './helpers';
 import {
   JustificationState,
@@ -10,7 +11,8 @@ import {
   Evaluation,
   Absence,
   Lesson,
-  EvaluationType
+  EvaluationType,
+  Event
 } from './api-types';
 import group from '@/utils';
 @Component({
@@ -89,7 +91,7 @@ export default class Mixin extends Vue {
     osztalyCsoportUid
   }: Note) {
     return {
-      Tartalom: content,
+      Tartalom: this.formatText(content),
       Típus: type,
       Cím: title,
       Dátum: this.formatDate(date),
@@ -207,10 +209,10 @@ export default class Mixin extends Vue {
       }
     };
   }
-  eventValues({ title, content, date, endDate, attachments = [] }) {
+  eventValues({ title, content, date, endDate, attachments = [] }: Event) {
     return Object.fromEntries([
       ['Cím', title],
-      ['Tartalom', content.replace(/\n/gm, '<br/>')],
+      ['Tartalom', this.formatText(content)],
       ['Dátum', this.formatDate(date)],
       ['Utoljára látható', this.formatDate(endDate)],
       ...attachments.map((a, i) => {
@@ -427,4 +429,15 @@ export default class Mixin extends Vue {
     return icon;
   }
   group = group;
+
+  formatText(text: string) {
+    return linkifyHtml(text, {
+      defaultProtocol: 'https',
+      nl2br: true
+    });
+  }
+
+  trimText(text: string) {
+    return text.substr(0, 100) + (text.length > 100 ? '...' : '');
+  }
 }

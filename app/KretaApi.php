@@ -128,7 +128,9 @@ class KretaApi
     public static function getEvents($school, $tok)
     {
         $out = self::send($school, 'EventAmi', $tok);
-        return json_decode($out);
+        return self::wrapApi(
+            json_decode($out)
+        );
     }
 
     public static function getClassAverages($school, $tok) {
@@ -464,7 +466,7 @@ class KretaApi
             if (is_object($val) || is_array($val)) {
                 $newVal = self::wrapApi($val);
             } else {
-                if (Str::endsWith($key, ['UTC', 'Utc', 'Time']) || $key === "Date") {
+                if (Str::endsWith($key, ['UTC', 'Utc', 'Time', 'Date'])) {
 
                     $newVal = strtotime($val);
                     $newKey = str_replace(['Utc', 'UTC'], '', $newKey);

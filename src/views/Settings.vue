@@ -82,7 +82,7 @@
             : 'mdi-bell-off-outline'
         }}
       </v-icon>
-      Értesítések {{ notificationsEnabled ? 'ki' : 'be' }}kapcsolva!
+      Értesítések {{ notificationsEnabled ? 'be' : 'ki' }}kapcsolva!
       <v-btn icon @click="toast = false">
         <v-icon>
           mdi-close

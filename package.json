@@ -12,16 +12,18 @@
   "dependencies": {
     "@d0whc3r/vue-auth-plugin": "^1.7.0",
     "@mdi/font": "^3.6.95",
-    "@sentry/browser": "^5.13.2",
+    "@sentry/browser": "^5.14.1",
     "@sentry/integrations": "^5.11.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "firebase": "^7.9.0",
+    "linkifyjs": "^2.1.9",
     "roboto-fontface": "*",
     "sass": "^1.25.0",
     "vue": "^2.6.11",
     "vue-axios": "^2.1.5",
     "vue-class-component": "^7.2.2",
+    "vue-cli": "^2.9.6",
     "vue-meta": "^2.3.2",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.1.5",
@@ -60,8 +62,7 @@
     "typescript": "^3.8.2",
     "vue-cli-plugin-vuetify": "^2.0.5",
     "vue-template-compiler": "^2.6.11",
-    "vuetify-loader": "^1.4.3",
-    "webpack-deep-scope-plugin": "^1.6.2"
+    "vuetify-loader": "^1.4.3"
   },
   "gitHooks": {
     "pre-commit": "lint-staged",

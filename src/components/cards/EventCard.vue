@@ -4,7 +4,7 @@
       {{ event.title }}
     </v-card-title>
     <v-card-subtitle>
-      <div>{{ event.content }}</div>
+      <div>{{ trimText(event.content) }}</div>
       <div class="font-weight-thin">{{ event.teacher }}</div>
     </v-card-subtitle>
     <v-divider light></v-divider>
