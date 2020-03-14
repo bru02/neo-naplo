@@ -38,11 +38,13 @@
                 v-model="password"
                 :append-icon="e1 ? 'mdi-eye' : 'mdi-eye-off'"
                 @click:append="() => (e1 = !e1)"
+                v-on:focus="errorMsg = ''"
                 :type="e1 ? 'password' : 'text'"
                 :rules="passwordRules"
                 autocomplete="current-password"
                 counter
                 required
+                :error-messages="errorMsg"
                 v-on:keyup.enter="login"
               ></v-text-field>
               <v-checkbox
@@ -51,9 +53,6 @@
                 v-model="rememberMe"
               ></v-checkbox>
               <v-layout justify-space-between>
-                <p class="text-center red--text" v-show="!!errorMsg">
-                  {{ errorMsg }}
-                </p>
                 <v-btn
                   @click="login"
                   :class="{
@@ -96,7 +95,6 @@ export default class LoginComponent extends mixins(Mixin) {
   schoolRules = [v => !!v || 'Iskola megadása kötelező'];
   rememberMe = false;
   errorMsg = '';
-
   schools = [];
   loading = true;
 
@@ -116,7 +114,7 @@ export default class LoginComponent extends mixins(Mixin) {
       this.loading = true;
       this.$store
         .dispatch('auth/login', {
-          school: this.school,
+          school: this.school ?? '',
           username: this.username,
           password: this.password,
           rme: this.rememberMe
@@ -127,7 +125,10 @@ export default class LoginComponent extends mixins(Mixin) {
         })
         .catch(err => {
           this.loading = false;
-          throw err;
+          const response = err.response;
+          if (response && response.status === 401) {
+            this.errorMsg = response.data?.error ?? '';
+          } else throw err;
         });
     }
   }

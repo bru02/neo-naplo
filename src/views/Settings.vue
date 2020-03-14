@@ -36,11 +36,9 @@
           <v-list-item-title>Színek testreszabása</v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <v-btn icon>
-            <v-icon>
-              mdi-arrow-right
-            </v-icon>
-          </v-btn>
+          <v-icon>
+            mdi-arrow-right
+          </v-icon>
         </v-list-item-action>
       </v-list-item>
     </v-list>

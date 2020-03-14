@@ -44,11 +44,9 @@
           </v-tooltip>
         </td>
         <td
-          :class="[
-            `${getEvaluationColor(
-              getAverage(groupedEvaluations[subject])
-            )}--text`
-          ]"
+          :style="{
+            color: getEvaluationColor(getAverage(groupedEvaluations[subject]))
+          }"
         >
           {{ getAverage(groupedEvaluations[subject]) || '-' }}
         </td>

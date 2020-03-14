@@ -32,7 +32,8 @@ class KretaUserProvider implements IlluminateUserProvider
                 $user->load(Session::get('user'));
                 return $user;
             }
-        };
+            return null;
+        }
         $user = DB::table('tokens')->select('*')->where([
             ['kreta_id', $identifier->id],
             ['remember_token', $identifier->hash]
