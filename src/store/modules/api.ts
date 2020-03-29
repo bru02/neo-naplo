@@ -1,4 +1,9 @@
-import { TimetableAPI, Evaluation, ClassAverage } from './../../api-types.d';
+import {
+  TimetableAPI,
+  Evaluation,
+  ClassAverage,
+  Exam
+} from './../../api-types.d';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { Getters, Mutations, Actions, Module } from 'vuex-smart-module';
@@ -40,6 +45,7 @@ export class ApiState {
   events = new Resource<Event[]>([]);
   hirdetmenyek = new Resource<Event[]>([]);
   classAverages = new Resource<ClassAverage[]>([]);
+  exams = new Resource<Exam[]>([]);
   timetable: { [key: string]: Resource<TimetableAPI> } = {};
 }
 
@@ -57,6 +63,12 @@ class ApiGetters extends Getters<ApiState> {
     cards.push(
       ...this.getters.events.map(e => {
         (e as any).category = 'events';
+        return e;
+      })
+    );
+    cards.push(
+      ...this.state.exams.data.map(e => {
+        (e as any).category = 'exams';
         return e;
       })
     );
@@ -105,6 +117,9 @@ class ApiMutations extends Mutations<ApiState> {
   updateHomeworks(data) {
     this.state.homework.update(data);
   }
+  updateExams(data: Exam[]) {
+    this.state.exams.update(data);
+  }
   updateTimetable(data: { range: string; response: TimetableAPI }) {
     Vue.set(this.state.timetable[data.range], 'data', data.response);
     this.state.timetable[data.range].loading = false;
@@ -117,6 +132,7 @@ class ApiMutations extends Mutations<ApiState> {
     this.state.hirdetmenyek.reset();
     this.state.classAverages.reset();
     this.state.homework.reset();
+    this.state.exams.reset();
     localStorage.setItem('packData', '');
   }
 }
@@ -127,54 +143,55 @@ class ApiActions extends Actions<
   ApiMutations,
   ApiActions
 > {
-  pullGeneral(): Promise<GeneralAPI> {
+  async pullGeneral(): Promise<GeneralAPI> {
     this.state.general.load();
-    return api.getGeneral().then(response => {
-      if (response) {
-        this.commit('updateGeneral', response);
-        return response;
-      }
-      return this.state.general.data;
-    });
-  }
-  pullEvents(): Promise<Event[]> {
-    this.state.events.load();
-    return api.getEvents().then(response => {
-      if (response) {
-        this.commit('updateEvents', response);
-        return response;
-      }
-      return this.state.events.data;
-    });
-  }
-  pullHirdetmenyek(className: string): Promise<GeneralAPI> {
-    this.state.hirdetmenyek.load();
-    return api.getHirdetmenyek(className).then(response => {
-      if (response) {
-        this.commit('updateHirdetmenyek', response);
-        return response;
-      }
-      return this.state.hirdetmenyek.data;
-    });
-  }
-  pullClassAverages(): Promise<GeneralAPI> {
-    this.state.classAverages.load();
-    return api.getClassAverages().then(response => {
-      if (response) {
-        this.commit('updateClassAverages', response);
-        return response;
-      }
-      return this.state.classAverages.data;
-    });
-  }
-  pullHomeworks() {
-    this.state.homework.load();
-    return api.getHomeworks().then(response => {
-      this.commit('updateHomeworks', response);
+    const response = await api.getGeneral();
+    if (response) {
+      this.commit('updateGeneral', response);
       return response;
-    });
+    }
+    return this.state.general.data;
   }
-  pullTimetable({ from, to }): Promise<TimetableAPI> {
+  async pullEvents(): Promise<Event[]> {
+    this.state.events.load();
+    const response = await api.getEvents();
+    if (response) {
+      this.commit('updateEvents', response);
+      return response;
+    }
+    return this.state.events.data;
+  }
+  async pullHirdetmenyek(className: string): Promise<Event[]> {
+    this.state.hirdetmenyek.load();
+    const response = await api.getHirdetmenyek(className);
+    if (response) {
+      this.commit('updateHirdetmenyek', response);
+      return response;
+    }
+    return this.state.hirdetmenyek.data;
+  }
+  async pullClassAverages(): Promise<ClassAverage[]> {
+    this.state.classAverages.load();
+    const response = await api.getClassAverages();
+    if (response) {
+      this.commit('updateClassAverages', response);
+      return response;
+    }
+    return this.state.classAverages.data;
+  }
+  async pullHomeworks() {
+    this.state.homework.load();
+    const response = await api.getHomeworks();
+    this.commit('updateHomeworks', response);
+    return response;
+  }
+  async pullExams() {
+    this.state.exams.load();
+    const response = await api.getExams();
+    this.commit('updateExams', response);
+    return response;
+  }
+  async pullTimetable({ from, to }): Promise<TimetableAPI> {
     let range = `${from}-${to}`;
     if (!(range in this.state.timetable)) {
       Vue.set(this.state.timetable, range, {
@@ -183,18 +200,19 @@ class ApiActions extends Actions<
         loaded: false
       });
     } else this.state.timetable[range].loading = true;
-    return api.getTimetable(from, to).then(response => {
-      if (response) {
-        this.commit('updateTimetable', { response, range });
-        return response;
-      }
-      return {};
-    });
+    const response = await api.getTimetable(from, to);
+    if (response) {
+      this.commit('updateTimetable', { response, range });
+      return response;
+    }
+    return {};
   }
 }
 
 function _sortValue(item) {
-  return 'creatingTime' in item ? item.creatingTime : item.date;
+  return 'creatingTime' in item && !item.category != 'exams'
+    ? item.creatingTime
+    : item.date;
 }
 
 export default new Module({

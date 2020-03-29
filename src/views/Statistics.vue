@@ -332,7 +332,7 @@ import Mixin from '@/mixins';
 import { apiMapper } from '@/store';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import Vue from 'vue';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
 import EvaluationListItem from '@/components/listItems/EvaluationListItem.vue';

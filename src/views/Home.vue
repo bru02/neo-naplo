@@ -23,21 +23,30 @@
           <NoteCard
             :note="card"
             v-if="card.category == 'notes'"
-            v-model="selectedNote"/>
+            v-model="selectedNote"
+          />
           <EvaluationCard
             :evaluation="card"
             v-else-if="card.category == 'evaluations'"
-            v-model="selectedEval"/>
+            v-model="selectedEval"
+          />
           <AbsencesCard
             :absences="card"
             v-else-if="card.category == 'absences'"
             v-model="selectedAbsenceGroup"
-            v-on:lesson="a => (selectedAbsence = a)"/>
+            v-on:lesson="a => (selectedAbsence = a)"
+          />
           <EventCard
             :event="card"
             v-else-if="card.category == 'events'"
             v-model="selectedEvent"
-        /></v-lazy>
+          />
+          <ExamCard
+            :exam="card"
+            v-else-if="card.category == 'exams'"
+            v-model="selectedExam"
+          />
+        </v-lazy>
       </v-col>
 
       <v-alert :value="true" type="info" v-show="cards.length == 0 && !loading">
@@ -53,6 +62,7 @@
     <DataViewer title="Értékelés" :fn="evalValues" v-model="selectedEval" />
     <DataViewer title="Óra" :fn="lessonValues" v-model="selectedLesson" />
     <DataViewer title="Faliújság" :fn="eventValues" v-model="selectedEvent" />
+    <DataViewer title="Számonkérés" :fn="examValues" v-model="selectedExam" />
     <Dialog title="Mulasztások" v-model="selectedAbsenceGroup">
       <AbsencesList
         :absences="selectedAbsenceGroup.items"
@@ -66,14 +76,15 @@ import Vue from 'vue';
 import Mixin from '@/mixins';
 import { apiMapper, timeMapper } from '@/store';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import AbsencesCard from '@/components/cards/AbsencesCard.vue';
 import EvaluationCard from '@/components/cards/EvaluationCard.vue';
 import EventCard from '@/components/cards/EventCard.vue';
 import NoteCard from '@/components/cards/NoteCard.vue';
+import ExamCard from '@/components/cards/ExamCard.vue';
 import NextLessonCard from '@/components/cards/NextLessonCard.vue';
 import ChangedLessonCard from '@/components/cards/ChangedLessonCard.vue';
-import Dialog from '@/components/Dialog.vue';
+import Dialog from '@/components/dialogs/Dialog.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
@@ -84,7 +95,8 @@ import {
   Lesson,
   Event,
   AbsenceGroup,
-  TimetableAPI
+  TimetableAPI,
+  Exam
 } from '../api-types';
 @Component({
   computed: {
@@ -92,11 +104,10 @@ import {
       loading: state => state.general.loading,
       instituteName: state => state.general.data.instituteName,
       evaluations: state => state.general.data.evaluations,
-      events: state => state.events.data,
-
+      exams: state => state.exams.data,
       notes: state => state.general.data.notes
     }),
-    ...apiMapper.mapGetters(['cards', 'flatAbsences']),
+    ...apiMapper.mapGetters(['cards', 'flatAbsences', 'events']),
     ...timeMapper.mapGetters(['date', 'time'])
   },
   components: {
@@ -106,6 +117,7 @@ import {
     EvaluationCard,
     EventCard,
     NoteCard,
+    ExamCard,
     NextLessonCard,
     ChangedLessonCard,
     Dialog
@@ -120,6 +132,7 @@ export default class HomeComponent extends mixins(Mixin) {
   selectedEval: Evaluation | boolean = false;
   selectedLesson: Lesson | boolean = false;
   selectedEvent: Event | boolean = false;
+  selectedExam: Exam | boolean = false;
   selectedAbsenceGroup: AbsenceGroup | boolean = false;
   timetable: TimetableAPI = {};
   time!: Date;
@@ -131,13 +144,13 @@ export default class HomeComponent extends mixins(Mixin) {
   flatAbsences!: Absence[];
   notes!: Note[];
   events!: Event[];
-
+  exams!: Exam[];
   mounted() {
     this.obtain('general').then(d => {
       if (d.instituteCode == 'klik035220001') this.obtain('hirdetmenyek');
     });
     this.obtain('events');
-
+    this.obtain('exams');
     this.obtain('timetable').then(tt => {
       this.timetable = tt;
     });
@@ -166,9 +179,13 @@ export default class HomeComponent extends mixins(Mixin) {
           if (!this.selectedEvent)
             this.selectedEvent = this.events.find(e => e.id === id) ?? false;
           break;
+        case 'exam':
+          if (!this.selectedExam)
+            this.selectedExam = this.exams.find(e => e.id === id) ?? false;
+          break;
       }
     } else {
-      ['Eval', 'Absence', 'Note', 'Event'].forEach(e =>
+      ['Eval', 'Absence', 'Note', 'Event', 'Exam'].forEach(e =>
         Vue.set(this, `selected${e}`, false)
       );
     }
@@ -203,6 +220,15 @@ export default class HomeComponent extends mixins(Mixin) {
   onselectedEventChange(value) {
     if (value) {
       if (!this.$route.params.type) this.$router.push(`/event/${value.id}`);
+    } else {
+      if (this.$route.params.type) this.$router.push(`/`);
+    }
+  }
+
+  @Watch('selectedExam')
+  onselectedExamChange(value) {
+    if (value) {
+      if (!this.$route.params.type) this.$router.push(`/exam/${value.id}`);
     } else {
       if (this.$route.params.type) this.$router.push(`/`);
     }

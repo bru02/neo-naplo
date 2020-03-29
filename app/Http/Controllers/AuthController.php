@@ -81,6 +81,7 @@ class AuthController extends Controller
             'school' => 'required',
             'username' => 'required',
             'password' => 'required',
+            'rme' => 'nullable|boolean'
         ]);
     }
 

@@ -21,6 +21,10 @@ Route::group(['middleware' => 'jwt.auth'], function() {
     Route::any('/hirdetmenyek/{class}', 'eFilcController@hirdetmenyekApi');
     Route::put('/notifications/token', 'eFilcController@updateToken');
     Route::delete('/notifications/token', 'eFilcController@deleteToken');
+    Route::get('/exams', 'eFilcController@examsApi');
+    Route::put('/exams', 'eFilcController@createExam');
+    Route::delete('/exam/{id}', 'eFilcController@deleteExam');
+
 });
 
 Route::post('/refresh', 'AuthController@refreshToken');

@@ -59,7 +59,7 @@
 import Vue from 'vue';
 import Mixin from '@/mixins';
 import LessonsList from '@/components/dataviews/LessonsList.vue';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Watch, Prop } from 'vue-property-decorator';
 import { Lesson, TimetableAPI } from '@/api-types';

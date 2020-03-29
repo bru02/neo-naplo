@@ -20,6 +20,7 @@ const Evaluations = () =>
   import(/* webpackChunkName: "views" */ '@/views/Evaluations.vue');
 const Settings = () =>
   import(/* webpackChunkName: "views" */ '@/views/Settings.vue');
+const Exams = () => import(/* webpackChunkName: "views" */ '@/views/Exams.vue');
 
 const routes = [
   {
@@ -93,13 +94,21 @@ const routes = [
     path: '/statistics/:subject?/:type?/:id?',
     component: Statistics,
     name: 'Statisztikák',
-    icon: 'mdi-calendar-check-outline',
+    icon: 'mdi-chart-timeline-variant',
     meta: {
       auth: true
     },
     props: true
   },
-
+  {
+    path: '/exams',
+    name: 'Számonkérések',
+    icon: 'mdi-file-document-edit-outline',
+    component: Exams,
+    meta: {
+      auth: true
+    }
+  },
   {
     path: '/profile',
     name: 'Profil',

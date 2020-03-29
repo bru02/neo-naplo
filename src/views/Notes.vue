@@ -62,7 +62,7 @@ import Mixin from '@/mixins';
 import { apiMapper } from '@/store';
 import Component, { mixins } from 'vue-class-component';
 import { Note } from '../api-types';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import { Watch } from 'vue-property-decorator';
 
 @Component({

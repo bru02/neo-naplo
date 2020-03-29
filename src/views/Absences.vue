@@ -90,7 +90,7 @@
 <script lang="ts">
 import { apiMapper } from '@/store';
 import Mixin from '@/mixins';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import { Watch } from 'vue-property-decorator';
 
 import Component, { mixins } from 'vue-class-component';

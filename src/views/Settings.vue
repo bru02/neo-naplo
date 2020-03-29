@@ -107,7 +107,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/messaging';
 import { Watch } from 'vue-property-decorator';
 import { settingsMapper, authMapper } from '@/store';
-import Dialog from '../components/Dialog.vue';
+import Dialog from '../components/dialogs/Dialog.vue';
 import EvaluationListItem from '../components/listItems/EvaluationListItem.vue';
 
 @Component({

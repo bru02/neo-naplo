@@ -89,7 +89,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { TimetableAPI } from '../../api-types';
 import { timeMapper } from '@/store';
 import LessonList from '@/components/dataviews/LessonsList.vue';
-import Dialog from '@/components/Dialog.vue';
+import Dialog from '@/components/dialogs/Dialog.vue';
 
 @Component({
   computed: timeMapper.mapGetters(['time', 'date']),

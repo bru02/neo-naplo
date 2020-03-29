@@ -26,7 +26,7 @@ import { apiMapper } from '@/store';
 import Mixin from '@/mixins';
 import EvaluationsTable from '@/components/dataviews/EvaluationsTable.vue';
 import EvaluationsList from '@/components/dataviews/EvaluationsList.vue';
-import DataViewer from '@/components/DataViewer.vue';
+import DataViewer from '@/components/dialogs/DataViewer.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Evaluation } from '../api-types';
 import { Watch } from 'vue-property-decorator';

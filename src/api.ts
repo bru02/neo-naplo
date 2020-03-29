@@ -1,3 +1,4 @@
+import { Exam } from './api-types.d';
 import Vue from 'vue';
 export default {
   async getGeneral() {
@@ -53,5 +54,14 @@ export default {
   },
   async deleteToken() {
     return await Vue.axios.delete('/notifications/token');
+  },
+  async getExams() {
+    return (await Vue.axios.get('/exams')).data;
+  },
+  async createExam(exam: Exam) {
+    return await Vue.axios.put('/exams', exam);
+  },
+  async deleteExam(id: number) {
+    return await Vue.axios.delete(`/exam/${id}`);
   }
 };

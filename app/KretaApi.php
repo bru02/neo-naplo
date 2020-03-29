@@ -41,14 +41,13 @@ class KretaApi
             return self::$jar->toArray();
         }
     }
-    private static function send($school, $endpoint, $token = null, $data = null)
+    private static function send($school, $endpoint, $token = null, $data = null, $method = 'GET')
     {
-        $method = 'GET';
         // $v = config('app.version');
         $options = [
             'verify' => false,
             'headers' => [
-                'User-Agent' => "Kreta.Ellenorzo/2.9.4.2019101401 (Android; POT-LX1 0.0)"
+                'User-Agent' => "Kreta.Ellenorzo/2.9.8.2020012301 (Android; POT-LX1 0.0)"
             ],
         ];
         if($endpoint == 'Token') {
@@ -292,16 +291,23 @@ class KretaApi
 
         foreach ($groupedEvals as $group) {
             if (count($group) > 1) {
-                $length = count($group);
+                $length = count($group) - 1;
                 for ($i = 0; $i < $length; $i++) {
-                    if (isset($group[$i + 1]) && $group[$i]->date === $group[$i + 1]->date && $group[$i]->type === $group[$i + 1]->type && $group[$i]->weight === $group[$i + 1]->weight && $group[$i]->subject === $group[$i + 1]->subject) {
-                        $a = $group[$i];
-                        $b = $group[$i + 1];
+                    $a = isset($group[$i]) ? $group[$i] : NULL;
+                    $b = $group[$i + 1];
+                    if (
+                        isset($b) &&
+                        $a->date === $b->date &&
+                        $a->type === $b->type &&
+                        $a->weight === $b->weight &&
+                        $a->subject === $b->subject
+                    ) {
+                        
                         if (abs($a->numberValue - $b->numberValue) === 1) {
                             $w = str_replace('%', '', $a->weight) * 2;
                             if ($w <= 200) {
                                 $a->weight = "$w%";
-                                $a->numberValue = $a->value = $a->numberValue > $b->numberValue ? intval("$b->numberValue.$a->numberValue") : intval("$a->numberValue.$b->numberValue");
+                                $a->numberValue = $a->value = $a->numberValue > $b->numberValue ? floatval("$b->numberValue.$a->numberValue") : floatval("$a->numberValue.$b->numberValue");
                                 $group[$i + 1]->Was = 1;
                                 $evals[] = $a;
                                 continue;
@@ -398,6 +404,32 @@ class KretaApi
         );
     }
 
+    public static function createStudentHomework($school, $tok, $lessonId, $lessonDate, $lessonType, $deadline, $text)
+    {
+        $out = self::send($school, "HaziFeladat/CreateTanuloHaziFeladat?" . http_build_query([
+            'OraId' => $lessonId,
+            'OraDate' => $lessonDate,
+            'OraType' => $lessonType,
+            'HataridoUtc' => gmdate('Y-m-d H:i:s', $deadline),
+            'FeladatSzovege' => $text
+        ]), $tok);
+
+        if (!$out || empty($out)) {
+            return [];
+        }
+
+        return json_decode($out);
+    }
+
+    public static function deleteStudentHomework($school, $tok, $id) {
+        $out = self::send($school, "HaziFeladat/DeleteTanuloHaziFeladat/$id", $tok, null, 'DELETE');
+        if (!$out || empty($out)) {
+            return [];
+        }
+
+        return json_decode($out);
+    }
+
     public static function getHomeworkList($school, $tok) {
         $out = self::send($school, "HaziFeladat/TanuloHaziFeladatLista", $tok);
         if (!$out || empty($out)) {
@@ -442,16 +474,41 @@ class KretaApi
         );
     }
 
+    public static function markAsread($tok, $id, $read = true) {
+        $out = self::send('eugyintezes', "kommunikacio/uzenetek/olvasott", $tok, [
+            'isOlvasott' => $read,
+            'uzenetAzonositoLista' => [$id]
+        ], 'POST');
+
+        if (! isset($out)) {
+            return [];
+        }
+
+        return json_decode($out);
+    }
+
     public static function getExams($school, $tok, $from, $to) {
-        $ret = self::send($school, 'BejelentettSzamonkeres?' . http_build_query([
+        $ret = self::send($school, 'BejelentettSzamonkeresAmi?' . http_build_query([
             'DatumTol' => date('Y-m-d', $from),
-            'DatumIg' => date('Y-m-d', $to)
+            'DatumIg' => isset($to) ? date('Y-m-d', $to) : null
         ]), $tok);
         if (! isset($ret)) {
             return [];
         }
 
-        return self::wrapApi(
+        return array_map(function($item) { 
+            return [
+                'id' => $item->Id,
+                'date' => strtotime($item->Datum),
+                'count' => $item->OraSzam,
+                'subject' =>$item->Tantargy,
+                'teacher' => $item->Tanar,
+                'name' => $item->SzamonkeresMegnevezese,
+                'type' => $item->SzamonkeresModja,
+                'creatingTime' => strtotime($item->BejelentesDatuma),
+                'osztalyCsoportUid' => $item->OsztalyCsoportUid
+            ];
+        },
             json_decode($ret)
         );
     }

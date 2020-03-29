@@ -73,6 +73,7 @@
   </v-app>
 </template>
 <script lang="ts">
+import Sentry from '@sentry/browser';
 import Mixin from '@/mixins';
 import { routes } from '@/plugins/router';
 import Component, { mixins } from 'vue-class-component';
@@ -103,8 +104,8 @@ export default class App extends mixins(Mixin) {
       },
       (error: any) => {
         this.loading--;
-        const status = error && error.response && error.response.status;
-        switch (status) {
+        const response = error?.response;
+        switch (response?.status) {
           case 424:
             this.error = {
               icon: 'mdi-sync-alert',
@@ -130,6 +131,14 @@ export default class App extends mixins(Mixin) {
             };
             break;
         }
+        const data = response?.data;
+        if (
+          data &&
+          process.env.NODE_ENV === 'production' &&
+          process.env.VUE_APP_SENTRY_LARAVEL_DSN
+        ) {
+          Sentry.setExtra('response_data', data);
+        }
         this.errorToast = true;
         throw error;
       }
@@ -144,6 +153,7 @@ export default class App extends mixins(Mixin) {
       ]) {
         const cachedResponse = await caches.match(`/api/${key}`);
         let a = key.split('?')[0];
+
         if (cachedResponse)
           this.$store.dispatch(
             `update${a[0].toUpperCase() + a.substr(1)}`,

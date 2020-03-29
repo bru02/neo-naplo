@@ -268,14 +268,13 @@ export enum State {
 }
 
 export interface Exam {
-  uid: string;
-  id: number;
-  datum: number;
-  hetNapja: string;
-  oraszam: number;
-  tantargy: string;
-  tanar: string;
-  szamonkeresMegnevezese: string;
-  szamonkeresModja: string;
-  bejelentesDatuma: string;
+  id?: number | string;
+  date: number;
+  count: string;
+  subject: string;
+  teacher: string;
+  name: string;
+  type: string;
+  creatingTime: number;
+  osztalyCsoportUid: string;
 }

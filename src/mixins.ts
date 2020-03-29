@@ -1,3 +1,4 @@
+import { Exam } from './api-types.d';
 import { ApiState } from '@/store/modules/api';
 
 import Vue from 'vue';
@@ -172,6 +173,32 @@ export default class Mixin extends Vue {
       Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
     };
   }
+  examValues({
+    date,
+    teacher,
+    subject,
+    name,
+    type,
+    count,
+    creatingTime,
+    osztalyCsoportUid
+  }: Exam) {
+    return {
+      Időpont: `${count}. óra, ${this.formatDate(date)}`,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
+      Téma: name,
+      Típus: type,
+      Tanár: teacher,
+      '': {
+        title: 'Óra megtekintése',
+        to: this.getLessonUrl(date, count)
+      },
+      'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
+        creatingTime
+      )}`,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
+    };
+  }
   absenceValues({
     typeName,
     type,
@@ -184,15 +211,6 @@ export default class Mixin extends Vue {
     numberOfLessons,
     osztalyCsoportUid
   }: Absence) {
-    const getMonday = utc => {
-      const d = new Date(utc);
-      const day = d.getDay(),
-        diff = d.getDate() - day + (day == 0 ? -6 : 1);
-      return +new Date(d.setDate(diff));
-    };
-    const to = `/timetable/${Math.round(
-      (getMonday(date * 1000) - getMonday(this.date)) / 604800000
-    )}/${date}:${numberOfLessons}`;
     return {
       Típus: typeName + (type == 'Delay' ? `(${delayTimeMinutes} perc)` : ''),
       Tantárgy: { title: subject, to: `/statistics/${subject}` },
@@ -205,7 +223,7 @@ export default class Mixin extends Vue {
       Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid),
       '': {
         title: 'Óra megtekintése',
-        to
+        to: this.getLessonUrl(date, numberOfLessons)
       }
     };
   }
@@ -262,7 +280,13 @@ export default class Mixin extends Vue {
   }
 
   async obtain(
-    what: 'general' | 'timetable' | 'events' | 'hirdetmenyek' | 'classAverages',
+    what:
+      | 'general'
+      | 'timetable'
+      | 'events'
+      | 'hirdetmenyek'
+      | 'classAverages'
+      | 'exams',
     w = 0
   ) {
     let resource = this.state[what],
@@ -439,5 +463,17 @@ export default class Mixin extends Vue {
 
   trimText(text: string) {
     return text.substr(0, 100) + (text.length > 100 ? '...' : '');
+  }
+
+  getLessonUrl(date, numberOfLessons) {
+    const getMonday = utc => {
+      const d = new Date(utc);
+      const day = d.getDay(),
+        diff = d.getDate() - day + (day == 0 ? -6 : 1);
+      return +new Date(d.setDate(diff));
+    };
+    return `/timetable/${Math.round(
+      (getMonday(date * 1000) - getMonday(this.date)) / 604800000
+    )}/${date}:${numberOfLessons}`;
   }
 }

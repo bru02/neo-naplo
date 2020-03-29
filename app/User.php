@@ -4,12 +4,12 @@ namespace App;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Support\Facades\Log;
 use Session;
 use Jenssegers\Model\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
+use Illuminate\Database\Query\Expression;
 
 
 class User extends Model implements Authenticatable, JWTSubject
@@ -157,6 +157,21 @@ class User extends Model implements Authenticatable, JWTSubject
         return KretaApi::getStudent($this->school, $this->getToken());
     }
 
+    public function loadExams() {
+        return DB::table('exams')->where([
+                ['user_id', '=', $this->id],
+                 ['date', '>', new Expression('CURDATE()')]
+                ])->get()->map(function($exam) {
+                    $exam->id = 'f' . $exam->id;
+                    $exam->creatingTime = $exam->created_at;
+                    unset($exam->created_at, $exam->updated_at, $exam->user_id);
+                    return $exam;
+                })->concat(
+                    KretaApi::getExams($this->school, $this->getToken(), time(), null)
+                );
+    }
+
+
     public function getTimetable($from, $to, $group = true) {
         $ret = KretaApi::timetable($this->school, $this->getToken(), $from, $to, $group);
         $this->timetable->{"${from}-${to}-${group}"} = $ret;
@@ -188,14 +203,20 @@ class User extends Model implements Authenticatable, JWTSubject
         try {
             $result = KretaApi::getToken($this->school, $this->refresh_token);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
-            sleep(0.5);
-            $user = Auth::user();
-            if($user->refresh_token !== $this->refresh_token) {
-                $this->setTokens([
-                    'access_token' => $user->access_token,
-                    'refresh_token' => $user->refresh_token,
-                ]);
-            } else {
+            $broke = false;
+            for($i = 0; $i < 15; $i++) { // Ah yes, threads
+                sleep(0.1);
+                $user = auth()->user();
+                if($user->refresh_token !== $this->refresh_token) {
+                    $this->setTokens([
+                        'access_token' => $user->access_token,
+                        'refresh_token' => $user->refresh_token,
+                    ]);
+                    $broke = true;
+                    break;
+                }
+            }
+            if(!$broke) {
                 auth()->logout();
                 return null;
             }

@@ -110,7 +110,8 @@ export default class EvaluationsTable extends mixins(Mixin) {
       'red--text': evaluation.weight && evaluation.weight != '100%',
       'gray--text': evaluation.mode == 'Órai munka',
       'teal--text-lighten-2': evaluation.mode == 'Házi dolgozat',
-      'font-weight-bold': evaluation.weight == '200%'
+      'font-weight-bold': evaluation.weight == '200%',
+      eval: true
     };
   }
   getClassAverage(subject) {
@@ -139,3 +140,8 @@ function round(n) {
   return Math.round(100 * n) / 100;
 }
 </script>
+<style>
+.eval {
+  cursor: pointer;
+}
+</style>
