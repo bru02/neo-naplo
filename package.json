@@ -18,7 +18,7 @@
     "firebase": "^7.13.2",
     "linkifyjs": "^2.1.9",
     "roboto-fontface": "*",
-    "sass": "^1.25.0",
+    "sass": "^1.26.3",
     "vue": "^2.6.11",
     "vue-axios": "^2.1.5",
     "vue-class-component": "^7.2.2",
