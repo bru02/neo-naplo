@@ -1,4 +1,4 @@
-# **[Neo Napló](http://filc-naplo.herokuapp.com/)**
+# **[Neo Napló](https://neo-naplo.herokuapp.com/)**
 ## *Okos KRÉTA kliens*
 Extrák:
  - [x] Hiányzások: Ugrás az órához
@@ -20,4 +20,4 @@ Felhasználva:
 3. [Laravel](https://laravel.com) - Backend
 4. [Firebase](https://firebase.google.com/) - Értesitések
 
-*Bónusz: kisbb app méret + weboldal*
+*Bónusz: kisebb app méret + weboldal*
