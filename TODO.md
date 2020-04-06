@@ -1,0 +1,11 @@
+~:
+ - [ ] Üzenetkezelés
+ - [ ] Bejelentett számonkérés kezelés
+ - [x] Statisztikák
+ - [x] Kövi óra kártya
+ - [ ] Multiuser
+ - [ ] Push notifications
+ - [ ] Célok
+ - [ ] Célok + b. sz. kérések
+ - [x] Változott óra kártya
+ - [ ] Házik

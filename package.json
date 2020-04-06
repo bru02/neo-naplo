@@ -1,0 +1,80 @@
+{
+  "name": "neo-naplo",
+  "version": "0.0.0-development",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "rm -rf public/{js,css,img} && vue-cli-service build --no-clean",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint",
+    "semantic-release": "semantic-release"
+  },
+  "dependencies": {
+    "@mdi/font": "^3.6.95",
+    "@sentry/browser": "^5.14.1",
+    "@sentry/integrations": "^5.11.1",
+    "axios": "^0.19.2",
+    "core-js": "^3.6.4",
+    "firebase": "^7.9.0",
+    "linkifyjs": "^2.1.9",
+    "roboto-fontface": "*",
+    "sass": "^1.25.0",
+    "vue": "^2.6.11",
+    "vue-axios": "^2.1.5",
+    "vue-class-component": "^7.2.2",
+    "vue-cli": "^2.9.6",
+    "vue-meta": "^2.3.2",
+    "vue-property-decorator": "^8.3.0",
+    "vue-router": "^3.1.5",
+    "vuetify": "^2.2.8",
+    "vuex": "^3.1.2",
+    "vuex-smart-module": "^0.3.4"
+  },
+  "devDependencies": {
+    "@sentry/webpack-plugin": "^1.10.0",
+    "@types/jest": "^25.2.1",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "@vue/cli-plugin-babel": "~4.2.2",
+    "@vue/cli-plugin-eslint": "~4.2.2",
+    "@vue/cli-plugin-pwa": "~4.2.2",
+    "@vue/cli-plugin-typescript": "^4.3.0",
+    "@vue/cli-plugin-unit-mocha": "~4.2.2",
+    "@vue/cli-service": "~4.2.2",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "@vue/preload-webpack-plugin": "^1.1.1",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "eslint": "^6.8.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-vue": "^6.2.1",
+    "gm": "^1.23.1",
+    "lint-staged": "^9.5.0",
+    "node-sass": "^4.13.1",
+    "prettier": "^1.19.1",
+    "sass-loader": "^8.0.2",
+    "semantic-release": "^17.0.4",
+    "sharp": "^0.23.4",
+    "typescript": "^3.8.2",
+    "vue-cli-plugin-vuetify": "^2.0.5",
+    "vue-template-compiler": "^2.6.11",
+    "vuetify-loader": "^1.4.3"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged",
+    "pre-push": "touch rel.bat && rel.bat"
+  },
+  "lint-staged": {
+    "*.{js,vue,ts}": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bru02/filc.git"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

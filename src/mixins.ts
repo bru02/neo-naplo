@@ -1,0 +1,495 @@
+import { Exam } from './api-types.d';
+import { ApiState } from '@/store/modules/api';
+
+import Vue from 'vue';
+import { apiMapper, timeMapper } from '@/store';
+import Component from 'vue-class-component';
+import linkifyHtml from 'linkifyjs/html';
+import { formatDate, day, formatTime, utc2date } from './helpers';
+import {
+  JustificationState,
+  Note,
+  Evaluation,
+  Absence,
+  Lesson,
+  EvaluationType,
+  Event
+} from './api-types';
+import group from '@/utils';
+@Component({
+  computed: {
+    ...apiMapper.mapState({
+      state: state => state
+    }),
+    ...timeMapper.mapGetters(['time', 'date'])
+  }
+})
+export default class Mixin extends Vue {
+  state!: ApiState;
+  time!: Date;
+  date!: Date;
+
+  getEvaluationColor(nv: number | null) {
+    const colors = this.$store.state.settings.evaluationColors;
+    if (!nv) return colors.default;
+    for (let i = 4.5; i > 0; i -= 1) {
+      if (nv >= i) {
+        return colors[i + 0.5];
+      }
+    }
+    return colors.default;
+  }
+
+  isDark(bgColor: string) {
+    const color = bgColor.charAt(0) === '#' ? bgColor.substring(1, 7) : bgColor,
+      r = parseInt(color.substring(0, 2), 16), // hexToR
+      g = parseInt(color.substring(2, 4), 16), // hexToG
+      b = parseInt(color.substring(4, 6), 16), // hexToB
+      uicolors = [r / 255, g / 255, b / 255],
+      c = uicolors.map(col => {
+        if (col <= 0.03928) {
+          return col / 12.92;
+        }
+        return Math.pow((col + 0.055) / 1.055, 2.4);
+      });
+    const L = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    return L < 0.5; // 179
+  }
+
+  getAverage(evaluations: Evaluation[]) {
+    let sum = 0,
+      n = 0;
+    for (const evaluation of evaluations) {
+      if (evaluation.isAtlagbaBeleszamit && evaluation.form == 'Mark') {
+        let weight = +evaluation.weight.slice(0, -1);
+        sum += weight * +evaluation.numberValue;
+        n += weight;
+      }
+    }
+    if (n == 0) return 0;
+    return Math.round((100 * sum) / n) / 100;
+  }
+
+  getAbsenceColor(justificationState: JustificationState) {
+    const colors = this.$store.state.settings.evaluationColors;
+
+    return {
+      Justified: colors[5],
+      BeJustified: colors[2],
+      UnJustified: colors[1]
+    }[justificationState];
+  }
+  getKey(item) {
+    return `${item.id}-${item.date}`;
+  }
+  noteValues({
+    content,
+    type,
+    title,
+    date,
+    teacher,
+    creatingTime,
+    osztalyCsoportUid
+  }: Note) {
+    return {
+      Tartalom: this.formatText(content),
+      Típus: type,
+      Cím: title,
+      Dátum: this.formatDate(date),
+      Tanár: teacher,
+      'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
+        creatingTime
+      )}`,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
+    };
+  }
+  evalValues(evaluation: Evaluation) {
+    const {
+      value,
+      weight,
+      theme,
+      subject,
+      mode,
+      typeName,
+      date,
+      teacher,
+      creatingTime,
+      osztalyCsoportUid
+    } = evaluation;
+    const haa = 'Hatás az átlagodra';
+    const ret = {
+      Jegy: `${value} ${weight && weight != '-' ? `(${weight})` : ''}`,
+      [haa]: '',
+      Téma: theme,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
+      Mód: mode,
+      Típus: typeName,
+      Dátum: this.formatDate(date),
+      Tanár: teacher,
+      'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
+        creatingTime
+      )}`,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
+    };
+    if (evaluation.isAtlagbaBeleszamit && evaluation.form == 'Mark') {
+      const evals = this.$store.getters['api/groupedEvaluations'][subject];
+      const others = [...evals];
+      others.splice(others.indexOf(evaluation), 1);
+      const impact =
+        Math.round(100 * (this.getAverage(evals) - this.getAverage(others))) /
+        100;
+      ret[haa] = `<span class="${
+        impact == 0 ? '' : impact > 0 ? 'green--text' : 'red--text'
+      }"> ${impact}</span>`;
+    } else {
+      delete ret[haa];
+    }
+    return ret;
+  }
+  lessonValues({
+    date,
+    startTime,
+    endTime,
+    teacher,
+    deputyTeacher,
+    subject,
+    theme,
+    homework,
+    classRoom,
+    count,
+    presenceTypeName,
+    osztalyCsoportUid
+  }: Lesson) {
+    return {
+      Időpont: `${count}. óra, ${this.formatDate(date)}; ${this.formatTime(
+        startTime
+      )} - ${this.formatTime(endTime)}`,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
+      Téma: theme,
+      Tanár: deputyTeacher ? `Helyettesítő: ${deputyTeacher}` : teacher,
+      Terem: classRoom,
+      Házi: homework,
+      Jelenlét: presenceTypeName,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
+    };
+  }
+  examValues({
+    date,
+    teacher,
+    subject,
+    name,
+    type,
+    count,
+    creatingTime,
+    osztalyCsoportUid
+  }: Exam) {
+    return {
+      Időpont: `${count}. óra, ${this.formatDate(date)}`,
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
+      Téma: name,
+      Típus: type,
+      Tanár: teacher,
+      '': {
+        title: 'Óra megtekintése',
+        to: this.getLessonUrl(date, count)
+      },
+      'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
+        creatingTime
+      )}`,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid)
+    };
+  }
+  absenceValues({
+    typeName,
+    type,
+    subject,
+    date,
+    justificationTypeName,
+    teacher,
+    creatingTime,
+    delayTimeMinutes,
+    numberOfLessons,
+    osztalyCsoportUid
+  }: Absence) {
+    return {
+      Típus: typeName + (type == 'Delay' ? `(${delayTimeMinutes} perc)` : ''),
+      Tantárgy: { title: subject, to: `/statistics/${subject}` },
+      Dátum: `${this.formatDate(date)}; ${numberOfLessons}. óra`,
+      'Igazolás típusa': justificationTypeName,
+      Tanár: teacher,
+      'Naplózás dátuma': `${this.formatDate(creatingTime)}, ${this.formatTime(
+        creatingTime
+      )}`,
+      Osztálycsoport: this.getClassGroupTextFromUID(osztalyCsoportUid),
+      '': {
+        title: 'Óra megtekintése',
+        to: this.getLessonUrl(date, numberOfLessons)
+      }
+    };
+  }
+  eventValues({ title, content, date, endDate, attachments = [] }: Event) {
+    return Object.fromEntries([
+      ['Cím', title],
+      ['Tartalom', this.formatText(content)],
+      ['Dátum', this.formatDate(date)],
+      ['Utoljára látható', this.formatDate(endDate)],
+      ...attachments.map((a, i) => {
+        return [
+          `Csatolmány${new Array(i + 1).join('&nbsp;')}`,
+          // @ts-ignore: type never bs
+          `<a href="${a.url}" target="_blank">${a.title}</a>`
+        ];
+      })
+    ]);
+  }
+  getWeek(week: number) {
+    function _format(d: Date): string {
+      return `${d.getFullYear()}-${`0${d.getMonth() + 1}`.slice(
+        -2
+      )}-${`0${d.getDate()}`.slice(-2)}`;
+    }
+    let now = new Date(this.date);
+    now.setDate(now.getDate() + week * 7);
+    let monday = new Date(+now - now.getDay() * 86400000);
+    let sunday = new Date(+now - (now.getDay() - 6) * 86400000);
+    return { from: _format(monday), to: _format(sunday) };
+  }
+  get mobile() {
+    return innerWidth < 600;
+  }
+
+  getClassGroupTextFromUID(uid: string) {
+    let classGroup;
+    for (const cg of this.state.general.data.osztalyCsoportok || []) {
+      if (cg.uid == uid) {
+        classGroup = cg;
+        break;
+      }
+    }
+    if (!classGroup) return '';
+    return `<span class='text--primary'>${classGroup.nev}</span> &mdash; ${classGroup.oktatasNevelesiFeladat.leiras}`;
+  }
+
+  getEvaluationTypeName(type: EvaluationType) {
+    return {
+      EndYear: 'Évvégi',
+      HalfYear: 'Félévi',
+      IQuarterEvaluation: 'Negyedéves',
+      IIIQuarterEvaluation: 'Negyedéves'
+    }[type];
+  }
+
+  async obtain(
+    what:
+      | 'general'
+      | 'timetable'
+      | 'events'
+      | 'hirdetmenyek'
+      | 'classAverages'
+      | 'exams',
+    w = 0
+  ) {
+    let resource = this.state[what],
+      arg: any;
+    if (what == 'timetable') {
+      arg = this.getWeek(w);
+      // @ts-ignore
+      resource = this.state.timetable[`${arg.from}-${arg.to}`];
+    } else if (what == 'hirdetmenyek') {
+      arg = await this.obtain('general').then(
+        d =>
+          d.osztalyCsoportok.find(o => o.osztalyCsoportTipus === 'Osztaly').nev
+      );
+    }
+    if (resource && !resource.loading && resource.loaded) return resource.data;
+
+    return this.$store.dispatch(
+      `api/pull${what.charAt(0).toUpperCase() + what.slice(1)}`,
+      arg
+    );
+  }
+  formatDate = formatDate;
+  formatTime = formatTime;
+  utc2date = utc2date;
+  day = day;
+
+  getSubjectIcon(scm: string | null) {
+    const subjectCategoryName = scm || '',
+      map = {
+        'Állampolgári ismeretek': 'mdi-account-badge-horizontal-outline',
+        'Diákotthoni feladat': 'mdi-notebook-outline',
+        'Gyermekotthoni feladat': 'mdi-notebook-outline',
+        Napközi: 'mdi-notebook-outline',
+        'Életvitel és gyakorlat': 'mdi-lightbulb-on-outline',
+        Filozófia: 'mdi-lightbulb-on-outline',
+        Fizika: 'mdi-atom',
+        Földrajz: 'mdi-globe-model',
+        'Földünk – környezetünk': 'mdi-globe-model',
+        Háztartástan: 'mdi-home-alert',
+        Etika: 'mdi-scale-balance', // Nincs kép
+        'Hit- és erkölcstan': 'mdi-scale-balance',
+        'Hon- és népismeret': 'mdi-flag-variant',
+        Kémia: 'mdi-flask',
+        Könyvtárhasználat: 'mdi-library',
+        Környezetismeret: 'mdi-leaf-maple',
+        'Magyar nyelv és irodalom': 'mdi-book-open-page-variant',
+        Matematika: 'mdi-calculator-variant',
+        'Mozógképkultúra és médiaismeret': 'mdi-image-search-outline',
+        Művészetek: 'mdi-palette-outline',
+        'Osztályfőnöki, élet- és pályatervezés': 'mdi-rocket',
+        'Óvódai feladat': 'mdi-rabbit', // Nincs kép
+        'Technika, életvitel és gyakorlat': 'mdi-scissors-cutting',
+        'Testnevelés és sport': 'mdi-basketball',
+        Történelem: 'mdi-owl'
+      };
+    if (subjectCategoryName in map) return map[subjectCategoryName];
+    let icon = 'mdi-book';
+    if (subjectCategoryName.indexOf('nyelv') > -1) icon = 'mdi-headset';
+    else if (subjectCategoryName.indexOf('Biológia') > -1) icon = 'mdi-dna';
+    else if (subjectCategoryName.indexOf('Dráma') > -1)
+      icon = 'mdi-drama-masks';
+    else if (subjectCategoryName.indexOf('Ember') > -1)
+      icon = 'mdi-human-male-height';
+    else if (
+      subjectCategoryName.indexOf('Informatika') > -1 ||
+      subjectCategoryName.indexOf('Számítástechnika') > -1
+    )
+      icon = 'mdi-monitor';
+    else if (
+      subjectCategoryName.indexOf('Művészet') > -1 ||
+      subjectCategoryName.indexOf('Vizuális kultúra') > -1
+    )
+      icon = 'mdi-palette-outline';
+    else if (subjectCategoryName.indexOf('Szakma') > -1)
+      icon = 'mdi-folder-alert-outliner';
+    // nincs kép
+    else if (
+      subjectCategoryName.indexOf('egészségügy') > -1 ||
+      subjectCategoryName.indexOf('szociális szolgáltatások') > -1
+    )
+      icon = 'mdi-folder-heart-outline';
+    // nincs kép
+    else if (subjectCategoryName.indexOf('elektronika') > -1)
+      icon = 'mdi-led-on';
+    else if (subjectCategoryName.indexOf('élelmiszer') > -1) icon = 'mdi-food';
+    else if (subjectCategoryName.indexOf('építészet') > -1)
+      icon = 'mdi-office-building';
+    else if (subjectCategoryName.indexOf('faipar') > -1)
+      icon = 'mdi-tree-outline';
+    else if (subjectCategoryName.indexOf('gépészet') > -1)
+      icon = 'mdi-slot-machine-outline';
+    else if (subjectCategoryName.indexOf('kerskedelem') > -1) icon = 'mdi-cash';
+    else if (subjectCategoryName.indexOf('vízgazdálkodás') > -1)
+      icon = 'mdi-cup-water';
+    else if (subjectCategoryName.indexOf('közgazdaságtan') > -1)
+      icon = 'mdi-chart-areaspline';
+    // nincs kép
+    else if (subjectCategoryName.indexOf('közlekedés') > -1) icon = 'mdi-bus';
+    else if (subjectCategoryName.indexOf('mezőgazdaság') > -1)
+      icon = 'mdi-food-apple-outline';
+    else if (subjectCategoryName.indexOf('nyomda') > -1)
+      icon = 'mdi-newspaper-variant-multiple-outline';
+    else if (subjectCategoryName.indexOf('oktatás') > -1)
+      icon = 'mdi-school-outline';
+    else if (subjectCategoryName.indexOf('orientáció') > -1)
+      icon = 'mdi-rocket';
+    else if (subjectCategoryName.indexOf('vegyipar') > -1) icon = 'mdi-flask';
+    else if (subjectCategoryName.indexOf('orientáció') > -1)
+      icon = 'mdi-rocket';
+    else if (subjectCategoryName.indexOf('vendéglátás') > -1)
+      icon = 'mdi-hotel';
+    else if (subjectCategoryName.indexOf('Társadalmi') > -1)
+      icon = 'mdi-account-badge-horizontal-outline';
+    else if (subjectCategoryName.indexOf('természet') > -1)
+      icon = 'mdi-leaf-maple';
+    else if (subjectCategoryName.indexOf('zene') > -1) icon = 'mdi-music';
+    return icon;
+  }
+  getEvaluationIcon(mode: string) {
+    let icon = 'mdi-help-circle-outline';
+    switch (mode) {
+      case 'Írásbeli témazáró dolgozat':
+      case 'Témazáró':
+        icon = 'mdi-widgets';
+        break;
+      case 'Írásbeli röpdolgozat':
+        icon = 'mdi-border-color';
+        break;
+      case 'Dolgozat':
+      case 'Beszámoló':
+        icon = 'mdi-text-subject';
+        break;
+      case 'Projektmunka':
+        icon = 'mdi-clipboard-text';
+        break;
+      case 'Gyakorlati feladat':
+        icon = 'mdi-walk';
+        break;
+      case 'Szódolgozat':
+        icon = 'mdi-flag-variant';
+        break;
+      case 'Szóbeli felelet':
+        icon = 'mdi-human-greeting';
+        break;
+      case 'Házi feladat':
+        icon = 'mdi-home';
+        break;
+      case 'Órai munka':
+        icon = 'mdi-school';
+        break;
+      case 'Versenyen, vetélkedőn való részvétel':
+        icon = 'mdi-account-star-outline';
+        break;
+      case 'Magyar nyelv évfolyamdolgozat':
+        icon = 'mdi-book';
+        break;
+      case 'év végi':
+        icon = 'mdi-flag-checkered';
+        break;
+      case 'Házi dolgozat':
+        icon = 'mdi-file-outline';
+        break;
+    }
+    return icon;
+  }
+  group = group;
+
+  formatText(text: string) {
+    return linkifyHtml(text, {
+      defaultProtocol: 'https',
+      nl2br: true
+    });
+  }
+
+  trimText(text: string) {
+    return text.substr(0, 100) + (text.length > 100 ? '...' : '');
+  }
+
+  getLessonUrl(date, numberOfLessons) {
+    const getMonday = utc => {
+      const d = new Date(utc);
+      const day = d.getDay(),
+        diff = d.getDate() - day + 1;
+      return +new Date(d.setDate(diff));
+    };
+    return `/timetable/${Math.round(
+      (getMonday(date * 1000) - getMonday(this.date)) / 604800000
+    )}/${date}:${numberOfLessons}`;
+  }
+
+  getEvalValue(nv: number | any) {
+    return (
+      {
+        1: 'Elégtelen',
+        1.5: 'Egy-ketted',
+        2: 'Elégséges',
+        2.5: 'Két-harmad',
+        3: 'Közepes',
+        3.5: 'Három-negyed',
+        4: 'Jó',
+        4.5: 'Négy-ötöd',
+        5: 'Jeles'
+      }[nv] ?? 'Szöveges értékelés'
+    );
+  }
+}
