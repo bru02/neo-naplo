@@ -4,9 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-
-    "content-hash": "1d0b36c8fd75eae4efa3f41decfd431b",
-
+    "content-hash": "a2a2e7828fd6e1c30a6146affc73a3a5",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1570,16 +1568,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.31.0",
+            "version": "2.32.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "bbc0ab53f41a4c6f223c18efcdbd9bc725eb5d2d"
+                "reference": "f10e22cf546704fab1db4ad4b9dedbc5c797a0dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/bbc0ab53f41a4c6f223c18efcdbd9bc725eb5d2d",
-                "reference": "bbc0ab53f41a4c6f223c18efcdbd9bc725eb5d2d",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/f10e22cf546704fab1db4ad4b9dedbc5c797a0dc",
+                "reference": "f10e22cf546704fab1db4ad4b9dedbc5c797a0dc",
                 "shasum": ""
             },
             "require": {
@@ -1588,6 +1586,7 @@
                 "symfony/translation": "^3.4 || ^4.0 || ^5.0"
             },
             "require-dev": {
+                "doctrine/orm": "^2.7",
                 "friendsofphp/php-cs-fixer": "^2.14 || ^3.0",
                 "kylekatarnls/multi-tester": "^1.1",
                 "phpmd/phpmd": "^2.8",
@@ -1636,7 +1635,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2020-03-01T11:11:58+00:00"
+            "time": "2020-03-31T13:43:19+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -4094,16 +4093,16 @@
         },
         {
             "name": "symfony/polyfill-php56",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php56.git",
-                "reference": "16ec91cb06998b609501b55b7177b7d7c02badb3"
+                "reference": "d51ec491c8ddceae7dca8dd6c7e30428f543f37d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php56/zipball/16ec91cb06998b609501b55b7177b7d7c02badb3",
-                "reference": "16ec91cb06998b609501b55b7177b7d7c02badb3",
+                "url": "https://api.github.com/repos/symfony/polyfill-php56/zipball/d51ec491c8ddceae7dca8dd6c7e30428f543f37d",
+                "reference": "d51ec491c8ddceae7dca8dd6c7e30428f543f37d",
                 "shasum": ""
             },
             "require": {
@@ -4113,7 +4112,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -4146,7 +4145,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-03-09T19:04:49+00:00"
         },
         {
             "name": "symfony/polyfill-php72",
@@ -4263,16 +4262,16 @@
         },
         {
             "name": "symfony/polyfill-util",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-util.git",
-                "reference": "ba3cfcea6d0192cae46c62041f61cbb704b526d3"
+                "reference": "d8e76c104127675d0ea3df3be0f2ae24a8619027"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-util/zipball/ba3cfcea6d0192cae46c62041f61cbb704b526d3",
-                "reference": "ba3cfcea6d0192cae46c62041f61cbb704b526d3",
+                "url": "https://api.github.com/repos/symfony/polyfill-util/zipball/d8e76c104127675d0ea3df3be0f2ae24a8619027",
+                "reference": "d8e76c104127675d0ea3df3be0f2ae24a8619027",
                 "shasum": ""
             },
             "require": {
@@ -4281,7 +4280,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -4311,7 +4310,7 @@
                 "polyfill",
                 "shim"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-03-02T11:55:35+00:00"
         },
         {
             "name": "symfony/polyfill-uuid",
@@ -4557,16 +4556,16 @@
         },
         {
             "name": "symfony/translation",
-            "version": "v4.4.5",
+            "version": "v4.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "0a19a77fba20818a969ef03fdaf1602de0546353"
+                "reference": "4e54d336f2eca5facad449d0b0118bb449375b76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/0a19a77fba20818a969ef03fdaf1602de0546353",
-                "reference": "0a19a77fba20818a969ef03fdaf1602de0546353",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/4e54d336f2eca5facad449d0b0118bb449375b76",
+                "reference": "4e54d336f2eca5facad449d0b0118bb449375b76",
                 "shasum": ""
             },
             "require": {
@@ -4629,7 +4628,7 @@
             ],
             "description": "Symfony Translation Component",
             "homepage": "https://symfony.com",
-            "time": "2020-02-04T09:32:40+00:00"
+            "time": "2020-03-27T16:54:36+00:00"
         },
         {
             "name": "symfony/translation-contracts",
@@ -4815,33 +4814,32 @@
         },
         {
             "name": "tymon/jwt-auth",
-            "version": "1.0.0-rc.5",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tymondesigns/jwt-auth.git",
-                "reference": "103739700dc0358039a33b5bc91247570bb83529"
+                "reference": "d4cf9fd2b98790712d3e6cd1094e5ff018431f19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/103739700dc0358039a33b5bc91247570bb83529",
-                "reference": "103739700dc0358039a33b5bc91247570bb83529",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/d4cf9fd2b98790712d3e6cd1094e5ff018431f19",
+                "reference": "d4cf9fd2b98790712d3e6cd1094e5ff018431f19",
                 "shasum": ""
             },
             "require": {
-                "illuminate/auth": "^5.1|^6",
-                "illuminate/contracts": "^5.1|^6",
-                "illuminate/http": "^5.1|^6",
-                "illuminate/support": "^5.1|^6",
+                "illuminate/auth": "^5.2|^6|^7",
+                "illuminate/contracts": "^5.2|^6|^7",
+                "illuminate/http": "^5.2|^6|^7",
+                "illuminate/support": "^5.2|^6|^7",
                 "lcobucci/jwt": "^3.2",
                 "namshi/jose": "^7.0",
                 "nesbot/carbon": "^1.0|^2.0",
                 "php": "^5.5.9|^7.0"
             },
             "require-dev": {
-                "cartalyst/sentinel": "^2|^3",
-                "illuminate/console": "^5.1|^6",
-                "illuminate/database": "^5.1|^6",
-                "illuminate/routing": "^5.1|^6",
+                "illuminate/console": "^5.2|^6|^7",
+                "illuminate/database": "^5.2|^6|^7",
+                "illuminate/routing": "^5.2|^6|^7",
                 "mockery/mockery": ">=0.9.9",
                 "phpunit/phpunit": "~4.8|~6.0"
             },
@@ -4886,7 +4884,7 @@
                 "jwt",
                 "laravel"
             ],
-            "time": "2019-09-09T03:33:47+00:00"
+            "time": "2020-03-04T11:21:28+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
