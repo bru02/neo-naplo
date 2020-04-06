@@ -16,7 +16,7 @@
         "guzzlehttp/guzzle": "~6.0",
         "jenssegers/model": "^1.2",
         "laravel/framework": "^6.0",
-        "laravel/tinker": "^1.0",
+        "laravel/tinker": "^2.3",
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "1.7.1",
         "spatie/async": "^1.2",
