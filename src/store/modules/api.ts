@@ -210,7 +210,7 @@ class ApiActions extends Actions<
 }
 
 function _sortValue(item) {
-  return 'creatingTime' in item && !item.category != 'exams'
+  return 'creatingTime' in item
     ? item.creatingTime
     : item.date;
 }
