@@ -10,7 +10,7 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@mdi/font": "^3.6.95",
+    "@mdi/font": "^5.0.45",
     "@sentry/browser": "^5.14.1",
     "@sentry/integrations": "^5.11.1",
     "axios": "^0.19.2",
