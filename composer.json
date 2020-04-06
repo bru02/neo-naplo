@@ -10,7 +10,7 @@
     "require": {
         "php": "^7.2",
         "ext-blackfire": "^1.31",
-        "barryvdh/laravel-cors": "^0.11.4",
+        "barryvdh/laravel-cors": "^1.0.5",
         "brozot/laravel-fcm": "^1.3",
         "fideloper/proxy": "^4.0",
         "guzzlehttp/guzzle": "~6.0",
