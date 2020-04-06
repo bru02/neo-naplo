@@ -1,6 +1,9 @@
 # **[Neo Napló](https://neo-naplo.herokuapp.com/)**
-## *Okos KRÉTA kliens*
-Extrák:
+> *Okos KRÉTA kliens*
+
+
+:construction: **Fejlesztés alatt** :construction:
+### Extrák
  - [x] Hiányzások: Ugrás az órához
  - [x] Jegyek: Hatás az átlagodra
  - [x] Értelmes(ebb) UI
@@ -14,7 +17,7 @@ Extrák:
  - [ ] Saját házi / doga felirása
 
 
-Felhasználva:
+### Felhasználva
 1. [Vue](https://vuejs.org) - Reaktivitás
 2. [Vuetify](https://vuetifyjs.com) - UX
 3. [Laravel](https://laravel.com) - Backend
