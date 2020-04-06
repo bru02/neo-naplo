@@ -845,6 +845,7 @@
                     "email": "jakub.onderka@gmail.com"
                 }
             ],
+            "abandoned": "php-parallel-lint/php-console-color",
             "time": "2018-09-29T17:23:10+00:00"
         },
         {
@@ -891,6 +892,7 @@
                 }
             ],
             "description": "Highlight PHP code in terminal",
+            "abandoned": "php-parallel-lint/php-console-highlighter",
             "time": "2018-09-29T18:48:56+00:00"
         },
         {
@@ -3049,16 +3051,16 @@
         },
         {
             "name": "spatie/async",
-            "version": "1.2.0",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/async.git",
-                "reference": "8d4b54dc53acc434cfba6a3432b03510dc3d2a8c"
+                "reference": "4deae48d4a3bb36da83c5556163f8d3472a73de9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/async/zipball/8d4b54dc53acc434cfba6a3432b03510dc3d2a8c",
-                "reference": "8d4b54dc53acc434cfba6a3432b03510dc3d2a8c",
+                "url": "https://api.github.com/repos/spatie/async/zipball/4deae48d4a3bb36da83c5556163f8d3472a73de9",
+                "reference": "4deae48d4a3bb36da83c5556163f8d3472a73de9",
                 "shasum": ""
             },
             "require": {
@@ -3102,7 +3104,7 @@
                 "async",
                 "spatie"
             ],
-            "time": "2020-02-14T07:11:19+00:00"
+            "time": "2020-03-17T07:13:43+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -4365,16 +4367,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v4.4.5",
+            "version": "v4.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "bf9166bac906c9e69fb7a11d94875e7ced97bcd7"
+                "reference": "3e40e87a20eaf83a1db825e1fa5097ae89042db3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/bf9166bac906c9e69fb7a11d94875e7ced97bcd7",
-                "reference": "bf9166bac906c9e69fb7a11d94875e7ced97bcd7",
+                "url": "https://api.github.com/repos/symfony/process/zipball/3e40e87a20eaf83a1db825e1fa5097ae89042db3",
+                "reference": "3e40e87a20eaf83a1db825e1fa5097ae89042db3",
                 "shasum": ""
             },
             "require": {
@@ -4410,7 +4412,7 @@
             ],
             "description": "Symfony Process Component",
             "homepage": "https://symfony.com",
-            "time": "2020-02-07T20:06:44+00:00"
+            "time": "2020-03-27T16:54:36+00:00"
         },
         {
             "name": "symfony/routing",
@@ -8316,8 +8318,8 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "role": "Developer",
-                    "email": "arne@blankerts.de"
+                    "email": "arne@blankerts.de",
+                    "role": "Developer"
                 }
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
