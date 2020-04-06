@@ -8,19 +8,19 @@
  - [x] Jegyek: Hatás az átlagodra
  - [x] Értelmes(ebb) UI
  - [x] Törtjegyek kezelése
- - [x] Stasztikák + Milenne ha kapnék egy ...?
+ - [x] Stasztikák + Mi lenne ha kapnék egy ...?
  - [x] Kártyák
  - [x] Sötét mód & testreszabhatóság
  - [x] Gyorsaság
  - [ ] Teams & Classroom integráció
  - [ ] Szerkeszthető termek
- - [ ] Saját házi / doga felirása
+ - [ ] Saját házi / dolgozat felírása
 
 
 ### Felhasználva
 1. [Vue](https://vuejs.org) - Reaktivitás
-2. [Vuetify](https://vuetifyjs.com) - UX
+2. [Vuetify](https://vuetifyjs.com) - UI komponensek
 3. [Laravel](https://laravel.com) - Backend
-4. [Firebase](https://firebase.google.com/) - Értesitések
+4. [Firebase](https://firebase.google.com/) - Értesítések
 
 *Bónusz: kisebb app méret + weboldal*
