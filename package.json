@@ -15,7 +15,7 @@
     "@sentry/integrations": "^5.15.4",
     "axios": "^0.19.2",
     "core-js": "^3.6.5",
-    "firebase": "^7.14.0",
+    "firebase": "^7.15.4",
     "linkifyjs": "^2.1.9",
     "roboto-fontface": "*",
     "sass": "^1.26.3",
