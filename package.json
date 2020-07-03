@@ -31,7 +31,7 @@
     "vuex-smart-module": "^0.3.4"
   },
   "devDependencies": {
-    "@sentry/webpack-plugin": "^1.10.0",
+    "@sentry/webpack-plugin": "^1.12.0",
     "@types/jest": "^25.2.1",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.27.0",
