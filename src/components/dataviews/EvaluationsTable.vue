@@ -5,8 +5,10 @@
         <th class="text-left">Tantárgy</th>
         <th class="text-left" v-for="key in keys" :key="key">{{ key }}</th>
         <th class="text-left">Átlag</th>
-        <th class="text-left">Osztály átlag</th>
-        <th class="text-left">Különbség</th>
+        <template v-if="classAvgLoaded">
+          <th class="text-left">Osztály átlag</th>
+          <th class="text-left">Különbség</th>
+        </template>
       </tr>
     </thead>
     <tbody>
@@ -50,10 +52,12 @@
         >
           {{ getAverage(groupedEvaluations[subject]) || '-' }}
         </td>
-        <td>{{ getClassAverage(subject) || '-' }}</td>
-        <td :class="getDifferenceColor(subject)">
-          {{ getDifference(subject) }}
-        </td>
+        <template v-if="classAvgLoaded">
+          <td>{{ getClassAverage(subject) || '-' }}</td>
+          <td :class="getDifferenceColor(subject)">
+            {{ getDifference(subject) }}
+          </td>
+        </template>
       </tr>
     </tbody>
   </v-simple-table>
@@ -64,7 +68,13 @@ import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Evaluation, ClassAverage } from '../../api-types';
-@Component
+import { getAverage, getEvaluationTypeName } from '../../utils/evaluations';
+import { apiMapper } from '../../store';
+@Component({
+  computed: apiMapper.mapState({
+    classAvgLoaded: state => state.classAverages.loaded
+  })
+})
 export default class EvaluationsTable extends mixins(Mixin) {
   @Prop(Array) readonly evaluations!: Evaluation[];
   @Prop() readonly groupedClassAverages!: { [k: string]: ClassAverage[] };
@@ -82,10 +92,10 @@ export default class EvaluationsTable extends mixins(Mixin) {
       const grouped = {};
       for (const evaluation of evaluations) {
         let key;
-        if (evaluation.type == 'MidYear') {
+        if (evaluation.type === 'MidYear') {
           key = `0${utc2date(evaluation.date).getMonth() + 1}`.slice(-2);
         } else {
-          key = this.getEvaluationTypeName(evaluation.type);
+          key = getEvaluationTypeName(evaluation.type);
         }
 
         if (!(key in grouped)) {
@@ -98,19 +108,19 @@ export default class EvaluationsTable extends mixins(Mixin) {
     }
     this.keys = keys
       .filter((v, i, a) => {
-        return a.indexOf(v) == i;
+        return a.indexOf(v) === i;
       })
       .reverse();
     return ret;
   }
   getClasses(evaluation) {
     return {
-      'green--text': evaluation.mode == 'Beszámoló',
-      'blue--text': evaluation.mode == 'Gyakorlati feladat',
+      'green--text': evaluation.mode === 'Beszámoló',
+      'blue--text': evaluation.mode === 'Gyakorlati feladat',
       'red--text': evaluation.weight && evaluation.weight != '100%',
-      'gray--text': evaluation.mode == 'Órai munka',
-      'teal--text-lighten-2': evaluation.mode == 'Házi dolgozat',
-      'font-weight-bold': evaluation.weight == '200%',
+      'gray--text': evaluation.mode === 'Órai munka',
+      'teal--text-lighten-2': evaluation.mode === 'Házi dolgozat',
+      'font-weight-bold': evaluation.weight === '200%',
       eval: true
     };
   }
@@ -122,18 +132,18 @@ export default class EvaluationsTable extends mixins(Mixin) {
   getDifference(subject) {
     if (
       !this.getClassAverage(subject) ||
-      !this.getAverage(this.groupedEvaluations[subject])
+      !getAverage(this.groupedEvaluations[subject])
     )
       return '-';
     return round(
-      this.getAverage(this.groupedEvaluations[subject]) -
+      getAverage(this.groupedEvaluations[subject]) -
         // @ts-ignore
         this.getClassAverage(subject)
     );
   }
   getDifferenceColor(subject) {
     const diff = this.getDifference(subject);
-    return diff == 0 ? '' : diff > 0 ? 'green--text' : 'red--text';
+    return diff === 0 ? '' : diff > 0 ? 'green--text' : 'red--text';
   }
 }
 function round(n) {

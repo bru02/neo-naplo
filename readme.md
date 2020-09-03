@@ -6,10 +6,11 @@ Extrák:
  - [x] Értelmes(ebb) UI
  - [x] Törtjegyek kezelése
  - [x] Stasztikák + Milenne ha kapnék egy ...?
- - [x] Kártyák
+ - [x] Színes kártyák
  - [x] Sötét mód & testreszabhatóság
  - [x] Gyorsaság
- - [ ] Teams & Classroom integráció
+ - [ ] Classroom integráció
+ - [ ] Teams integráció
  - [ ] Szerkeszthető termek
  - [ ] Saját házi / doga felirása
 
@@ -20,4 +21,4 @@ Felhasználva:
 3. [Laravel](https://laravel.com) - Backend
 4. [Firebase](https://firebase.google.com/) - Értesitések
 
-*Bónusz: kisbb app méret + weboldal*
+*Bónusz: kisebb app méret + weboldal*

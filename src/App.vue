@@ -2,27 +2,17 @@
   <v-app id="app">
     <v-navigation-drawer fixed app v-model="drawer">
       <v-list dense>
-        <v-list-item
-          v-for="(item, i) in routes"
-          v-show="
-            (item.meta ? item.meta.auth == isAuthenticated : true) &&
-              !!item.icon
-          "
-          :to="`/${item.path.split('/').find(u => !!u && u[0] !== ':') || ''}`"
-          :key="i"
-        >
+        <v-list-item v-for="(link, i) in links" :to="link.link" :key="i">
           <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
+            <v-icon>{{ link.icon }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>
-              {{ item.name }}
+              {{ link.name }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item
-          @click="$store.dispatch('auth/logout'), $router.push('/login')"
-        >
+        <v-list-item @click="logout">
           <v-list-item-action>
             <v-icon>mdi-logout-variant</v-icon>
           </v-list-item-action>
@@ -58,77 +48,103 @@
     </v-app-bar>
     <v-content>
       <router-view></router-view>
-      <v-snackbar v-model="errorToast" color="error">
-        <v-icon>
-          {{ error.icon }}
-        </v-icon>
-        {{ error.text }}
-        <v-btn icon @click="errorToast = false">
-          <v-icon>
-            mdi-close
-          </v-icon>
-        </v-btn>
-      </v-snackbar>
     </v-content>
+    <Toast />
   </v-app>
 </template>
 <script lang="ts">
-import Sentry from '@sentry/browser';
+import Vue from 'vue';
+import * as Sentry from '@sentry/browser';
 import Mixin from '@/mixins';
-import { routes } from '@/plugins/router';
 import Component, { mixins } from 'vue-class-component';
-import { formatDate } from './helpers';
 import { authMapper } from '@/store';
+import { AxiosError } from 'axios';
+import { getWeek } from './utils/evaluations';
+import { apiClient } from './plugins/axios';
+import Toast from './components/Toast.vue';
+import { toast } from './plugins/toasts';
+import { fromCache } from './utils';
+
 @Component({
   computed: authMapper.mapGetters(['isAuthenticated']),
   metaInfo: {
     title: '...',
     titleTemplate: '%s | Neo Napló'
+  },
+  components: {
+    Toast
   }
 })
 export default class App extends mixins(Mixin) {
   drawer = false;
-  routes = routes;
   loading = 0;
-  errorToast = false;
-  error = {};
+
+  links = [
+    { name: 'Faliújság', icon: 'mdi-home', link: '/' },
+    { name: 'Hiányzások', icon: 'mdi-block-helper', link: '/absences' },
+    {
+      name: 'Feljegyzések',
+      icon: 'mdi-comment-processing-outline',
+      link: '/notes'
+    },
+    {
+      name: 'Órarend',
+      icon: 'mdi-calendar-text-outline',
+      link: '/timetable'
+    },
+    {
+      name: 'Jegyek',
+      icon: 'mdi-calendar-check-outline',
+      link: '/evaluations'
+    },
+    {
+      name: 'Statisztikák',
+      icon: 'mdi-chart-timeline-variant',
+      link: '/statistics'
+    },
+
+    {
+      name: 'Számonkérések',
+      icon: 'mdi-file-document-edit-outline',
+      link: '/exams'
+    },
+    { name: 'Profil', icon: 'mdi-account', link: '/profile' },
+    { name: 'Beállítások', icon: 'mdi-settings', link: '/settings' }
+  ];
+
   async created() {
-    this.$http.interceptors.request.use((config = {}) => {
+    apiClient.interceptors.request.use((config = {}) => {
       this.loading++;
       return config;
     });
-    this.$http.interceptors.response.use(
+    apiClient.interceptors.response.use(
       res => {
         this.loading--;
         return res;
       },
-      (error: any) => {
+      (error: AxiosError) => {
         this.loading--;
         const response = error?.response;
         switch (response?.status) {
           case 424:
-            this.error = {
-              icon: 'mdi-sync-alert',
-              text: 'KRÉTA éppen frissít'
-            };
+            toast.error('KRÉTA éppen frissít', {
+              icon: 'mdi-sync-alert'
+            });
             break;
           case 401:
-            this.error = {
-              icon: 'mdi-account-alert',
-              text: 'Azonosítási hiba'
-            };
+            toast.error('Azonosítási hiba', {
+              icon: 'mdi-account-alert'
+            });
             break;
           case 500:
-            this.error = {
-              icon: 'mdi-wrench',
-              text: 'Belső hiba'
-            };
+            toast.error('Belső hiba', {
+              icon: 'mdi-wrench'
+            });
             break;
           default:
-            this.error = {
-              icon: 'mdi-wifi-off',
-              text: 'Hálózati hiba'
-            };
+            toast.error('Hálózati hiba', {
+              icon: 'mdi-wifi-off'
+            });
             break;
         }
         const data = response?.data;
@@ -139,35 +155,42 @@ export default class App extends mixins(Mixin) {
         ) {
           Sentry.setExtra('response_data', data);
         }
-        this.errorToast = true;
         throw error;
       }
     );
-    if (this.$store.getters['auth/isAuthenticated']) {
-      const w = this.getWeek(0);
-      for (const key in [
-        'general',
-        `timetable?from=${w.from}&to=${w.to}`,
-        'events',
-        'classAverages'
-      ]) {
-        const cachedResponse = await caches.match(`/api/${key}`);
-        let a = key.split('?')[0];
+    if (this.$store.getters['auth/isAuthenticated'] && 'caches' in window) {
+      for (const key of ['general', 'events', 'classAverages']) {
+        const data = await fromCache(key);
+        if (!data) continue;
+        this.$store.commit(
+          `api/update${key[0].toUpperCase() + key.substr(1)}`,
+          data
+        );
+      }
 
-        if (cachedResponse)
-          this.$store.dispatch(
-            `update${a[0].toUpperCase() + a.substr(1)}`,
-            cachedResponse
-          );
+      const w = getWeek(0);
+      const data = await fromCache(`timetable?from=${w.from}&to=${w.to}`);
+      if (data) {
+        this.$store.state.api.timetable[`${w.from}-${w.to}`] = {};
+        Vue.set(this.$store.state.api.timetable, `${w.from}-${w.to}`, {
+          data,
+          loading: false,
+          loaded: true
+        });
       }
     } else if (this.$route.name !== 'Belépés') {
       this.$router.push('/login');
     }
   }
+
+  logout() {
+    this.drawer = false;
+    this.$store.dispatch('auth/logout');
+    this.$router.push('/login');
+  }
 }
 </script>
 <style>
-@import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
 .v-list-item__title,
 .v-list-item__subtitle {
   text-overflow: clip;

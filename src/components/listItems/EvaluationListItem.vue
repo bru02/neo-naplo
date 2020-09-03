@@ -19,7 +19,7 @@
     <v-list-item-action>
       <slot name="action">
         <v-list-item-action-text>
-          {{ formatDate(eval.date) }}
+          {{ eval.date | formatDate }}
         </v-list-item-action-text>
       </slot>
     </v-list-item-action>
@@ -28,21 +28,20 @@
 <script lang="ts">
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
-import { Watch, Prop } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Evaluation } from '../../api-types';
+import { isDark } from '../../helpers';
 
 @Component
 export default class EvaluationListItem extends mixins(Mixin) {
   @Prop() readonly eval!: Evaluation;
   get classes() {
     return {
-      'white--text': this.isDark(
-        this.getEvaluationColor(+this.eval.numberValue)
-      ),
+      'white--text': isDark(this.getEvaluationColor(+this.eval.numberValue)),
       [`font-weight-${
-        this.eval.weight == '100%'
+        this.eval.weight === '100%'
           ? 'regular'
-          : this.eval.weight == '50%'
+          : this.eval.weight === '50%'
           ? 'thin'
           : 'bold'
       }`]: true

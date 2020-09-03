@@ -4,75 +4,67 @@
       <NextLessonCard
         :timetable="timetable"
         :instituteName="instituteName"
-        v-model="selectedLesson"
+        @input="$router.push(`/lesson/${$event}`)"
       ></NextLessonCard>
       <ChangedLessonCard
         v-for="lesson in changedLessons"
         :key="lesson.id"
         :lesson="lesson"
-        v-model="selectedLesson"
+        @input="$router.push(`/lesson/${$event}`)"
       >
       </ChangedLessonCard>
-
+      <v-skeleton-loader
+        :type="new Array(loadingCount).fill('image').join(', ')"
+      >
+      </v-skeleton-loader>
       <v-col
         cols="12"
-        v-for="card in cards"
-        :key="(card.id || card.date) + card.category"
+        v-for="card in cardsToRender"
+        :key="(card.id || card.date || card[0].date) + card.category"
       >
         <v-lazy :height="150">
           <NoteCard
             :note="card"
-            v-if="card.category == 'notes'"
-            v-model="selectedNote"
+            v-if="card.category === 'notes'"
+            @input="$router.push(`/note/${$event}`)"
           />
           <EvaluationCard
             :evaluation="card"
-            v-else-if="card.category == 'evaluations'"
-            v-model="selectedEval"
+            v-else-if="card.category === 'evaluations'"
+            @input="$router.push(`/evaluation/${$event}`)"
           />
           <AbsencesCard
             :absences="card"
-            v-else-if="card.category == 'absences'"
-            v-model="selectedAbsenceGroup"
-            v-on:lesson="a => (selectedAbsence = a)"
+            v-else-if="card.category === 'absences'"
+            @input="$router.push(`/absence/${$event}`)"
+            v-on:lesson="$router.push(`/absence/${$event}`)"
           />
           <EventCard
             :event="card"
-            v-else-if="card.category == 'events'"
-            v-model="selectedEvent"
+            v-else-if="card.category === 'events'"
+            @input="$router.push(`/event/${$event}`)"
           />
           <ExamCard
             :exam="card"
-            v-else-if="card.category == 'exams'"
-            v-model="selectedExam"
+            v-else-if="card.category === 'exams'"
+            @input="$router.push(`/exam/${$event}`)"
           />
         </v-lazy>
       </v-col>
+      <hr v-intersect="onIntersect" />
 
-      <v-alert :value="true" type="info" v-show="cards.length == 0 && !loading">
-        Még nem kaptál semmit..
+      <v-alert
+        value
+        type="info"
+        v-if="cards.length === 0 && loadingCount === 0"
+      >
+        Még üres a napló
       </v-alert>
     </v-row>
-    <DataViewer title="Feljegyzés" :fn="noteValues" v-model="selectedNote" />
-    <DataViewer
-      title="Mulasztás"
-      :fn="absenceValues"
-      v-model="selectedAbsence"
-    />
-    <DataViewer title="Értékelés" :fn="evalValues" v-model="selectedEval" />
-    <DataViewer title="Óra" :fn="lessonValues" v-model="selectedLesson" />
-    <DataViewer title="Faliújság" :fn="eventValues" v-model="selectedEvent" />
-    <DataViewer title="Számonkérés" :fn="examValues" v-model="selectedExam" />
-    <Dialog title="Mulasztások" v-model="selectedAbsenceGroup">
-      <AbsencesList
-        :absences="selectedAbsenceGroup.items"
-        v-model="selectedAbsence"
-      />
-    </Dialog>
+    <router-view></router-view>
   </v-container>
 </template>
 <script lang="ts">
-import Vue from 'vue';
 import Mixin from '@/mixins';
 import { apiMapper, timeMapper } from '@/store';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
@@ -87,27 +79,28 @@ import ChangedLessonCard from '@/components/cards/ChangedLessonCard.vue';
 import Dialog from '@/components/dialogs/Dialog.vue';
 
 import Component, { mixins } from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
 import {
   Note,
   Absence,
   Evaluation,
   Lesson,
   Event,
-  AbsenceGroup,
   TimetableAPI,
   Exam
 } from '../api-types';
 @Component({
   computed: {
     ...apiMapper.mapState({
-      loading: state => state.general.loading,
+      loadingCount: state => {
+        const score = res => (state[res].loaded ? 0 : 1);
+        return score('general') + score('events') + score('exams');
+      },
       instituteName: state => state.general.data.instituteName,
       evaluations: state => state.general.data.evaluations,
       exams: state => state.exams.data,
       notes: state => state.general.data.notes
     }),
-    ...apiMapper.mapGetters(['cards', 'flatAbsences', 'events']),
+    ...apiMapper.mapGetters(['cards', 'absences', 'events']),
     ...timeMapper.mapGetters(['date', 'time'])
   },
   components: {
@@ -127,13 +120,7 @@ import {
   }
 })
 export default class HomeComponent extends mixins(Mixin) {
-  selectedNote: Note | boolean = false;
-  selectedAbsence: Absence | boolean = false;
-  selectedEval: Evaluation | boolean = false;
-  selectedLesson: Lesson | boolean = false;
-  selectedEvent: Event | boolean = false;
-  selectedExam: Exam | boolean = false;
-  selectedAbsenceGroup: AbsenceGroup | boolean = false;
+  selectedAbsenceGroup: Absence[] | boolean = false;
   timetable: TimetableAPI = {};
   time!: Date;
   date!: Date;
@@ -141,13 +128,17 @@ export default class HomeComponent extends mixins(Mixin) {
   instituteName!: string;
 
   evaluations!: Evaluation[];
-  flatAbsences!: Absence[];
+  absences!: Absence[];
   notes!: Note[];
   events!: Event[];
   exams!: Exam[];
+  cards!: any[];
+
+  maxLen = 10;
+
   mounted() {
     this.obtain('general').then(d => {
-      if (d.instituteCode == 'klik035220001') this.obtain('hirdetmenyek');
+      if (d.instituteCode === 'klik035220001') this.obtain('hirdetmenyek');
     });
     this.obtain('events');
     this.obtain('exams');
@@ -156,83 +147,6 @@ export default class HomeComponent extends mixins(Mixin) {
     });
   }
 
-  @Watch('$route')
-  onRouteChange() {
-    if (this.$route.params.type) {
-      const { type, id } = this.$route.params;
-      switch (type) {
-        case 'evaluation':
-          if (!this.selectedEval)
-            this.selectedEval =
-              this.evaluations.find(e => e.id === +id) ?? false;
-          break;
-        case 'absence':
-          if (!this.selectedAbsence)
-            this.selectedAbsence =
-              this.flatAbsences.find(e => e.id === +id) ?? false;
-          break;
-        case 'note':
-          if (!this.selectedNote)
-            this.selectedNote = this.notes.find(e => e.id === +id) ?? false;
-          break;
-        case 'event':
-          if (!this.selectedEvent)
-            this.selectedEvent = this.events.find(e => e.id === id) ?? false;
-          break;
-        case 'exam':
-          if (!this.selectedExam)
-            this.selectedExam = this.exams.find(e => e.id === id) ?? false;
-          break;
-      }
-    } else {
-      ['Eval', 'Absence', 'Note', 'Event', 'Exam'].forEach(e =>
-        Vue.set(this, `selected${e}`, false)
-      );
-    }
-  }
-
-  @Watch('selectedEval')
-  onselectedEvalChange(value) {
-    if (value) {
-      if (!this.$route.params.type)
-        this.$router.push(`/evaluation/${value.id}`);
-    } else {
-      if (this.$route.params.type) this.$router.push(`/`);
-    }
-  }
-  @Watch('selectedAbsence')
-  onselectedAbsenceChange(value) {
-    if (value) {
-      if (!this.$route.params.type) this.$router.push(`/absence/${value.id}`);
-    } else {
-      if (this.$route.params.type) this.$router.push(`/`);
-    }
-  }
-  @Watch('selectedNote')
-  onselectedNoteChange(value) {
-    if (value) {
-      if (!this.$route.params.type) this.$router.push(`/note/${value.id}`);
-    } else {
-      if (this.$route.params.type) this.$router.push(`/`);
-    }
-  }
-  @Watch('selectedEvent')
-  onselectedEventChange(value) {
-    if (value) {
-      if (!this.$route.params.type) this.$router.push(`/event/${value.id}`);
-    } else {
-      if (this.$route.params.type) this.$router.push(`/`);
-    }
-  }
-
-  @Watch('selectedExam')
-  onselectedExamChange(value) {
-    if (value) {
-      if (!this.$route.params.type) this.$router.push(`/exam/${value.id}`);
-    } else {
-      if (this.$route.params.type) this.$router.push(`/`);
-    }
-  }
   get changedLessons() {
     const lessons: Lesson[] = [];
     for (const [key, ls] of Object.entries(this.timetable)) {
@@ -242,9 +156,19 @@ export default class HomeComponent extends mixins(Mixin) {
     }
     return lessons.filter(
       l =>
-        (!!l.deputyTeacher || l.state == 'Missed') &&
+        (!!l.deputyTeacher || l.state === 'Missed') &&
         l.endTime * 1000 > +this.time
     );
+  }
+
+  get cardsToRender() {
+    return this.cards.slice(0, this.maxLen);
+  }
+
+  onIntersect() {
+    if (this.maxLen < this.cards.length) {
+      this.maxLen += 10;
+    }
   }
 }
 </script>

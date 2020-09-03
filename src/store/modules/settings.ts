@@ -1,18 +1,21 @@
+import { JustificationState } from './../../api-types.d';
 import { messaging } from '../../plugins/firebase';
 import { Getters, Mutations, Actions, Module } from 'vuex-smart-module';
 import api from '@/api';
 
+const defaultColors = {
+  1: '#bf360c',
+  2: '#ff8f00',
+  3: '#afb42b',
+  4: '#7cb342',
+  5: '#43a047',
+  default: '#607d8b'
+};
+
 export class SettingsState {
   token = localStorage.getItem('fcm_token') || '';
   evaluationColors = Object.assign(
-    {
-      1: '#bf360c',
-      2: '#ff8f00',
-      3: '#afb42b',
-      4: '#7cb342',
-      5: '#43a047',
-      default: '#607d8b'
-    },
+    defaultColors,
     JSON.parse(localStorage.getItem('colors') || '{}')
   );
 }
@@ -24,7 +27,7 @@ class SettingsGetters extends Getters<SettingsState> {
 }
 
 class SettingsMutations extends Mutations<SettingsState> {
-  async updateToken(token: string | boolean) {
+  updateToken(token: string | boolean) {
     this.state.token = token ? token + '' : '';
     localStorage.setItem('fcm_token', this.state.token);
     return token;
@@ -36,14 +39,7 @@ class SettingsMutations extends Mutations<SettingsState> {
     localStorage.setItem('colors', JSON.stringify(saved));
   }
   resetColors() {
-    this.state.evaluationColors = {
-      1: '#bf360c',
-      2: '#ff8f00',
-      3: '#afb42b',
-      4: '#7cb342',
-      5: '#43a047',
-      default: '#607d8b'
-    };
+    this.state.evaluationColors = { ...defaultColors };
     localStorage.setItem('colors', '');
   }
 }

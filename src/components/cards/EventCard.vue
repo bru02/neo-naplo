@@ -1,5 +1,5 @@
 <template>
-  <v-card color="blue lighten-1" dark @click.native="$emit('input', event)">
+  <v-card color="blue lighten-1" dark @click.native="$emit('input', event.id)">
     <v-card-title primary-title>
       {{ event.title }}
     </v-card-title>

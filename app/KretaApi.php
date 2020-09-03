@@ -1,21 +1,27 @@
 <?php
+
 namespace App;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Str;
+use Illuminate\Validation\UnauthorizedException;
 use Spatie\Async\Pool;
 
+if (config('app.env') === 'local') {
+    Pool::$forceSynchronous = true;
+}
 
 date_default_timezone_set('Europe/Budapest');
 
-function _group_by($array, $key, $kv = true) {
+function _group_by($array, $key, $kv = true)
+{
     $return = [];
-    foreach($array as $val) {
-        if($kv) {
+    foreach ($array as $val) {
+        if ($kv) {
             $return[$val->{$key}][] = $val;
         } else {
-            if(!isset($return[$val->{$key}])) {
+            if (!isset($return[$val->{$key}])) {
                 $return[$val->{$key}] = (object) ['items' => []];
                 $return[$val->{$key}]->{$key} = $val->{$key};
             }
@@ -28,14 +34,16 @@ function _group_by($array, $key, $kv = true) {
 class KretaApi
 {
     public static $jar;
-    private static function client($base_uri) {
+    private static function client($base_uri)
+    {
         return new Client([
             'base_uri' => "$base_uri",
             'cookies' => self::$jar,
         ]);
     }
-    public static function cookies($cookies = null) {
-        if(isset($cookies)) {
+    public static function cookies($cookies = null)
+    {
+        if (isset($cookies)) {
             self::$jar->fromArray($cookies, request()->getHttpHost());
         } else {
             return self::$jar->toArray();
@@ -50,20 +58,20 @@ class KretaApi
                 'User-Agent' => "Kreta.Ellenorzo/2.9.8.2020012301 (Android; POT-LX1 0.0)"
             ],
         ];
-        if($endpoint == 'Token') {
+        if ($endpoint === 'Token') {
             $options['form_params'] = $data;
             $options['form_params']['client_id'] = '919e0c1c-76a2-4646-a2fb-7085bbbf3c56';
             $method = 'POST';
             $namespace = 'idp';
         } else {
-            if(isset($data)) {
+            if (isset($data)) {
                 $options['json'] = $data;
                 $method = 'POST';
             }
             $options['headers']['Authorization'] = "bearer $token";
             $namespace = 'mapi';
         }
-        if($school == 'eugyintezes') {
+        if ($school === 'eugyintezes') {
             $uri = "/integration-kretamobile-api/v1/$endpoint";
         } else {
             $uri = "$namespace/api/v1/$endpoint";
@@ -83,7 +91,7 @@ class KretaApi
         $schools = json_decode($response);
         $out = [];
         $len = count($schools);
-        for ($i=0;$i < $len;$i++) {
+        for ($i = 0; $i < $len; $i++) {
             $school = $schools[$i];
             $out[] = [
                 'name' => $school->name,
@@ -93,7 +101,8 @@ class KretaApi
         return $out;
     }
 
-    public static function logIn($school, $username, $password) {
+    public static function logIn($school, $username, $password)
+    {
         try {
             $response = self::send($school, 'Token', null, [
                 'institute_code' => $school,
@@ -101,8 +110,14 @@ class KretaApi
                 'password' => $password,
                 'grant_type' => 'password',
             ]);
-        } catch(\GuzzleHttp\Exception\ClientException $e) {
-            $response = '{"error":true}';
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = json_decode(
+                $e->getResponse()->getBody()->getContents() ?? '{}'
+            );
+            if ($response->error === 'invalid_grant') {
+                throw new UnauthorizedException('Rossz felhasználónév vagy jelszó!');
+            }
+            throw new \Exception('Hiba bejelentkezés során', 0, $e);
         }
 
         return json_decode($response);
@@ -116,11 +131,10 @@ class KretaApi
             'institute_code' => $school
         ]);
 
-        
         $out = json_decode($out);
         if (isset($out) && is_object($out)) {
             return self::wrapApi($out);
-        } 
+        }
         return false;
     }
 
@@ -132,15 +146,18 @@ class KretaApi
         );
     }
 
-    public static function getClassAverages($school, $tok) {
+    public static function getClassAverages($school, $tok)
+    {
         $ret = self::send($school, 'Student?fromDate=1970-01-01&toDate=1970-01-01', $tok);
         return array_map(function ($a) {
             return ['subject' => $a->Subject, 'value' => $a->ClassValue];
         }, json_decode($ret)->SubjectAverages);
     }
 
-    public static function getHirdetmenyek($class) {
-        $toldyClassCode = explode('.',
+    public static function getHirdetmenyek($class)
+    {
+        $toldyClassCode = explode(
+            '.',
             $class
         );
         $toldyClassCode = (date('Y') - $toldyClassCode[0] + (date('m') < 13 && date('m') > 8 ? 7 : 6)) . $toldyClassCode[1];
@@ -159,7 +176,7 @@ class KretaApi
                 $date = self::parseToldyDate(
                     $xpath->query('./h3', $article)->item(0)->textContent
                 );
-    
+
                 $link = $xpath->query('.//h3/a', $article)->item(0);
                 $title = $link->textContent;
                 $url = $link->getAttribute('href');
@@ -167,29 +184,31 @@ class KretaApi
                 $id = array_pop(
                     $boom
                 );
-                
+
                 $author = $xpath->query('.//p/a', $article)->item(0)->textContent;
-    
-                $type = explode('▼',
+
+                $type = explode(
+                    '▼',
                     $xpath->query('//div[contains(@class, "tinfo-category-label")]', $article)
                         ->item(0)
                         ->textContent
                 )[0];
-    
+
                 $doc = new \DOMDocument();
                 @$doc->loadHTML(
                     self::client(null)->get($url)->getBody()
                 );
                 $xpath2 = new \DOMXpath($doc);
-    
+
                 $endDate = self::parseToldyDate(
-                    explode(': ',
+                    explode(
+                        ': ',
                         $xpath2->query("//p[contains(@class, 'tinfo-info')]")[0]->textContent
                     )[1]
                 );
                 $links = $xpath2->query("//ul[contains(@class, 'tinfo-page-downloadables-holder')]/li/a");
-    
-                return (object)[
+
+                return (object) [
                     'date' => $date,
                     'title' => trim(ucwords($type)) . ": $title",
                     'content' => '',
@@ -203,8 +222,7 @@ class KretaApi
                     'id' => "t$id",
                     'endDate' => $endDate
                 ];
-
-            })->then(function($hirdetmeny) use ($hirdetmenyek) {
+            })->then(function ($hirdetmeny) use ($hirdetmenyek) {
                 $hirdetmenyek[] = $hirdetmeny;
             });
         }
@@ -241,7 +259,7 @@ class KretaApi
                     $newVal = $eval->NumberValue;
                     break;
             }
-            
+
 
             switch (ucfirst($eval->Value)) {
                 case "Példás":
@@ -269,7 +287,6 @@ class KretaApi
 
                 default:
                     break;
-
             }
             $eval->NumberValue = $newVal;
             unset($eval->FormName, $eval->SubjectCategory, $eval->Jelleg, $eval->ErtekFajta);
@@ -302,7 +319,7 @@ class KretaApi
                         $a->weight === $b->weight &&
                         $a->subject === $b->subject
                     ) {
-                        
+
                         if (abs($a->numberValue - $b->numberValue) === 1) {
                             $w = str_replace('%', '', $a->weight) * 2;
                             if ($w <= 200) {
@@ -331,7 +348,7 @@ class KretaApi
         $ids = array_column($out->absences, 'id');
 
         $out->absences = array_filter(
-            array_map(function($abs) {
+            array_map(function ($abs) {
                 $abs->date = $abs->lessonStartTime;
                 unset($abs->lessonStartTime);
                 return $abs;
@@ -341,20 +358,18 @@ class KretaApi
             },
             ARRAY_FILTER_USE_BOTH
         );
-        
+
+        usort(
+            $out->absences,
+            function ($a, $b) {
+                return $a->date - $b->date;
+            }
+        );
+
         usort(
             $out->absences,
             function ($a, $b) {
                 return $a->numberOfLessons - $b->numberOfLessons;
-            }
-        );
-
-        $out->absences = _group_by($out->absences, 'date', false);
-
-        usort(
-            $out->absences,
-            function ($a, $b) {
-                return $b->date - $a->date;
             }
         );
 
@@ -363,14 +378,14 @@ class KretaApi
 
     public static function timetable($school, $tok, $from, $to, $group = true)
     {
-        $out = self::send($school, 'LessonAmi?'. http_build_query([
+        $out = self::send($school, 'LessonAmi?' . http_build_query([
             'fromDate' => date('Y-m-d', $from),
             'toDate' => date('Y-m-d', $to)
         ]), $tok);
         $out = self::wrapApi(
             json_decode($out)
         );
-        if(!$group) return $out;
+        if (!$group) return $out;
         usort(
             $out,
             function ($a, $b) {
@@ -383,7 +398,7 @@ class KretaApi
     public static function getHomeWork($school, $tok, $id)
     {
         $ret = self::send($school, "HaziFeladat/TanuloHaziFeladatLista/$id", $tok);
-        if (! $ret || empty($ret)) {
+        if (!$ret || empty($ret)) {
             return [];
         }
 
@@ -421,7 +436,8 @@ class KretaApi
         return json_decode($out);
     }
 
-    public static function deleteStudentHomework($school, $tok, $id) {
+    public static function deleteStudentHomework($school, $tok, $id)
+    {
         $out = self::send($school, "HaziFeladat/DeleteTanuloHaziFeladat/$id", $tok, null, 'DELETE');
         if (!$out || empty($out)) {
             return [];
@@ -430,7 +446,8 @@ class KretaApi
         return json_decode($out);
     }
 
-    public static function getHomeworkList($school, $tok) {
+    public static function getHomeworkList($school, $tok)
+    {
         $out = self::send($school, "HaziFeladat/TanuloHaziFeladatLista", $tok);
         if (!$out || empty($out)) {
             return [];
@@ -441,7 +458,8 @@ class KretaApi
         );
     }
 
-    public static function getMessages($tok) {
+    public static function getMessages($tok)
+    {
         $out = self::send('eugyintezes', "/kommunikacio/uzenetek/sajat", $tok);
         if (!$out || empty($out)) {
             return [];
@@ -450,9 +468,10 @@ class KretaApi
         return self::wrapApi(
             json_decode($out)
         );
-    } 
+    }
 
-    public static function getMessage($tok, $id) {
+    public static function getMessage($tok, $id)
+    {
         $out = self::send('eugyintezes', "/kommunikacio/uzenetek/$id", $tok);
         if (!$out || empty($out)) {
             return [];
@@ -463,9 +482,10 @@ class KretaApi
         );
     }
 
-    public static function getAttachment($tok, $id) {
+    public static function getAttachment($tok, $id)
+    {
         $out = self::send('eugyintezes', "/dokumentumok/uzenetek/$id", $tok);
-        if (! isset($out)) {
+        if (!isset($out)) {
             return [];
         }
 
@@ -474,41 +494,44 @@ class KretaApi
         );
     }
 
-    public static function markAsread($tok, $id, $read = true) {
+    public static function markAsread($tok, $id, $read = true)
+    {
         $out = self::send('eugyintezes', "kommunikacio/uzenetek/olvasott", $tok, [
             'isOlvasott' => $read,
             'uzenetAzonositoLista' => [$id]
         ], 'POST');
 
-        if (! isset($out)) {
+        if (!isset($out)) {
             return [];
         }
 
         return json_decode($out);
     }
 
-    public static function getExams($school, $tok, $from, $to) {
+    public static function getExams($school, $tok, $from, $to)
+    {
         $ret = self::send($school, 'BejelentettSzamonkeresAmi?' . http_build_query([
             'DatumTol' => date('Y-m-d', $from),
             'DatumIg' => isset($to) ? date('Y-m-d', $to) : null
         ]), $tok);
-        if (! isset($ret)) {
+        if (!isset($ret)) {
             return [];
         }
 
-        return array_map(function($item) { 
-            return [
-                'id' => $item->Id,
-                'date' => strtotime($item->Datum),
-                'count' => $item->OraSzam,
-                'subject' =>$item->Tantargy,
-                'teacher' => $item->Tanar,
-                'name' => $item->SzamonkeresMegnevezese,
-                'type' => $item->SzamonkeresModja,
-                'creatingTime' => strtotime($item->BejelentesDatuma),
-                'osztalyCsoportUid' => $item->OsztalyCsoportUid
-            ];
-        },
+        return array_map(
+            function ($item) {
+                return [
+                    'id' => $item->Id,
+                    'date' => strtotime($item->Datum),
+                    'count' => $item->OraSzam,
+                    'subject' => $item->Tantargy,
+                    'teacher' => $item->Tanar,
+                    'name' => $item->SzamonkeresMegnevezese,
+                    'type' => $item->SzamonkeresModja,
+                    'creatingTime' => strtotime($item->BejelentesDatuma),
+                    'osztalyCsoportUid' => $item->OsztalyCsoportUid
+                ];
+            },
             json_decode($ret)
         );
     }
@@ -536,7 +559,7 @@ class KretaApi
                     }
                 }
             }
-            
+
             if ($isObj) {
                 $ret->{$newKey} = $newVal;
             } else {
@@ -546,10 +569,11 @@ class KretaApi
         return $ret;
     }
 
-    private static function parseToldyDate($string) {
+    private static function parseToldyDate($string)
+    {
         $date = trim($string);
-        if($date == 'ma') return date('Y-m-d');
-        if($date == 'holnap') return date('Y-m-d', strtotime('tomorrow'));
+        if ($date === 'ma') return date('Y-m-d');
+        if ($date === 'holnap') return date('Y-m-d', strtotime('tomorrow'));
 
         $date = str_replace('.', '', $date);
         $date = explode(' ', $date);

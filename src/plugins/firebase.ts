@@ -19,7 +19,6 @@ export const messaging = firebase.messaging();
 messaging.usePublicVapidKey(
   'BMBWunap5uu6T3JMHFwjn-qJRmAC-tTw9_AwCQbUCCXJ69r9KkWxmJymYV2ytB3ySXupkuNN1wvkpXRtPgjpxBc'
 );
-messaging.onMessage(payload => {
-  // console.log('Message received. ', payload);
-  // ...
-});
+
+export const analytics = firebase.analytics();
+export const perf = firebase.performance();

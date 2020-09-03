@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\UnauthorizedException;
+use UnexpectedValueException;
 
 class AuthController extends Controller
 {
@@ -67,11 +69,18 @@ class AuthController extends Controller
     {
         $credentials = $request->only('school', 'username', 'password', 'rme');
 
-        if (! $token = auth()->attempt($credentials)) {
+        try {
+            $token = auth()->attempt($credentials);
+        } catch (UnauthorizedException $e) {
             return response([
-                'error' => 'Rossz felhasználónév / jelszó!'
+                'error' => $e->getMessage()
+            ], 401);
+        } catch (UnexpectedValueException $e) {
+            return response([
+                'error' => $e->getMessage()
             ], 401);
         }
+
         return $this->respondWithToken($token);
     }
 
@@ -85,7 +94,7 @@ class AuthController extends Controller
         ]);
     }
 
-        /**
+    /**
      * Get the needed authorization credentials from the request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -105,22 +114,28 @@ class AuthController extends Controller
         ]);
     }
 
-    public function refreshToken(Request $request) {
-        // try {
-            return response()->json(['access_token' => auth()->setRequest($request)
-            ->parseToken()
-            ->refresh()
-        ]);
-        // } catch (JWTException $exception) {
-        //     throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
-        // }
+    public function refreshToken(Request $request)
+    {
+        try {
+            return response()->json([
+                'access_token' => auth()->setRequest($request)
+                    ->parseToken()
+                    ->refresh()
+            ]);
+        } catch (JWTException $exception) {
+            throw new UnauthorizedHttpException('jwt-auth', $exception->getMessage(), $exception, $exception->getCode());
+        }
     }
     public function logout()
     {
-        Auth::logout();
-        return response([
+        try {
+            Auth::logout();
+        } catch (UnauthorizedHttpException $e) {
+        } finally {
+            return response([
                 'status' => 'success',
                 'msg' => 'Sikeresen kiléptél!'
-        ], 200);
+            ], 200);
+        }
     }
 }

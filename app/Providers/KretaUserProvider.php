@@ -7,9 +7,10 @@ use Illuminate\Contracts\Auth\UserProvider as IlluminateUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use Session;
-
+use Nette\NotImplementedException;
 
 class KretaUserProvider implements IlluminateUserProvider
 {
@@ -26,8 +27,8 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveById($identifier)
     {
-        if(!is_object($identifier)) {
-            if(Session::has('user')) {
+        if (!is_object($identifier)) {
+            if (Session::has('user')) {
                 $user = new User();
                 $user->load(Session::get('user'));
                 return $user;
@@ -38,14 +39,15 @@ class KretaUserProvider implements IlluminateUserProvider
             ['kreta_id', $identifier->id],
             ['remember_token', $identifier->hash]
         ])->first();
-        if(! isset($user)) {
+        if (!isset($user)) {
             return null;
         }
         return self::retrieveByTokens($user->access_token, $user->refresh_token, $identifier->key, $identifier->hash);
     }
 
-    public static function retrieveByTokens($access_token, $refresh_token, $key, $hash = null) {
-        if (Str::startsWith($key = $key, 'base64:')) {
+    public static function retrieveByTokens($access_token, $refresh_token, $key, $hash = null)
+    {
+        if (Str::startsWith($key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
         }
         $enc = new Encrypter($key, config('app.cipher'));
@@ -67,7 +69,7 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveByToken($identifier, $token)
     {
-        return 'No.';
+        throw new NotImplementedException();
     }
 
     /**
@@ -90,9 +92,11 @@ class KretaUserProvider implements IlluminateUserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if (!isset($credentials) ||
-           (count($credentials) === 1 &&
-            array_key_exists('password', $credentials))) {
+        if (
+            !isset($credentials) ||
+            (count($credentials) === 1 &&
+                array_key_exists('password', $credentials))
+        ) {
             return;
         }
         return User::fromCredentials(

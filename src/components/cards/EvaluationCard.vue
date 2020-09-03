@@ -2,7 +2,7 @@
   <v-card
     :color="getEvaluationColor(evaluation.numberValue)"
     :dark="dark"
-    @click.native="$emit('input', evaluation)"
+    @click.native="$emit('input', evaluation.id)"
   >
     <div class="d-flex flex-no-wrap">
       <v-avatar class="ma-3" size="auto" tile>
@@ -10,9 +10,9 @@
           :class="[
             'display-1',
             `font-weight-${
-              evaluation.weight == '100%'
+              evaluation.weight === '100%'
                 ? 'regular'
-                : evaluation.weight == '50%'
+                : evaluation.weight === '50%'
                 ? 'thin'
                 : 'bold'
             }`
@@ -39,7 +39,7 @@
     <v-card-actions class="pa-3">
       <v-icon :dark="dark">{{ getEvaluationIcon(evaluation.mode) }}</v-icon
       >&#10240;{{
-        evaluation.type == 'MidYear' ? evaluation.mode : evaluation.typeName
+        evaluation.type === 'MidYear' ? evaluation.mode : evaluation.typeName
       }}
       <v-spacer></v-spacer>
       {{ evaluation.date | formatDate }}
@@ -51,12 +51,13 @@ import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Evaluation } from '../../api-types';
+import { isDark } from '../../helpers';
 
 @Component
 export default class EvaluationCard extends mixins(Mixin) {
   @Prop() readonly evaluation!: Evaluation;
   get dark() {
-    return this.isDark(this.getEvaluationColor(+this.evaluation.numberValue));
+    return isDark(this.getEvaluationColor(+this.evaluation.numberValue));
   }
 }
 </script>

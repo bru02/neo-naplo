@@ -3,9 +3,8 @@
 namespace App\Jobs;
 use App\KretaApi;
 use App\Providers\KretaUserProvider;
+use Exception;
 use Illuminate\Support\Facades\DB;
-use FCM;
-use FCMGroup;
 use InvalidArgumentException;
 use LaravelFCM\Message\OptionsBuilder;
 use LaravelFCM\Message\PayloadDataBuilder;
@@ -13,12 +12,13 @@ use LaravelFCM\Message\PayloadNotificationBuilder;
 use LogicException;
 use Spatie\Async\Pool;
 use GuzzleHttp\Exception\ClientException;
+use LaravelFCM\Facades\FCM;
+use LaravelFCM\Facades\FCMGroup;
 
-           // $new_absences_bejustified = self::absencesBejustified(
-            //     $data->absences
-            // )->diff(
-            //     json_decode($row->absences_bejustified)
-            // );
+if(config('app.env') === 'local') {
+    Pool::$forceSynchronous = true;
+}
+
 class SendNotifications {
     const dayMap = [
         'Vasárnap',
@@ -54,7 +54,7 @@ class SendNotifications {
                 $user->school,
                 $data->osztalyCsoportok
             );
-            dump($events);
+
             $newEvents = $events->filter( function ($event) use ($storedEvents) {
                 return !$storedEvents->has($event->id);
             });
@@ -91,7 +91,6 @@ class SendNotifications {
                 $this->sendNotification($notificationKey, $title, '', "/timetable/0/$lesson->date:$lesson->count", 'changedLesson');
             }
 
-
             $evaluationCT = strtotime($row->evaluation_creating_time);
 
             $newEvaluations = array_filter($data->evaluations, function ($eval) use ($evaluationCT)  {
@@ -101,7 +100,6 @@ class SendNotifications {
             foreach($newEvaluations as $eval) {
                 $this->sendNotification($notificationKey, "$eval->subject: $eval->value", "$eval->weight - $eval->theme", "/evaluation/$eval->id", 'evaluation');
             }
-
 
             $absenceCT = strtotime($row->absence_creating_time);
             $newAbsences = collect($data->absences)->transform(function($a) {
@@ -113,12 +111,20 @@ class SendNotifications {
                 $this->sendNotification($notificationKey, "$abs->subject: $abs->typeName", "$abs->date - $abs->justificationStateName", "/absence/$abs->id", 'absence');
             }
             $noteCT = strtotime($row->note_creating_time);
-            $new_notes = array_filter($data->evaluations, function ($note) use ($noteCT)  {
+            $new_notes = array_filter($data->notes, function ($note) use ($noteCT)  {
                 return $note->creatingTime > $noteCT;
             });
             foreach($new_notes as $note) {
                 $this->sendNotification($notificationKey, "$note->title", "$note->content - $note->teacher","/$note->id", 'note');
-            } 
+            }
+
+            DB::table('')->where('id', $row->id)->update([
+                    'absence_creating_time' => collect($data->absences)->max('creatingTime'),
+                    'evaluations_creating_time' => collect($data->evaluations)->max('creatingTime'),
+                    'note_creating_time' => collect($data->notes)->max('creatingTime'),
+
+            ]);
+            
         })->catch(function (LogicException $e) {
 
         })->catch(function (InvalidArgumentException $e) {

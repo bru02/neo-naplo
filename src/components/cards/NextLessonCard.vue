@@ -9,16 +9,16 @@
       <div class="d-flex flex-no-wrap">
         <v-avatar class="ma-3" size="auto" tile v-if="mobile && lessonButtons">
           <v-icon>
-            mdi-bag-personal{{ pack.length == packData.length ? '' : '-off' }}
+            mdi-bag-personal{{ pack.length === packData.length ? '' : '-off' }}
           </v-icon>
         </v-avatar>
         <div>
           <v-card-title primary-title>
-            {{ mode == 'today' ? nextLesson.subject : `${lessons.length} db` }}
+            {{ mode === 'today' ? nextLesson.subject : `${lessons.length} db` }}
           </v-card-title>
           <v-card-subtitle>
             {{
-              mode == 'today'
+              mode === 'today'
                 ? `lesz a következő órád, ${timeTillNextLesson}`
                 : 'órád lesz holnap'
             }}
@@ -32,7 +32,7 @@
         </div>
       </div>
       <v-divider light></v-divider>
-      <v-card-actions class="pa-3" v-if="mode == 'today'">
+      <v-card-actions class="pa-3" v-if="mode === 'today'">
         {{ nextLesson.count }} / {{ lessons[lessons.length - 1].count }}
         <v-spacer></v-spacer>
         {{ nextLesson.classRoom }}
@@ -47,7 +47,7 @@
         </v-btn>
         <v-btn icon @click="packDialog = true">
           <v-icon>
-            mdi-bag-personal{{ pack.length == packData.length ? '' : '-off' }}
+            mdi-bag-personal{{ pack.length === packData.length ? '' : '-off' }}
           </v-icon>
         </v-btn>
       </template>
@@ -125,7 +125,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   }
 
   get timetableKey() {
-    return +this.date / 1000 + (this.mode == 'tomorrow' ? 24 * 60 * 60 : 0);
+    return +this.date / 1000 + (this.mode === 'tomorrow' ? 24 * 60 * 60 : 0);
   }
 
   get lessons() {
@@ -133,7 +133,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   }
 
   get nextLesson() {
-    if (this.mode == 'today') {
+    if (this.mode === 'today') {
       for (let l of this.lessons) {
         if (l.startTime * 1000 > +this.time) {
           return l;
@@ -144,7 +144,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   }
 
   get timeTillNextLesson() {
-    if (this.mode == 'today') {
+    if (this.mode === 'today') {
       const MILLISECONDS_MINUTE = 60 * 1000;
       const MILLISECONDS_HOUR = 60 * MILLISECONDS_MINUTE;
 
@@ -166,7 +166,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   get changes() {
     if (this.mode != 'tomorrow') return [];
     const substitued = this.lessons.filter(l => !!l.deputyTeacher);
-    const missed = this.lessons.filter(l => l.state == 'Missed');
+    const missed = this.lessons.filter(l => l.state === 'Missed');
     let ret: any[] = [];
     if (substitued.length) {
       ret.push({
@@ -215,7 +215,7 @@ export default class NextLessonCard extends mixins(Mixin) {
       })
       .map(({ subject }) => subject)
       .filter((e, i, a) => {
-        return a.indexOf(e) == i;
+        return a.indexOf(e) === i;
       })
       .map(subject => {
         return {
@@ -251,7 +251,7 @@ export default class NextLessonCard extends mixins(Mixin) {
     return `https://www.google.com/maps/dir//${
       this.instituteName
     }/data=!4m6!4m5!2m3!6e1!7e2!8j${this.firstLessonTomorrow.startTime +
-      50 * 60}!3e3`;
+      110 * 60}!3e3`;
   }
 }
 </script>

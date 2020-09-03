@@ -3,7 +3,7 @@
     <v-data-iterator
       disable-pagination
       :sort-by="view.slice(5)"
-      v-show="view.slice(0, 4) == 'sort'"
+      v-show="view.slice(0, 4) === 'sort'"
       sort-desc
       hide-default-footer
       :items="evaluationsByType.MidYear"
@@ -14,15 +14,12 @@
             <v-lazy
               min-height="48"
               v-if="
-                view == 'sort:subject' &&
-                  (i == 0 || props.items[i - 1].subject != item.subject)
+                view === 'sort:subject' &&
+                  (i === 0 || props.items[i - 1].subject != item.subject)
               "
               :key="item.subject"
             >
-              <v-subheader
-                v-pushpin="getPushpinOpts(item.subject)"
-                style="z-index:4;background:#fff;width:100%"
-              >
+              <v-subheader>
                 <v-icon>{{ getSubjectIcon(item.subjectCategoryName) }}</v-icon
                 >&#10240;{{ item.subject }} &#10240; &mdash; &#10240;
                 <span
@@ -53,7 +50,7 @@
         </v-list>
       </template>
     </v-data-iterator>
-    <v-list v-show="view.slice(0, 4) == 'type'">
+    <v-list v-show="view.slice(0, 4) === 'type'">
       <EvaluationListItem
         v-on:input="$emit('input', $event)"
         v-for="item in evaluationsByType[view.slice(5)]"
@@ -83,9 +80,11 @@ import Vue from 'vue';
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Evaluation, ClassAverage } from '../../api-types';
+import { Evaluation } from '../../api-types';
 import { VPushPin } from '@/directives/pushpin';
 import EvaluationListItem from '@/components/listItems/EvaluationListItem.vue';
+import { getEvaluationTypeName } from '../../utils/evaluations';
+import group from '../../utils';
 @Component({
   components: { EvaluationListItem },
   directives: { pushpin: VPushPin }
@@ -102,7 +101,7 @@ export default class EvaluationList extends mixins(Mixin) {
       0;
   }
   get evaluationsByType() {
-    return this.group(this.evaluations, 'type');
+    return group(this.evaluations, 'type');
   }
   pushpinPositions = {};
   view = 'date';
@@ -132,12 +131,12 @@ export default class EvaluationList extends mixins(Mixin) {
         .filter(k => k !== 'MidYear')
         .map(k => ({
           id: `type:${k}`,
-          text: this.getEvaluationTypeName(k as any),
+          text: getEvaluationTypeName(k as any),
           icon: 'mdi-timeline'
         }))
     ];
   }
-  getPushpinOpts(subject) {
+  /*getPushpinOpts(subject) {
     const spec = this.pushpinPositions[subject] ?? {};
     return {
       top: spec.top ?? Infinity,
@@ -170,5 +169,8 @@ export default class EvaluationList extends mixins(Mixin) {
       });
     }
   }
+  v-pushpin="getPushpinOpts(item.subject)"
+  style="z-index:4;background:#fff;width:100%"
+  */
 }
 </script>

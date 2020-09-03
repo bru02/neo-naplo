@@ -3,10 +3,12 @@ import './registerServiceWorker';
 import store from './store';
 import router from './plugins/router';
 import vuetify from './plugins/vuetify';
-import './plugins/axios';
 import './plugins/sentry';
-import './plugins/firebase';
+import { analytics } from './plugins/firebase';
 import '@mdi/font/css/materialdesignicons.css';
+import { Route } from 'vue-router';
+import './plugins/toasts';
+import { apiClient } from './plugins/axios';
 
 import App from './App.vue';
 
@@ -20,7 +22,7 @@ export default new Vue({
   vuetify,
   render: h => h(App),
   async created() {
-    Vue.axios.interceptors.request.use(
+    apiClient.interceptors.request.use(
       async (config = {}) => {
         if (this.$store.getters['auth/isAuthenticated']) {
           let token = this.$store.state.auth.token;
@@ -44,7 +46,7 @@ export default new Vue({
         return Promise.reject(error);
       }
     );
-    Vue.axios.interceptors.response.use(
+    apiClient.interceptors.response.use(
       response => {
         return response;
       },
@@ -66,23 +68,26 @@ export default new Vue({
         throw error;
       }
     );
-    this.$router.beforeEach((to, from, next) => {
-      const routes = to.matched
-        .filter(url => url.name !== 'Belépés')
-        .filter(match => 'auth' in match.meta)
-        .filter(meta => !!meta);
-      if (routes && routes.length) {
+    this.$router.beforeEach((to: Route, from: Route, next: Function) => {
+      const requiresAuth = to.matched.some(r => r.meta?.auth);
+      if (requiresAuth) {
         if (
           this.$store.getters['auth/isAuthenticated'] ||
-          to.name == 'Belépés'
+          to.name === 'Belépés'
         ) {
           next();
         } else {
-          next('/login');
+          next({
+            name: 'Belépés',
+            query: { redirect: encodeURIComponent(to.fullPath) }
+          });
         }
       } else {
         next();
       }
+    });
+    this.$router.afterEach((to: Route) => {
+      analytics.logEvent('page_view', { page_path: to.fullPath });
     });
   }
 });

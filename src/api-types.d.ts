@@ -10,7 +10,7 @@ export interface GeneralAPI {
   instituteCode: string;
   evaluations: Evaluation[];
   subjectAverages: null;
-  absences: AbsenceGroup[];
+  absences: Absence[];
   notes: Note[];
   osztalyCsoportok: OsztalyCsoport[];
   events: Event[];
@@ -29,10 +29,6 @@ export interface GeneralAPI {
 //   NemAlapkepzes = "NemAlapkepzes",
 //   None = "None"
 // }
-export interface AbsenceGroup {
-  items: Absence[];
-  date: number;
-}
 
 export interface Absence {
   id: number;

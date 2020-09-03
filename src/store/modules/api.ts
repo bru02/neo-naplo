@@ -2,15 +2,16 @@ import {
   TimetableAPI,
   Evaluation,
   ClassAverage,
-  Exam
-} from './../../api-types.d';
+  Exam,
+  Absence
+} from '@/api-types.d';
+
 import Vue from 'vue';
-import Vuex from 'vuex';
 import { Getters, Mutations, Actions, Module } from 'vuex-smart-module';
 import { GeneralAPI } from '@/api-types';
 import api from '@/api';
 import group from '@/utils';
-Vue.use(Vuex);
+import { getAverage } from '@/utils/evaluations';
 
 class Resource<T> {
   data: T;
@@ -35,6 +36,46 @@ class Resource<T> {
   }
 }
 
+export interface Stat {
+  evaluations: Evaluation[];
+  absences: Absence[];
+  average: number | null;
+  classAverage: number | null;
+  absencesCount: { color: string; absencesByJustification: any; text: string };
+  subject: string;
+  subjectCategoryName: string;
+}
+
+function getAbsencesCount(absences: Absence[]) {
+  const absencesByJustification = group(absences, 'justificationState');
+  if (absencesByJustification.UnJustified) {
+    return {
+      color: 'red',
+      text: `${absencesByJustification.UnJustified.length} igazolatlan hiányzás`,
+      absencesByJustification
+    };
+  }
+  if (absencesByJustification.BeJustified) {
+    return {
+      color: 'orange',
+      text: `${absencesByJustification.BeJustified.length} igazolandó hiányzás`,
+      absencesByJustification
+    };
+  }
+  if (absencesByJustification.Justified) {
+    return {
+      color: 'green',
+      text: `${absencesByJustification.Justified.length} igazolt hiányzás`,
+      absencesByJustification
+    };
+  }
+  return {
+    color: '',
+    text: '',
+    absencesByJustification
+  };
+}
+
 export class ApiState {
   general = new Resource<GeneralAPI>({
     absences: [],
@@ -52,14 +93,22 @@ export class ApiState {
 class ApiGetters extends Getters<ApiState> {
   get cards() {
     let cards: any[] = [];
-    for (let type of ['absences', 'notes', 'evaluations']) {
+    for (let type of ['notes', 'evaluations']) {
       cards.push(
-        ...this.state.general.data[type].map(e => {
+        ...(this.state.general.data[type] ?? []).map(e => {
           e.category = type;
           return e;
         })
       );
     }
+    cards.push(
+      ...Object.values(this.getters.groupedAbsences).map(e => {
+        (e as any).category = 'absences';
+
+        (e as any).date = e[0].date;
+        return e;
+      })
+    );
     cards.push(
       ...this.getters.events.map(e => {
         (e as any).category = 'events';
@@ -80,8 +129,12 @@ class ApiGetters extends Getters<ApiState> {
     return this.state.general.data.absences;
   }
 
-  get flatAbsences() {
-    return this.state.general.data.absences.map(a => a.items).flatMap(a => a);
+  get groupedAbsences(): { [date: number]: Absence[] } {
+    return Object.values(group(this.state.general.data.absences, 'date'));
+  }
+
+  get absencesBySubject(): { [subject: string]: Absence[] } {
+    return group(this.state.general.data.absences, 'subject');
   }
 
   get events() {
@@ -98,6 +151,44 @@ class ApiGetters extends Getters<ApiState> {
 
   get groupedClassAverages(): { [k: string]: ClassAverage[] } {
     return group(this.state.classAverages.data, 'subject');
+  }
+
+  get stats() {
+    const subjects = [
+      ...Object.keys(this.getters.absencesBySubject),
+      ...Object.keys(this.getters.groupedEvaluations)
+    ].filter((e, i, a) => a.indexOf(e) === i);
+    const ret: Stat[] = [];
+    for (const subject of subjects) {
+      const absences = this.getters.absencesBySubject[subject] ?? [],
+        evaluations = this.getters.groupedEvaluations[subject] ?? [];
+      evaluations.sort(
+        (a, b) => +(b.type === 'MidYear') - +(a.type === 'MidYear')
+      );
+      ret.push({
+        absences,
+        evaluations,
+        average: getAverage(evaluations),
+        classAverage: this.getters.groupedClassAverages[subject]
+          ? this.getters.groupedClassAverages[subject][0].value
+          : null,
+        absencesCount: getAbsencesCount(absences),
+        subject,
+        subjectCategoryName: (absences.length ? absences : evaluations)[0]
+          .subjectCategoryName
+      });
+    }
+    if (subjects.length > 1)
+      ret.push({
+        absences: this.getters.absences,
+        evaluations: this.getters.evaluations,
+        average: getAverage(this.getters.evaluations),
+        classAverage: null,
+        absencesCount: getAbsencesCount(this.getters.absences),
+        subject: 'Összes tantárgy',
+        subjectCategoryName: 'Összes tantárgy'
+      });
+    return ret;
   }
 }
 
@@ -134,6 +225,7 @@ class ApiMutations extends Mutations<ApiState> {
     this.state.homework.reset();
     this.state.exams.reset();
     localStorage.setItem('packData', '');
+    caches?.delete('api-cache');
   }
 }
 
@@ -210,7 +302,7 @@ class ApiActions extends Actions<
 }
 
 function _sortValue(item) {
-  return 'creatingTime' in item && !item.category != 'exams'
+  return 'creatingTime' in item && item.category != 'exams'
     ? item.creatingTime
     : item.date;
 }

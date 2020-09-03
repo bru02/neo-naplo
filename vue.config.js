@@ -1,3 +1,6 @@
+const BundleAnalyzerPlugin = require('@bundle-analyzer/webpack-plugin');
+const { InjectManifest } = require('workbox-webpack-plugin');
+
 process.env.VUE_APP_SHA = process.env.SOURCE_VERSION;
 
 module.exports = {
@@ -11,9 +14,19 @@ module.exports = {
       ? '../resources/views/index.blade.php'
       : 'index.html',
   chainWebpack: config => {
-    config.plugin('VuetifyLoaderPlugin').tap(args => [
+    config.plugin('VuetifyLoaderPlugin').tap(() => [
       {
         progressiveImages: true
+      }
+    ]);
+    config.plugin('bundle-analyzer').use(BundleAnalyzerPlugin, [
+      {
+        token: process.env.BUNDLE_ANALYZER_PLUGIN
+      }
+    ]);
+    config.plugin('workbox').use(InjectManifest, [
+      {
+        swSrc: './src/sw.js'
       }
     ]);
   },

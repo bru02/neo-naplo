@@ -13,9 +13,12 @@
         <h4>{{ lesson.count }}</h4>
       </v-list-item-icon>
       <v-list-item-content>
-        <v-list-item-title :class="{ 'red--text': lesson.state == 'Missed' }">{{
-          lesson.subject + (lesson.state == 'Missed' ? ' (Elmarad)' : '')
-        }}</v-list-item-title>
+        <v-list-item-title
+          :class="{ 'red--text': lesson.state === 'Missed' }"
+          >{{
+            lesson.subject + (lesson.state === 'Missed' ? ' (Elmarad)' : '')
+          }}</v-list-item-title
+        >
         <v-list-item-subtitle class="text--primary">{{
           lesson.deputyTeacher
             ? `Helyettesítő: ${lesson.deputyTeacher}`
@@ -50,13 +53,13 @@ export default class LessonList extends mixins(Mixin) {
     if (this.mobile) {
       return this.lessons;
     } else {
-      if (this.lessons.length == 0) return [];
+      if (this.lessons.length === 0) return [];
       // @ts-ignore
       let n: number[] = this.lessons.map(l => l.count),
         min = this.min != null ? this.min : Math.min(...n);
       return [...Array(Math.max(...n) - min + 1).keys()].map(i => {
         for (const l of this.lessons) {
-          if (l.count == min + i) return l;
+          if (l.count === min + i) return l;
         }
         return { subject: '', count: i + min };
       });

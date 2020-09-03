@@ -15,13 +15,15 @@ use Illuminate\Http\Request;
 class eFilcController extends Controller
 {
 
-    public function generalApi(Request $request) {
+    public function generalApi(Request $request)
+    {
         $user = $request->user('api');
         $data = isset($user->data) ? $user->data : $user->loadData();
         return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function timetableApi(Request $request) {
+    public function timetableApi(Request $request)
+    {
         $user = $request->user('api');
         $data = $user->getTimeTable(
             strtotime(
@@ -30,40 +32,45 @@ class eFilcController extends Controller
             strtotime(
                 $request->query('to', 'this week saturday')
             ),
-            $request->query('group', 1) == 0 ? false : true 
+            $request->boolean('group', true)
         );
         return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function eventsApi(Request $request) {
+    public function eventsApi(Request $request)
+    {
         $user = $request->user('api');
         return response()->json($user->loadEvents(), 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function classAveragesApi(Request $request) {
+    public function classAveragesApi(Request $request)
+    {
         $user = $request->user('api');
         return response()->json($user->loadClassAverages(), 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function hirdetmenyekApi($class, Request $request) {
+    public function hirdetmenyekApi($class, Request $request)
+    {
         $user = $request->user('api');
         return response()->json($user->loadHirdetmenyek($class), 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function examsApi(Request $request) {
+    public function examsApi(Request $request)
+    {
         $user = $request->user('api');
         return response()->json($user->loadExams(), 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function createExam(Request $request) {
+    public function createExam(Request $request)
+    {
         $data = $request->validate([
             'subject' => 'required|max:100',
             'date' => 'required|date|after_or_equal:today',
             'count' => 'required|integer',
             'teacher' => 'required|max:150',
             'name' => 'required|max:250',
-            'type' =>'required|max:150',
-            'classGroup' => 'required|uuid'  
+            'type' => 'required|max:150',
+            'classGroup' => 'required|uuid'
         ]);
         $exam = [
             'user_id' => $request->user('api')->id,
@@ -79,29 +86,32 @@ class eFilcController extends Controller
         return response()->json($exam);
     }
 
-    public function deleteExam($id) {
-        if($id[0] === 'f') $id = substr($id, 1);
+    public function deleteExam($id)
+    {
+        if ($id[0] === 'f') $id = substr($id, 1);
         DB::table('exams')->find($id)->delete();
         return response()->json(['message' => 'Success.'], 200);
     }
 
-    public function schoolsApi() {
+    public function schoolsApi()
+    {
         return response()->json(
             Cache::remember('schools', strtotime('1 month', 0), function () {
                 return KretaApi::schools();
             })
         );
     }
-    public function updateToken(Request $request) {
+    public function updateToken(Request $request)
+    {
         $user = $request->user('api');
         $uid = $user->id;
         $token = $request->input('token');
         $sub = $user->getJWTIdentifier();
-        if(!is_array($sub)) return response()->json(['error' => 'Not permanent user.'], 400);
-        if(!DB::table('fcm_groups')->where('user_id', $uid)->exists()) {
+        if (!is_array($sub)) return response()->json(['error' => 'Not permanent user.'], 400);
+        if (!DB::table('fcm_groups')->where('user_id', $uid)->exists()) {
             try {
                 $notification_key = FCMGroup::createGroup("$uid", [$token]);
-            } catch(ClientException $e) {
+            } catch (ClientException $e) {
                 $client = new Client();
                 $notification_key =  json_decode($client->get("https://fcm.googleapis.com/fcm/notification?notification_key_name=$uid", [
                     'headers' => [
@@ -112,16 +122,16 @@ class eFilcController extends Controller
                 ])->getBody())->notification_key;
                 try {
                     FCMGroup::addToGroup("$uid", $notification_key, [$token]);
-                }
-                catch(\GuzzleHttp\Exception\ClientException $e) {
+                } catch (\GuzzleHttp\Exception\ClientException $e) {
                     return response()->json(
-                            json_decode(
+                        json_decode(
                             $e->getResponse()->getBody()->getContents() ?? '{}'
-                            ), 400
+                        ),
+                        400
                     );
                 }
             }
-            
+
 
             $data = isset($user->data) ? $user->data : $user->loadData();
 
@@ -149,7 +159,7 @@ class eFilcController extends Controller
             ['kreta_id', $sub['id']],
             ['remember_token', $sub['hash']]
         ])->first()->id;
-        if(DB::table('fcm_tokens')->where('row_id', $rowId)->exists()) {
+        if (DB::table('fcm_tokens')->where('row_id', $rowId)->exists()) {
             DB::table('fcm_tokens')->where('row_id', $rowId)->update([
                 'token' => $token
             ]);
@@ -166,7 +176,8 @@ class eFilcController extends Controller
         return response()->json(['message' => 'Success.'], 200);
     }
 
-    public function deleteToken(Request $request) {
+    public function deleteToken(Request $request)
+    {
         $user = $request->user('api');
         $sub = $user->getJWTIdentifier();
         $rowId = DB::table('tokens')->select('id')->where([

@@ -20,10 +20,9 @@
               ><div v-on="supportText && on">
                 <v-switch
                   :disabled="!!supportText"
-                  :value="notificationsEnabled"
                   v-on:change="toggle()"
                   :loading="loading"
-                  :input-value="true"
+                  :input-value="notificationsEnabled"
                 ></v-switch>
               </div>
             </template>
@@ -115,6 +114,7 @@ import { Watch } from 'vue-property-decorator';
 import { settingsMapper, authMapper } from '@/store';
 import Dialog from '../components/dialogs/Dialog.vue';
 import EvaluationListItem from '../components/listItems/EvaluationListItem.vue';
+import { getEvalValue } from '../utils/evaluations';
 
 @Component({
   metaInfo: {
@@ -163,7 +163,7 @@ export default class SettingsComponent extends mixins(Mixin) {
   get mocks() {
     return [1, 2, 3, 4, 5, null].map(e => ({
       numberValue: e,
-      subject: this.getEvalValue(e),
+      subject: getEvalValue(e),
       date: new Date()
     }));
   }
@@ -172,20 +172,6 @@ export default class SettingsComponent extends mixins(Mixin) {
       key: nv || 'default',
       value: this.color
     });
-  }
-  @Watch('colorsDialog')
-  onDialogChange(value) {
-    if (value) {
-      if (!this.$route.params.dialog)
-        this.$router.push(`/settings/colorsDialog`);
-    } else {
-      if (this.$route.params.dialog) this.$router.push(`/settings`);
-    }
-  }
-  @Watch('$route')
-  onRouteChange() {
-    const { dialog } = this.$route.params;
-    this.colorsDialog = dialog === 'colorsDialog';
   }
 }
 </script>

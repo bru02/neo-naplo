@@ -1,143 +1,123 @@
 <template>
   <v-container>
     <v-list>
-      <template v-for="entry in absences">
+      <template v-for="(abs, date) in groupedAbsences">
         <v-list-item
-          v-if="entry.items.length === 1"
-          :key="entry.date"
+          v-if="abs.length === 1"
+          :key="date"
           v-ripple
-          @click="selectedAbsence = entry.items[0]"
+          @click="selectedAbsence = abs[0]"
         >
           <v-list-item-avatar>
-            <v-icon
-              :color="getAbsenceColor(entry.items[0].justificationState)"
-              >{{ getIcon(entry) }}</v-icon
-            >
+            <v-icon :color="getAbsenceColor(abs[0].justificationState)">{{
+              getIcon(abs)
+            }}</v-icon>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title>{{ entry.items[0].subject }}</v-list-item-title>
+            <v-list-item-title>{{ abs[0].subject }}</v-list-item-title>
             <v-list-item-subtitle
               :style="{
-                color: getAbsenceColor(entry.items[0].justificationState)
+                color: getAbsenceColor(abs[0].justificationState)
               }"
-              >{{ entry.items[0].justificationStateName }}</v-list-item-subtitle
+              >{{ abs[0].justificationStateName }}</v-list-item-subtitle
             >
           </v-list-item-content>
           <v-list-item-action>
-            <v-list-item-action-text>
-              {{ entry.items[0].date | formatDate }}
-            </v-list-item-action-text>
-            {{ entry.items[0].numberOfLessons }}.óra
+            <v-list-item-action-text>{{
+              date | formatDate
+            }}</v-list-item-action-text>
+            {{ abs[0].numberOfLessons }}.óra
           </v-list-item-action>
         </v-list-item>
-        <v-list-group :key="entry.date" v-else no-action>
+        <v-list-group :key="date" v-else no-action>
           <template v-slot:prependIcon>
-            <v-icon
-              :color="getAbsenceColor(entry.items[0].justificationState)"
-              >{{ getIcon(entry) }}</v-icon
-            >
+            <v-icon :color="getAbsenceColor(getJustificationState(abs))">{{
+              getIcon(abs)
+            }}</v-icon>
           </template>
           <template v-slot:activator>
             <v-list-item-content>
-              <v-list-item-title
-                >{{ entry.items[0].typeName }} ({{ entry.items.length }} db
-                óra)</v-list-item-title
-              >
+              <v-list-item-title>
+                {{ abs[0].typeName }} ({{ abs.length }} db óra)
+              </v-list-item-title>
             </v-list-item-content>
 
             <v-list-item-action>
-              <v-list-item-action-text>
-                {{ entry.date | formatDate }}
-              </v-list-item-action-text>
+              <v-list-item-action-text>{{
+                date | formatDate
+              }}</v-list-item-action-text>
             </v-list-item-action>
           </template>
 
           <v-list-item
-            v-for="abs in entry.items"
-            :key="abs.id"
+            v-for="a in abs"
+            :key="a.id"
             v-ripple
-            @click="selectedAbsence = abs"
+            @click="selectedAbsence = a"
           >
             <v-list-item-content>
-              <v-list-item-title>{{ abs.subject }}</v-list-item-title>
+              <v-list-item-title>{{ a.subject }}</v-list-item-title>
               <v-list-item-subtitle
-                :style="{ color: getAbsenceColor(abs.justificationState) }"
-                >{{ abs.justificationStateName }}</v-list-item-subtitle
+                :style="{ color: getAbsenceColor(a.justificationState) }"
+                >{{ a.justificationStateName }}</v-list-item-subtitle
               >
             </v-list-item-content>
-            <v-list-item-action>
-              {{ abs.numberOfLessons }}.óra
-            </v-list-item-action>
+            <v-list-item-action>{{ a.numberOfLessons }}.óra</v-list-item-action>
           </v-list-item>
         </v-list-group>
       </template>
     </v-list>
-    <v-alert
-      :value="true"
-      type="info"
-      v-show="absences.length == 0 && !loading"
+    <v-alert value type="info" v-show="absences.length === 0 && !loading"
+      >Még nem hiányoztál</v-alert
     >
-      Még nem hiányoztál
-    </v-alert>
-    <DataViewer
-      v-model="selectedAbsence"
-      title="Mulasztás"
-      :fn="absenceValues"
-    />
+    <router-view></router-view>
   </v-container>
 </template>
 
 <script lang="ts">
 import { apiMapper } from '@/store';
 import Mixin from '@/mixins';
-import DataViewer from '@/components/dialogs/DataViewer.vue';
 import { Watch } from 'vue-property-decorator';
 
 import Component, { mixins } from 'vue-class-component';
 import { Absence } from '../api-types';
 @Component({
   computed: {
-    ...apiMapper.mapGetters(['absences', 'flatAbsences']),
+    ...apiMapper.mapGetters(['absences', 'groupedAbsences']),
     ...apiMapper.mapState({
       loading: state => state.general.loading
     })
   },
-  components: { DataViewer },
   metaInfo: {
     title: 'Hiányzások'
   }
 })
 export default class AbsencesComponent extends mixins(Mixin) {
   selectedAbsence: Absence | boolean = false;
-  flatAbsences!: Absence[];
+  absences!: Absence[];
+  groupedAbsences!: { [date: number]: Absence[] };
+
   mounted() {
     this.obtain('general');
   }
-  getIcon(entry) {
+  getJustificationState(absences) {
+    let type = absences[0].justificationState;
+    if (absences.length === 1) return type;
+    for (let i = 1; i < absences.length; i++) {
+      if (absences[i].justificationState !== type) {
+        type = 'Mixed';
+        break;
+      }
+    }
+    return type;
+  }
+  getIcon(abs) {
     return {
       Justified: 'mdi-check',
       BeJustified: 'mdi-help-circle-outline',
-      UnJustified: 'mdi-close'
-    }[entry.items[0].justificationState];
-  }
-  @Watch('selectedAbsence')
-  onselectedNoteChange(value) {
-    if (value) {
-      if (!this.$route.params.id) this.$router.push(`/absences/${value.id}`);
-    } else {
-      if (this.$route.params.id) this.$router.push(`/absences`);
-    }
-  }
-  @Watch('$route')
-  onRouteChange() {
-    const { id } = this.$route.params;
-    if (id) {
-      if (!this.selectedAbsence)
-        this.selectedAbsence =
-          this.flatAbsences.find(e => e.id === +id) ?? false;
-    } else {
-      this.selectedAbsence = false;
-    }
+      UnJustified: 'mdi-close',
+      Mixed: 'mdi-help'
+    }[this.getJustificationState(abs)];
   }
 }
 </script>

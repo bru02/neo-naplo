@@ -4,7 +4,7 @@
       <v-toolbar color="indigo darken-2" dark flat>
         <v-toolbar-title>Belépés</v-toolbar-title>
       </v-toolbar>
-      <v-card>
+      <v-card :loading="loginLoading">
         <v-card-text class="pt-4">
           <div>
             <v-form
@@ -16,7 +16,7 @@
               <input type="hidden" v-bind:value="csrf" name="_token" />
               <v-autocomplete
                 :items="schools"
-                :loading="loading"
+                :loading="schoolsLoading"
                 v-model="school"
                 item-text="name"
                 item-value="code"
@@ -55,9 +55,10 @@
               <v-layout justify-space-between>
                 <v-btn
                   @click="login"
+                  :loading="loginLoading"
                   :class="{
-                    'blue darken-4 white--text': valid && !loading,
-                    disabled: !valid || loading
+                    'blue darken-4 white--text': valid,
+                    disabled: !valid
                   }"
                   >Belépés</v-btn
                 >
@@ -74,6 +75,7 @@
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+import { apiClient } from '../plugins/axios';
 @Component({
   metaInfo: {
     title: 'Belépés'
@@ -96,22 +98,23 @@ export default class LoginComponent extends mixins(Mixin) {
   rememberMe = false;
   errorMsg = '';
   schools = [];
-  loading = true;
+  schoolsLoading = true;
+  loginLoading = false;
 
   mounted() {
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$router.push('/');
     }
     let self = this;
-    this.$http.get('schools').then(response => {
+    apiClient.get('schools').then(response => {
       self.schools = response.data;
-      this.school = `${this.$route.query.school}` ?? '';
-      self.loading = false;
+      this.school = `${this.$route.query.school}`;
+      self.schoolsLoading = false;
     });
   }
   login() {
     if (this.$refs.form.validate()) {
-      this.loading = true;
+      this.loginLoading = true;
       this.$store
         .dispatch('auth/login', {
           school: this.school ?? '',
@@ -120,13 +123,13 @@ export default class LoginComponent extends mixins(Mixin) {
           rme: this.rememberMe
         })
         .then(() => {
-          this.loading = false;
-          this.$router.push('/');
+          this.loginLoading = false;
+          this.$router.push(this.$route.params.redirect ?? '/');
         })
         .catch(err => {
-          this.loading = false;
+          this.loginLoading = false;
           const response = err.response;
-          if (response && response.status === 401) {
+          if (response?.status === 401) {
             this.errorMsg = response.data?.error ?? '';
           } else throw err;
         });

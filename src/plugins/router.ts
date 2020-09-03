@@ -1,3 +1,4 @@
+import { toast } from './toasts';
 import Vue from 'vue';
 import VueMeta from 'vue-meta';
 
@@ -6,23 +7,22 @@ import Home from '@/views/Home.vue';
 import Timetable from '@/views/Timetable.vue';
 import NotFound from '@/views/NotFound.vue';
 
-const Notes = () =>
-  import(
-    /* webpackChunkName: "views" */ /* webpackPrefetch: true */ '@/views/Notes.vue'
-  );
-const Absences = () =>
-  import(/* webpackChunkName: "views" */ '@/views/Absences.vue');
-const Profile = () =>
-  import(/* webpackChunkName: "views" */ '@/views/Profile.vue');
-const Statistics = () =>
-  import(/* webpackChunkName: "views" */ '@/views/Statistics.vue');
-const Evaluations = () =>
-  import(/* webpackChunkName: "views" */ '@/views/Evaluations.vue');
-const Settings = () =>
-  import(/* webpackChunkName: "views" */ '@/views/Settings.vue');
-// const Exams = () => import(/* webpackChunkName: "views" */ '@/views/Exams.vue');
+const Notes = () => import('@/views/Notes.vue');
+const Absences = () => import('@/views/Absences.vue');
+const Profile = () => import('@/views/Profile.vue');
+const Statistics = () => import('@/views/Statistics.vue');
+const Statistic = () => import('@/views/Statistic.vue');
+const Evaluations = () => import('@/views/Evaluations.vue');
+const Settings = () => import('@/views/Settings.vue');
+const Exams = () => import('@/views/Exams.vue');
 
-const routes = [
+const NoteDialog = () => import('@/components/dialogs/NoteDialog.vue');
+const AbsenceDialog = () => import('@/components/dialogs/AbsenceDialog.vue');
+const EvaluationDialog = () =>
+  import('@/components/dialogs/EvaluationDialog.vue');
+const EventDialog = () => import('@/components/dialogs/EventDialog.vue');
+
+const routes: RouteConfig[] = [
   {
     name: 'Belépés',
     path: '/login',
@@ -32,46 +32,147 @@ const routes = [
     }
   },
   {
-    path: '/:type(evaluation|note|absence|event)/:id?',
-    component: Home,
-    name: 'Faliújság ',
-
-    meta: {
-      auth: true
-    }
-  },
-  {
     path: '/',
     component: Home,
     name: 'Faliújság',
-    icon: 'mdi-home',
     meta: {
       auth: true
-    }
+    },
+    children: [
+      {
+        path: '/note/:id',
+        component: NoteDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const note = store.state.api.general.data?.notes.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!note) {
+            toast.error('Nem található a feljegyzés!');
+            next(false);
+            return;
+          }
+          to.params.note = note;
+          next();
+        }
+      },
+      {
+        path: '/absence/:id',
+        component: AbsenceDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const abs = store.state.api.general.data?.absences.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!abs) {
+            toast.error('Nem található a mulasztás!');
+            next(false);
+            return;
+          }
+          to.params.abs = abs;
+          next();
+        }
+      },
+      {
+        path: '/event/:id',
+        component: EventDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const evt = store.state.api.general.data?.events.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!evt) {
+            toast.error('Nem található a hirdetmény!');
+            next(false);
+            return;
+          }
+          to.params.event = evt;
+          next();
+        }
+      },
+      {
+        path: '/evaluation/:id',
+        component: EvaluationDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const evaluation = store.state.api.general.data?.evaluations.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!evaluation) {
+            toast.error('Nem található az értékelés!');
+            next(false);
+            return;
+          }
+          to.params.eval = evaluation;
+          next();
+        }
+      }
+    ]
   },
   {
     path: '/absences/:id?',
     component: Absences,
     name: 'Hiányzások',
-    icon: 'mdi-block-helper',
     meta: {
       auth: true
-    }
+    },
+    children: [
+      {
+        path: '/absence/:id',
+        component: AbsenceDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const abs = store.state.api.general.data?.absences.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!abs) {
+            toast.error('Nem található a mulasztás!');
+            next(false);
+            return;
+          }
+          to.params.abs = abs;
+          next();
+        }
+      }
+    ]
   },
   {
     path: '/notes/:id?',
     component: Notes,
     name: 'Feljegyzések',
-    icon: 'mdi-comment-processing-outline',
     meta: {
       auth: true
-    }
+    },
+    children: [
+      {
+        path: '/notes/:id',
+        component: NoteDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const note = store.state.api.general.data?.notes.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!note) {
+            toast.error('Nem található a feljegyzés!');
+            next(false);
+            return;
+          }
+          to.params.note = note;
+          next();
+        }
+      }
+    ]
   },
   {
     path: '/timetable/:cweek/:lessonHash?' /*:w?*/,
     component: Timetable,
     name: 'Órarend',
-    icon: 'mdi-calendar-text-outline',
     meta: {
       auth: true
     },
@@ -85,43 +186,87 @@ const routes = [
     path: '/evaluations/:id?',
     component: Evaluations,
     name: 'Jegyek',
-    icon: 'mdi-calendar-check-outline',
     meta: {
       auth: true
-    }
+    },
+    children: [
+      {
+        path: '/evaluations/:id',
+        component: EvaluationDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const evaluation = store.state.api.general.data?.evaluations.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!evaluation) {
+            toast.error('Nem található az értékelés!');
+            next(false);
+            return;
+          }
+          to.params.eval = evaluation;
+          next();
+        }
+      }
+    ]
   },
   {
-    path: '/statistics/:subject?/:type?/:id?',
+    path: '/statistics',
     component: Statistics,
     name: 'Statisztikák',
-    icon: 'mdi-chart-timeline-variant',
     meta: {
       auth: true
     },
     props: true
   },
-  /* {
+  {
+    path: '/statistics/:subject',
+    component: Statistic,
+    name: 'Statisztika',
+    meta: {
+      auth: true
+    },
+    children: [
+      {
+        path: '/statistics/:subject/evaluation/:id',
+        component: EvaluationDialog,
+        props: true,
+        beforeEnter: async (to, _, next) => {
+          await obtain('general');
+          const evaluation = store.state.api.general.data?.evaluations.find(
+            ({ id }) => +to.params.id === id
+          );
+          if (!evaluation) {
+            toast.error('Nem található az értékelés!');
+            next(false);
+            return;
+          }
+          to.params.eval = evaluation;
+          next();
+        }
+      }
+    ],
+    props: true
+  },
+  {
     path: '/exams',
     name: 'Számonkérések',
-    icon: 'mdi-file-document-edit-outline',
     component: Exams,
     meta: {
       auth: true
     }
-  },*/
+  },
   {
     path: '/profile',
     name: 'Profil',
-    icon: 'mdi-account',
     component: Profile,
     meta: {
       auth: true
     }
   },
   {
-    path: '/settings/:dialog?',
+    path: '/settings',
     name: 'Beállítások',
-    icon: 'mdi-settings',
     component: Settings,
     meta: {
       auth: true
@@ -134,7 +279,9 @@ const routes = [
   }
 ];
 
-import VueRouter from 'vue-router';
+import VueRouter, { RouteConfig } from 'vue-router';
+import store from '@/store';
+import { obtain } from '@/helpers';
 
 Vue.use(VueRouter);
 Vue.use(VueMeta);
@@ -152,7 +299,4 @@ const router = new VueRouter({
   }
 });
 
-(Vue as any).router = router;
-
 export default router;
-export { routes };

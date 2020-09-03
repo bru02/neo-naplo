@@ -64,7 +64,7 @@
 
           <v-list-item-content>
             <v-list-item-title>{{
-              formatDate(general.dateOfBirth)
+              general.dateOfBirth | formatDate
             }}</v-list-item-title>
             <v-list-item-subtitle>Születési idő</v-list-item-subtitle>
           </v-list-item-content>
@@ -82,7 +82,7 @@
           :key="index"
         >
           <v-list-item-icon>
-            <v-icon color="indigo" v-show="index == 0">mdi-map-marker</v-icon>
+            <v-icon color="indigo" v-show="index === 0">mdi-map-marker</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
@@ -121,7 +121,7 @@
             </v-list-item>
           </v-list-group>
         </v-list-group>
-        <!--  OSZTÁLY FÖNÖKÖK -->
+        <!--  OSZTÁLYFÖNÖKÖK -->
         <v-list-group>
           <template v-slot:prependIcon>
             <v-icon color="indigo">mdi-account</v-icon>
@@ -148,13 +148,13 @@
             </template>
             <v-list-item
               v-for="phoneNumber in teacher.tanar.alkalmazott.telefonok.filter(
-                p => p.tipus == 'PublikusTelefonszam'
+                p => p.tipus === 'PublikusTelefonszam'
               )"
               :key="phoneNumber.uid"
               :href="`${mobile ? 'tel' : 'callto'}:${phoneNumber.telefonszam}`"
             >
               <v-list-item-icon>
-                <v-icon v-show="i == 0"></v-icon>
+                <v-icon v-show="i === 0"></v-icon>
               </v-list-item-icon>
               <v-list-item-title>{{
                 phoneNumber.telefonszam
@@ -162,13 +162,13 @@
             </v-list-item>
             <v-list-item
               v-for="email in teacher.tanar.alkalmazott.emailek.filter(
-                e => e.tipus == 'PublikusEmailcim'
+                e => e.tipus === 'PublikusEmailcim'
               )"
               :key="email.uid"
               :href="`mailto:${email.email}`"
             >
               <v-list-item-icon>
-                <v-icon v-show="i == 0"></v-icon>
+                <v-icon v-show="i === 0"></v-icon>
               </v-list-item-icon>
               <v-list-item-title>{{ email.email }}</v-list-item-title>
             </v-list-item>
@@ -182,7 +182,7 @@
 import Mixin from '@/mixins';
 import { apiMapper } from '@/store';
 import Component, { mixins } from 'vue-class-component';
-import { GeneralAPI, OsztalyCsoport, Tutelary } from '../api-types';
+import { GeneralAPI, Tutelary } from '../api-types';
 @Component({
   computed: apiMapper.mapState({
     general: state => state.general.data
@@ -220,7 +220,7 @@ export default class Profile extends mixins(Mixin) {
   getClassGroup(teacher) {
     let classGroup;
     for (const cg of this.general.osztalyCsoportok) {
-      if (cg.osztalyfonokUid == teacher.uid) {
+      if (cg.osztalyfonokUid === teacher.uid) {
         classGroup = cg;
         break;
       }
