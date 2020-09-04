@@ -19,11 +19,6 @@ module.exports = {
         progressiveImages: true,
       },
     ]);
-    config.plugin('bundle-analyzer').use(BundleAnalyzerPlugin, [
-      {
-        token: process.env.BUNDLE_ANALYZER_PLUGIN,
-      },
-    ]);
     config.plugin('workbox').use(InjectManifest, [
       {
         swSrc: './src/sw.js',
