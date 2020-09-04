@@ -3,7 +3,7 @@ import { VNode } from 'vue/types/umd';
 
 export interface ToastOptions {
   id?: number;
-  msg: string;
+  msg?: string;
   queueable?: boolean;
   closeText?: string;
   color?: string;

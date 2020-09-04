@@ -48,34 +48,24 @@ class TimeActions extends Actions<
     }
   }
   continue() {
-    if (window.requestAnimationFrame) {
-      let start;
-      const step = (timestamp) => {
-        if (!start) {
-          start = timestamp;
-        }
+    let start;
+    const step = (timestamp) => {
+      if (!start) {
+        start = timestamp;
+      }
 
-        if (timestamp - start < 60000) {
-          this.state.requestId = requestAnimationFrame(step);
-        } else {
-          this.progress();
-        }
-      };
-
-      this.state.requestId = requestAnimationFrame(step);
-    } else {
-      this.state.timeoutId = setTimeout(() => {
+      if (timestamp - start < 60000) {
+        this.state.requestId = requestAnimationFrame(step);
+      } else {
         this.progress();
-      }, 60000);
-    }
+      }
+    };
+
+    this.state.requestId = requestAnimationFrame(step);
   }
 
   pause() {
-    if (window.requestAnimationFrame) {
-      cancelAnimationFrame(this.state.requestId);
-    } else {
-      clearTimeout(this.state.timeoutId);
-    }
+    cancelAnimationFrame(this.state.requestId);
   }
 
   progress() {

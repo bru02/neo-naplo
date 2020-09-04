@@ -2,7 +2,7 @@
   <v-container
     class="text-center"
     fill-height
-    style="height: calc(100vh - 58px);"
+    style="height: calc(100vh - 58px)"
   >
     <v-row align="center">
       <v-col>
@@ -10,9 +10,7 @@
 
         <p>Ez az oldal nem létezik</p>
 
-        <v-btn to="/" color="primary" outlined>
-          Faliújság
-        </v-btn>
+        <v-btn to="/" color="primary" outlined> Faliújság </v-btn>
       </v-col>
     </v-row>
   </v-container>

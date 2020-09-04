@@ -50,9 +50,7 @@
               getClassGroupTextFromUID(exam.osztalyCsoportUid, osztalyCsoportok)
             "
           ></v-list-item-title>
-          <v-list-item-subtitle>
-            Osztálycsoport
-          </v-list-item-subtitle>
+          <v-list-item-subtitle> Osztálycsoport </v-list-item-subtitle>
         </v-list-item-content></v-list-item
       >
     </v-list>

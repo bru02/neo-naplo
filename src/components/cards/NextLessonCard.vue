@@ -41,9 +41,7 @@
     <Dialog title="Órák" v-model="lessonsDialog">
       <template v-slot:toolbar v-if="lessonButtons">
         <v-btn icon :href="directions" target="_blank">
-          <v-icon>
-            mdi-directions
-          </v-icon>
+          <v-icon> mdi-directions </v-icon>
         </v-btn>
         <v-btn icon @click="packDialog = true">
           <v-icon>

@@ -9,7 +9,7 @@
       :items="evaluationsByType.MidYear"
     >
       <template v-slot:default="props">
-        <v-list two-line subheader style="position: relative;">
+        <v-list two-line subheader style="position: relative">
           <template v-for="(item, i) in props.items">
             <v-lazy
               min-height="48"

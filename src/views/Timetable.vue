@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: none; overflow: scroll;">
+  <v-container style="max-width: none; overflow: scroll">
     <v-sheet class="text-center" height="45">
       <v-btn
         text

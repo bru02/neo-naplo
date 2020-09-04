@@ -35,18 +35,14 @@
           <v-list-item-title>Színek testreszabása</v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <v-icon>
-            mdi-arrow-right
-          </v-icon>
+          <v-icon> mdi-arrow-right </v-icon>
         </v-list-item-action>
       </v-list-item>
     </v-list>
     <Dialog title="Színek testreszabása" v-model="colorsDialog">
       <template v-slot:toolbar>
         <v-btn icon @click="$store.commit('settings/resetColors')">
-          <v-icon>
-            mdi-format-clear
-          </v-icon>
+          <v-icon> mdi-format-clear </v-icon>
         </v-btn>
       </template>
       <v-container>
@@ -69,9 +65,7 @@
             v-on:input="updateColor($event.numberValue)"
           >
             <template v-slot:action>
-              <v-icon>
-                mdi-format-color-fill
-              </v-icon>
+              <v-icon> mdi-format-color-fill </v-icon>
             </template>
           </EvaluationListItem>
         </v-list>
@@ -87,20 +81,14 @@
       </v-icon>
       Értesítések {{ notificationsEnabled ? 'be' : 'ki' }}kapcsolva!
       <v-btn icon @click="toast = false">
-        <v-icon>
-          mdi-close
-        </v-icon>
+        <v-icon> mdi-close </v-icon>
       </v-btn>
     </v-snackbar>
     <v-snackbar v-model="errorToast" color="error">
-      <v-icon>
-        mdi-bell-alert-outline
-      </v-icon>
+      <v-icon> mdi-bell-alert-outline </v-icon>
       Hiba az értesítések {{ notificationsEnabled ? 'be' : 'ki' }}kapcsolásánál!
       <v-btn icon @click="toast = false">
-        <v-icon>
-          mdi-close
-        </v-icon>
+        <v-icon> mdi-close </v-icon>
       </v-btn>
     </v-snackbar>
   </v-container>

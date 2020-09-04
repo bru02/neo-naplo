@@ -17,9 +17,7 @@
             <v-icon>mdi-logout-variant</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>
-              Kilépés
-            </v-list-item-title>
+            <v-list-item-title> Kilépés </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
