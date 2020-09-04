@@ -9,7 +9,7 @@ const defaultColors = {
   3: '#afb42b',
   4: '#7cb342',
   5: '#43a047',
-  default: '#607d8b'
+  default: '#607d8b',
 };
 
 export class SettingsState {
@@ -97,5 +97,5 @@ export default new Module({
   state: SettingsState,
   getters: SettingsGetters,
   mutations: SettingsMutations,
-  actions: SettingsActions
+  actions: SettingsActions,
 });

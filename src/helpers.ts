@@ -12,7 +12,7 @@ const utc2date = (value: number | Date): Date => {
       'Szerda',
       'Csütörtök',
       'Péntek',
-      'Szombat'
+      'Szombat',
     ][utc2date(utc).getDay()];
   },
   leadingZero = (n: number) => {
@@ -38,7 +38,7 @@ export function isDark(bgColor: string) {
     g = parseInt(color.substring(2, 4), 16), // hexToG
     b = parseInt(color.substring(4, 6), 16), // hexToB
     uicolors = [r / 255, g / 255, b / 255],
-    c = uicolors.map(col => {
+    c = uicolors.map((col) => {
       if (col <= 0.03928) {
         return col / 12.92;
       }
@@ -51,7 +51,7 @@ export function isDark(bgColor: string) {
 export function formatText(text: string) {
   return linkifyHtml(text, {
     defaultProtocol: 'https',
-    nl2br: true
+    nl2br: true,
   });
 }
 
@@ -60,7 +60,7 @@ export function trimText(text: string) {
 }
 
 export function getLessonUrl(date, numberOfLessons) {
-  const getMonday = utc => {
+  const getMonday = (utc) => {
     const d = new Date(utc);
     const day = d.getDay(),
       diff = d.getDate() - day + 1;
@@ -90,7 +90,8 @@ export async function obtain(
     resource = store.state.api.timetable[`${arg.from}-${arg.to}`];
   } else if (what === 'hirdetmenyek') {
     arg = await obtain('general').then(
-      d => d.osztalyCsoportok.find(o => o.osztalyCsoportTipus === 'Osztaly').nev
+      (d) =>
+        d.osztalyCsoportok.find((o) => o.osztalyCsoportTipus === 'Osztaly').nev
     );
   }
   if (resource && !resource.loading && resource.loaded) return resource.data;

@@ -76,7 +76,7 @@ import Dialog from './Dialog.vue';
 import { Prop } from 'vue-property-decorator';
 import { Lesson } from '../../api-types';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class LessonDialog extends mixins(Mixin) {
   open = false;

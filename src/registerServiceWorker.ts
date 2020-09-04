@@ -9,7 +9,7 @@ if ('serviceWorker' in navigator) {
 async function registerSW() {
   const wb = new Workbox('/sw.js');
   let registration;
-  const showSkipWaitingPrompt = event => {
+  const showSkipWaitingPrompt = (event) => {
     // `event.wasWaitingBeforeRegister` will be false if this is
     // the first time the updated service worker is waiting.
     // When `event.wasWaitingBeforeRegister` is true, a previously
@@ -18,7 +18,7 @@ async function registerSW() {
 
     toast
       .prompt('Elérhető egy új verzió', {
-        confirm: 'Frissítés'
+        confirm: 'Frissítés',
       })
       .then(async () => {
         // Assuming the user accepted the update, set up a listener

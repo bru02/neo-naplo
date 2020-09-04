@@ -55,9 +55,9 @@ export default class LessonList extends mixins(Mixin) {
     } else {
       if (this.lessons.length === 0) return [];
       // @ts-ignore
-      let n: number[] = this.lessons.map(l => l.count),
+      let n: number[] = this.lessons.map((l) => l.count),
         min = this.min != null ? this.min : Math.min(...n);
-      return [...Array(Math.max(...n) - min + 1).keys()].map(i => {
+      return [...Array(Math.max(...n) - min + 1).keys()].map((i) => {
         for (const l of this.lessons) {
           if (l.count === min + i) return l;
         }

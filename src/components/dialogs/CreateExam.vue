@@ -8,7 +8,7 @@ import Component, { mixins } from 'vue-class-component';
 import Dialog from './Dialog.vue';
 import { Watch, Prop } from 'vue-property-decorator';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class DataViewer extends mixins(Mixin) {
   @Prop([Object, Boolean]) readonly value!: Boolean;

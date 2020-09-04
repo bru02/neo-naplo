@@ -3,7 +3,7 @@ import { registerRoute } from 'workbox-routing';
 import {
   NetworkFirst,
   CacheFirst,
-  StaleWhileRevalidate
+  StaleWhileRevalidate,
 } from 'workbox-strategies';
 import { precacheAndRoute } from 'workbox-precaching';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
@@ -18,9 +18,9 @@ registerRoute(
     cacheName: 'api-cache',
     plugins: [
       new CacheableResponsePlugin({
-        statuses: [0, 200]
-      })
-    ]
+        statuses: [0, 200],
+      }),
+    ],
   })
 );
 
@@ -28,7 +28,7 @@ registerRoute(
 registerRoute(
   /^https:\/\/fonts\.googleapis\.com/,
   new StaleWhileRevalidate({
-    cacheName: 'google-fonts-stylesheets'
+    cacheName: 'google-fonts-stylesheets',
   })
 );
 
@@ -39,19 +39,19 @@ registerRoute(
     cacheName: 'google-fonts-webfonts',
     plugins: [
       new CacheableResponsePlugin({
-        statuses: [0, 200]
+        statuses: [0, 200],
       }),
       new ExpirationPlugin({
         maxAgeSeconds: 60 * 60 * 24 * 365,
-        maxEntries: 30
-      })
-    ]
+        maxEntries: 30,
+      }),
+    ],
   })
 );
 
 googleAnalytics.initialize();
 
-addEventListener('message', event => {
+addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     skipWaiting();
   }
@@ -64,28 +64,28 @@ firebase.initializeApp({
   messagingSenderId: '189077601555',
   appId: '1:189077601555:web:318300dfc3a2d300',
   apiKey: 'AIzaSyBS6oHXLZJJbCeVHTGoX15JhNI_tMuT7Hk',
-  projectId: 'efilc-239813'
+  projectId: 'efilc-239813',
 });
 
 const messaging = firebase.messaging();
 
-messaging.setBackgroundMessageHandler(function(payload) {
+messaging.setBackgroundMessageHandler(function (payload) {
   console.log('[sw.js] Received background message ', payload);
 
   return self.registration.showNotification(payload.title, {
     body: payload.body,
     icon: '/favicon.ico',
     data: {
-      url: payload.data.url
-    }
+      url: payload.data.url,
+    },
   });
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
   const url = event.notification.data.url;
   event.notification.close(); // Android needs explicit close.
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(windowClients => {
+    clients.matchAll({ type: 'window' }).then((windowClients) => {
       // Check if there is already a window/tab open with the target URL
       for (var i = 0; i < windowClients.length; i++) {
         var client = windowClients[i];

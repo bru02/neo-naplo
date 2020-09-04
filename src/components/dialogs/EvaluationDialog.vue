@@ -28,7 +28,7 @@
         ><v-list-item-content>
           <v-list-item-title
             :class="[
-              impact === 0 ? '' : impact > 0 ? 'green--text' : 'red--text'
+              impact === 0 ? '' : impact > 0 ? 'green--text' : 'red--text',
             ]"
             >{{ impact }}</v-list-item-title
           >
@@ -92,7 +92,7 @@ import { Prop } from 'vue-property-decorator';
 import { Evaluation } from '../../api-types';
 import { getAverage } from '../../utils/evaluations';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class EvaluationDialog extends mixins(Mixin) {
   open = false;

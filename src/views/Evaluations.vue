@@ -29,12 +29,12 @@ import { Evaluation } from '../api-types';
   computed: apiMapper.mapGetters([
     'evaluations',
     'groupedClassAverages',
-    'groupedEvaluations'
+    'groupedEvaluations',
   ]),
   components: { EvaluationsTable, EvaluationsList },
   metaInfo: {
-    title: 'Jegyek'
-  }
+    title: 'Jegyek',
+  },
 })
 export default class EvaluationsComponent extends mixins(Mixin) {
   evaluations!: Evaluation[];

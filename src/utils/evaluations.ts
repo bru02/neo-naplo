@@ -46,7 +46,7 @@ export function getEvaluationTypeName(type: EvaluationType) {
     EndYear: 'Évvégi',
     HalfYear: 'Félévi',
     IQuarterEvaluation: 'Negyedéves',
-    IIIQuarterEvaluation: 'Negyedéves'
+    IIIQuarterEvaluation: 'Negyedéves',
   }[type];
 }
 
@@ -77,7 +77,7 @@ export function getSubjectIcon(scm: string | null) {
       'Óvódai feladat': 'mdi-rabbit', // Nincs kép
       'Technika, életvitel és gyakorlat': 'mdi-scissors-cutting',
       'Testnevelés és sport': 'mdi-basketball',
-      Történelem: 'mdi-owl'
+      Történelem: 'mdi-owl',
     };
   if (subjectCategoryName in map) return map[subjectCategoryName];
   let icon = 'mdi-book';
@@ -197,7 +197,7 @@ export function getEvalValue(nv: number | any) {
       3.5: 'Három-negyed',
       4: 'Jó',
       4.5: 'Négy-ötöd',
-      5: 'Jeles'
+      5: 'Jeles',
     }[nv] ?? 'Szöveges értékelés'
   );
 }

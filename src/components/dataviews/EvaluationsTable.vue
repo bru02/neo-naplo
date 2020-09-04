@@ -47,7 +47,7 @@
         </td>
         <td
           :style="{
-            color: getEvaluationColor(getAverage(groupedEvaluations[subject]))
+            color: getEvaluationColor(getAverage(groupedEvaluations[subject])),
           }"
         >
           {{ getAverage(groupedEvaluations[subject]) || '-' }}
@@ -72,8 +72,8 @@ import { getAverage, getEvaluationTypeName } from '../../utils/evaluations';
 import { apiMapper } from '../../store';
 @Component({
   computed: apiMapper.mapState({
-    classAvgLoaded: state => state.classAverages.loaded
-  })
+    classAvgLoaded: (state) => state.classAverages.loaded,
+  }),
 })
 export default class EvaluationsTable extends mixins(Mixin) {
   @Prop(Array) readonly evaluations!: Evaluation[];
@@ -121,7 +121,7 @@ export default class EvaluationsTable extends mixins(Mixin) {
       'gray--text': evaluation.mode === 'Órai munka',
       'teal--text-lighten-2': evaluation.mode === 'Házi dolgozat',
       'font-weight-bold': evaluation.weight === '200%',
-      eval: true
+      eval: true,
     };
   }
   getClassAverage(subject) {

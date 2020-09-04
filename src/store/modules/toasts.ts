@@ -28,11 +28,11 @@ class ToastsMutations extends Mutations<ToastsState> {
   addToast({ toast, front }: { toast: ToastOptions; front?: boolean }) {
     this.state.queue[front || false ? 'unshift' : 'push']({
       ...toast,
-      id: nextId++
+      id: nextId++,
     });
   }
   deleteToast(id: number) {
-    this.state.queue = this.state.queue.filter(t => t.id !== id);
+    this.state.queue = this.state.queue.filter((t) => t.id !== id);
   }
 }
 
@@ -56,5 +56,5 @@ export default new Module({
   state: ToastsState,
   getters: ToastsGetters,
   mutations: ToastsMutations,
-  actions: ToastsActions
+  actions: ToastsActions,
 });

@@ -20,7 +20,7 @@ export default new Vue({
   router,
   // @ts-ignore
   vuetify,
-  render: h => h(App),
+  render: (h) => h(App),
   async created() {
     apiClient.interceptors.request.use(
       async (config = {}) => {
@@ -42,12 +42,12 @@ export default new Vue({
         }
         return config;
       },
-      function(error) {
+      function (error) {
         return Promise.reject(error);
       }
     );
     apiClient.interceptors.response.use(
-      response => {
+      (response) => {
         return response;
       },
       (error: any) => {
@@ -61,7 +61,7 @@ export default new Vue({
           if (this.$route.name != 'Belépés') {
             this.$router.push({
               name: `Belépés`,
-              query: { school: instituteCode }
+              query: { school: instituteCode },
             });
           }
         }
@@ -69,7 +69,7 @@ export default new Vue({
       }
     );
     this.$router.beforeEach((to: Route, from: Route, next: Function) => {
-      const requiresAuth = to.matched.some(r => r.meta?.auth);
+      const requiresAuth = to.matched.some((r) => r.meta?.auth);
       if (requiresAuth) {
         if (
           this.$store.getters['auth/isAuthenticated'] ||
@@ -79,7 +79,7 @@ export default new Vue({
         } else {
           next({
             name: 'Belépés',
-            query: { redirect: encodeURIComponent(to.fullPath) }
+            query: { redirect: encodeURIComponent(to.fullPath) },
           });
         }
       } else {
@@ -89,7 +89,7 @@ export default new Vue({
     this.$router.afterEach((to: Route) => {
       analytics.logEvent('page_view', { page_path: to.fullPath });
     });
-  }
+  },
 });
 
 import * as helpers from './helpers';

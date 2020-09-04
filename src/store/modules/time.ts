@@ -50,7 +50,7 @@ class TimeActions extends Actions<
   continue() {
     if (window.requestAnimationFrame) {
       let start;
-      const step = timestamp => {
+      const step = (timestamp) => {
         if (!start) {
           start = timestamp;
         }
@@ -88,5 +88,5 @@ export default new Module({
   state: TimeState,
   getters: TimeGetters,
   mutations: TimeMutations,
-  actions: TimeActions
+  actions: TimeActions,
 });

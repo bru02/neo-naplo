@@ -9,15 +9,15 @@ const storedTheme = localStorage.getItem('dark_theme');
 
 export default new Vuetify({
   icons: {
-    iconfont: 'mdi'
+    iconfont: 'mdi',
   },
   lang: {
     locales: { hu, en },
-    current: 'hu'
+    current: 'hu',
   },
   theme: {
     dark: storedTheme
       ? storedTheme === 'true'
-      : matchMedia && matchMedia('(prefers-color-scheme: dark)').matches
-  }
+      : matchMedia && matchMedia('(prefers-color-scheme: dark)').matches,
+  },
 });

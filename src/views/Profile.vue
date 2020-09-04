@@ -148,7 +148,7 @@
             </template>
             <v-list-item
               v-for="phoneNumber in teacher.tanar.alkalmazott.telefonok.filter(
-                p => p.tipus === 'PublikusTelefonszam'
+                (p) => p.tipus === 'PublikusTelefonszam'
               )"
               :key="phoneNumber.uid"
               :href="`${mobile ? 'tel' : 'callto'}:${phoneNumber.telefonszam}`"
@@ -162,7 +162,7 @@
             </v-list-item>
             <v-list-item
               v-for="email in teacher.tanar.alkalmazott.emailek.filter(
-                e => e.tipus === 'PublikusEmailcim'
+                (e) => e.tipus === 'PublikusEmailcim'
               )"
               :key="email.uid"
               :href="`mailto:${email.email}`"
@@ -185,11 +185,11 @@ import Component, { mixins } from 'vue-class-component';
 import { GeneralAPI, Tutelary } from '../api-types';
 @Component({
   computed: apiMapper.mapState({
-    general: state => state.general.data
+    general: (state) => state.general.data,
   }),
   metaInfo: {
-    title: 'Profil'
-  }
+    title: 'Profil',
+  },
 })
 export default class Profile extends mixins(Mixin) {
   general!: GeneralAPI;
@@ -204,14 +204,14 @@ export default class Profile extends mixins(Mixin) {
         ret.push({
           title: obj.phoneNumber,
           icon: 'mdi-phone',
-          href: `${this.mobile ? 'tel' : 'callto'}:${obj.phoneNumber}`
+          href: `${this.mobile ? 'tel' : 'callto'}:${obj.phoneNumber}`,
         });
       }
       if (obj.email) {
         ret.push({
           title: obj.email,
           icon: 'mdi-email',
-          href: `mailto:${obj.email}`
+          href: `mailto:${obj.email}`,
         });
       }
     }

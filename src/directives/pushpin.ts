@@ -15,11 +15,9 @@ function update(el: HTMLElement, binding) {
   }
   if (scrolled > binding.value.bottom) {
     el.style.position = 'relative';
-    el.style.top = `${binding.value.bottom -
-      (el as any).defaultOffsetTop -
-      58 -
-      11 -
-      3}px`;
+    el.style.top = `${
+      binding.value.bottom - (el as any).defaultOffsetTop - 58 - 11 - 3
+    }px`;
   }
 }
 
@@ -30,5 +28,5 @@ function unbind(el) {
 export const VPushPin = {
   update,
   inserted,
-  unbind
+  unbind,
 } as DirectiveOptions;

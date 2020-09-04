@@ -26,8 +26,8 @@ export default {
     const r = await apiClient.get(`timetable`, {
       params: {
         from,
-        to
-      }
+        to,
+      },
     });
     return r.data;
   },
@@ -41,7 +41,7 @@ export default {
       username,
       password,
       school,
-      rme
+      rme,
     });
   },
   async logout() {
@@ -64,5 +64,5 @@ export default {
   },
   async deleteExam(id: number) {
     return await apiClient.delete(`/exam/${id}`);
-  }
+  },
 };

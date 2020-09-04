@@ -65,7 +65,7 @@ import Dialog from './Dialog.vue';
 import { Prop } from 'vue-property-decorator';
 import { Exam } from '../../api-types';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class ExamDialog extends mixins(Mixin) {
   open = false;

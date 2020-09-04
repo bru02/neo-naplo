@@ -118,13 +118,13 @@ import { getEvalValue } from '../utils/evaluations';
 
 @Component({
   metaInfo: {
-    title: 'Beállítások'
+    title: 'Beállítások',
   },
   computed: {
     ...settingsMapper.mapGetters(['notificationsEnabled']),
-    ...authMapper.mapGetters(['tokenData'])
+    ...authMapper.mapGetters(['tokenData']),
   },
-  components: { Dialog, EvaluationListItem }
+  components: { Dialog, EvaluationListItem },
 })
 export default class SettingsComponent extends mixins(Mixin) {
   tokenData!: any;
@@ -145,7 +145,7 @@ export default class SettingsComponent extends mixins(Mixin) {
         this.loading = false;
         this.toast = true;
       })
-      .catch(e => {
+      .catch((e) => {
         this.loading = false;
         this.errorToast = true;
         throw e;
@@ -161,16 +161,16 @@ export default class SettingsComponent extends mixins(Mixin) {
     return '';
   }
   get mocks() {
-    return [1, 2, 3, 4, 5, null].map(e => ({
+    return [1, 2, 3, 4, 5, null].map((e) => ({
       numberValue: e,
       subject: getEvalValue(e),
-      date: new Date()
+      date: new Date(),
     }));
   }
   updateColor(nv) {
     this.$store.commit('settings/updateColor', {
       key: nv || 'default',
-      value: this.color
+      value: this.color,
     });
   }
 }

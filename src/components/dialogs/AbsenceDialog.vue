@@ -6,7 +6,7 @@
           <v-list-item-title>
             {{
               abs.typeName +
-                (abs.type === 'Delay' ? `(${abs.delayTimeMinutes} perc)` : '')
+              (abs.type === 'Delay' ? `(${abs.delayTimeMinutes} perc)` : '')
             }}
           </v-list-item-title>
           <v-list-item-subtitle>Típus</v-list-item-subtitle>
@@ -70,7 +70,7 @@ import { Prop } from 'vue-property-decorator';
 import { Absence } from '../../api-types';
 import { getLessonUrl } from '../../helpers';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class AbsenceDialog extends mixins(Mixin) {
   open = false;

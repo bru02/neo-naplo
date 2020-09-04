@@ -10,16 +10,16 @@ interface PromptOptions extends ToastOptions {
 
 Vue.use(() => {
   const createElement = new Vue({ components: { VBtn } }).$createElement;
-  Vue.prototype.$toast = function(msg: string, opts: ToastOptions) {
+  Vue.prototype.$toast = function (msg: string, opts: ToastOptions) {
     store.dispatch('toasts/show', { msg, ...opts });
   };
   const basicColors = ['info', 'success', 'warning', 'error'];
   for (const color of basicColors) {
-    Vue.prototype.$toast[color] = function(msg: string, opts: ToastOptions) {
+    Vue.prototype.$toast[color] = function (msg: string, opts: ToastOptions) {
       store.dispatch('toasts/show', { msg, ...opts, color });
     };
   }
-  Vue.prototype.$toast.prompt = function(msg: string, opts: PromptOptions) {
+  Vue.prototype.$toast.prompt = function (msg: string, opts: PromptOptions) {
     return new Promise((resolve, reject) => {
       let resolved = false;
       store.dispatch('toasts/show', {
@@ -37,16 +37,16 @@ Vue.use(() => {
                 click: () => {
                   resolved = true;
                   resolve();
-                }
+                },
               },
               props: {
-                text: true
-              }
+                text: true,
+              },
             },
             [opts.confirm]
-          )
+          ),
         ],
-        closeText: opts.decline
+        closeText: opts.decline,
       });
     });
   };

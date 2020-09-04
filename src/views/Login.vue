@@ -58,7 +58,7 @@
                   :loading="loginLoading"
                   :class="{
                     'blue darken-4 white--text': valid,
-                    disabled: !valid
+                    disabled: !valid,
                   }"
                   >Belépés</v-btn
                 >
@@ -78,8 +78,8 @@ import { Prop } from 'vue-property-decorator';
 import { apiClient } from '../plugins/axios';
 @Component({
   metaInfo: {
-    title: 'Belépés'
-  }
+    title: 'Belépés',
+  },
 })
 export default class LoginComponent extends mixins(Mixin) {
   @Prop(String) readonly csrf: string | undefined;
@@ -90,11 +90,11 @@ export default class LoginComponent extends mixins(Mixin) {
   valid = false;
   e1 = true;
   password = '';
-  passwordRules = [v => !!v || 'Jelszó megadása kötelező'];
+  passwordRules = [(v) => !!v || 'Jelszó megadása kötelező'];
   username = '';
-  unRules = [v => !!v || 'Felhasználónév megadása kötelező'];
+  unRules = [(v) => !!v || 'Felhasználónév megadása kötelező'];
   school = '';
-  schoolRules = [v => !!v || 'Iskola megadása kötelező'];
+  schoolRules = [(v) => !!v || 'Iskola megadása kötelező'];
   rememberMe = false;
   errorMsg = '';
   schools = [];
@@ -106,7 +106,7 @@ export default class LoginComponent extends mixins(Mixin) {
       this.$router.push('/');
     }
     let self = this;
-    apiClient.get('schools').then(response => {
+    apiClient.get('schools').then((response) => {
       self.schools = response.data;
       this.school = `${this.$route.query.school}`;
       self.schoolsLoading = false;
@@ -120,13 +120,13 @@ export default class LoginComponent extends mixins(Mixin) {
           school: this.school ?? '',
           username: this.username,
           password: this.password,
-          rme: this.rememberMe
+          rme: this.rememberMe,
         })
         .then(() => {
           this.loginLoading = false;
           this.$router.push(this.$route.params.redirect ?? '/');
         })
-        .catch(err => {
+        .catch((err) => {
           this.loginLoading = false;
           const response = err.response;
           if (response?.status === 401) {

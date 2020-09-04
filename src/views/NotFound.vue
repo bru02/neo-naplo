@@ -22,8 +22,8 @@ import Component, { mixins } from 'vue-class-component';
 import Mixin from '@/mixins';
 @Component({
   metaInfo: {
-    title: '404'
-  }
+    title: '404',
+  },
 })
 export default class NotFoundComponent extends mixins(Mixin) {}
 </script>

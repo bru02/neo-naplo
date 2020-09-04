@@ -35,12 +35,12 @@ import { Note } from '../api-types';
 
 @Component({
   computed: apiMapper.mapState({
-    notes: state => state.general.data.notes,
-    loading: state => state.general.loading
+    notes: (state) => state.general.data.notes,
+    loading: (state) => state.general.loading,
   }),
   metaInfo: {
-    title: 'Feljegyzések'
-  }
+    title: 'Feljegyzések',
+  },
 })
 export default class NotesComponent extends mixins(Mixin) {
   notes!: Note[];
@@ -48,11 +48,11 @@ export default class NotesComponent extends mixins(Mixin) {
     {
       text: 'Dátum',
       align: 'left',
-      value: 'date'
+      value: 'date',
     },
     { text: 'Típus', value: 'title' },
     { text: 'Tanár', value: 'teacher' },
-    { text: 'Üzenet', value: 'content' }
+    { text: 'Üzenet', value: 'content' },
   ];
   mounted() {
     this.obtain('general');

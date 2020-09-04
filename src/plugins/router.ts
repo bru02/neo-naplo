@@ -28,15 +28,15 @@ const routes: RouteConfig[] = [
     path: '/login',
     component: Login,
     meta: {
-      auth: false
-    }
+      auth: false,
+    },
   },
   {
     path: '/',
     component: Home,
     name: 'Faliújság',
     meta: {
-      auth: true
+      auth: true,
     },
     children: [
       {
@@ -55,7 +55,7 @@ const routes: RouteConfig[] = [
           }
           to.params.note = note;
           next();
-        }
+        },
       },
       {
         path: '/absence/:id',
@@ -73,7 +73,7 @@ const routes: RouteConfig[] = [
           }
           to.params.abs = abs;
           next();
-        }
+        },
       },
       {
         path: '/event/:id',
@@ -91,7 +91,7 @@ const routes: RouteConfig[] = [
           }
           to.params.event = evt;
           next();
-        }
+        },
       },
       {
         path: '/evaluation/:id',
@@ -109,16 +109,16 @@ const routes: RouteConfig[] = [
           }
           to.params.eval = evaluation;
           next();
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     path: '/absences/:id?',
     component: Absences,
     name: 'Hiányzások',
     meta: {
-      auth: true
+      auth: true,
     },
     children: [
       {
@@ -137,16 +137,16 @@ const routes: RouteConfig[] = [
           }
           to.params.abs = abs;
           next();
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     path: '/notes/:id?',
     component: Notes,
     name: 'Feljegyzések',
     meta: {
-      auth: true
+      auth: true,
     },
     children: [
       {
@@ -165,29 +165,29 @@ const routes: RouteConfig[] = [
           }
           to.params.note = note;
           next();
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     path: '/timetable/:cweek/:lessonHash?' /*:w?*/,
     component: Timetable,
     name: 'Órarend',
     meta: {
-      auth: true
+      auth: true,
     },
-    props: true
+    props: true,
   },
   {
     path: '/timetable',
-    redirect: '/timetable/0'
+    redirect: '/timetable/0',
   },
   {
     path: '/evaluations/:id?',
     component: Evaluations,
     name: 'Jegyek',
     meta: {
-      auth: true
+      auth: true,
     },
     children: [
       {
@@ -206,25 +206,25 @@ const routes: RouteConfig[] = [
           }
           to.params.eval = evaluation;
           next();
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     path: '/statistics',
     component: Statistics,
     name: 'Statisztikák',
     meta: {
-      auth: true
+      auth: true,
     },
-    props: true
+    props: true,
   },
   {
     path: '/statistics/:subject',
     component: Statistic,
     name: 'Statisztika',
     meta: {
-      auth: true
+      auth: true,
     },
     children: [
       {
@@ -243,40 +243,40 @@ const routes: RouteConfig[] = [
           }
           to.params.eval = evaluation;
           next();
-        }
-      }
+        },
+      },
     ],
-    props: true
+    props: true,
   },
   {
     path: '/exams',
     name: 'Számonkérések',
     component: Exams,
     meta: {
-      auth: true
-    }
+      auth: true,
+    },
   },
   {
     path: '/profile',
     name: 'Profil',
     component: Profile,
     meta: {
-      auth: true
-    }
+      auth: true,
+    },
   },
   {
     path: '/settings',
     name: 'Beállítások',
     component: Settings,
     meta: {
-      auth: true
-    }
+      auth: true,
+    },
   },
 
   {
     path: '*',
-    component: NotFound
-  }
+    component: NotFound,
+  },
 ];
 
 import VueRouter, { RouteConfig } from 'vue-router';
@@ -296,7 +296,7 @@ const router = new VueRouter({
     } else if (to.name != from.name) {
       return { x: 0, y: 0 };
     }
-  }
+  },
 });
 
 export default router;

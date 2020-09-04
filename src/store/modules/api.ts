@@ -3,7 +3,7 @@ import {
   Evaluation,
   ClassAverage,
   Exam,
-  Absence
+  Absence,
 } from '@/api-types.d';
 
 import Vue from 'vue';
@@ -52,27 +52,27 @@ function getAbsencesCount(absences: Absence[]) {
     return {
       color: 'red',
       text: `${absencesByJustification.UnJustified.length} igazolatlan hiányzás`,
-      absencesByJustification
+      absencesByJustification,
     };
   }
   if (absencesByJustification.BeJustified) {
     return {
       color: 'orange',
       text: `${absencesByJustification.BeJustified.length} igazolandó hiányzás`,
-      absencesByJustification
+      absencesByJustification,
     };
   }
   if (absencesByJustification.Justified) {
     return {
       color: 'green',
       text: `${absencesByJustification.Justified.length} igazolt hiányzás`,
-      absencesByJustification
+      absencesByJustification,
     };
   }
   return {
     color: '',
     text: '',
-    absencesByJustification
+    absencesByJustification,
   };
 }
 
@@ -80,7 +80,7 @@ export class ApiState {
   general = new Resource<GeneralAPI>({
     absences: [],
     evaluations: [],
-    notes: []
+    notes: [],
   });
   homework = new Resource<any[]>([]);
   events = new Resource<Event[]>([]);
@@ -95,14 +95,14 @@ class ApiGetters extends Getters<ApiState> {
     let cards: any[] = [];
     for (let type of ['notes', 'evaluations']) {
       cards.push(
-        ...(this.state.general.data[type] ?? []).map(e => {
+        ...(this.state.general.data[type] ?? []).map((e) => {
           e.category = type;
           return e;
         })
       );
     }
     cards.push(
-      ...Object.values(this.getters.groupedAbsences).map(e => {
+      ...Object.values(this.getters.groupedAbsences).map((e) => {
         (e as any).category = 'absences';
 
         (e as any).date = e[0].date;
@@ -110,13 +110,13 @@ class ApiGetters extends Getters<ApiState> {
       })
     );
     cards.push(
-      ...this.getters.events.map(e => {
+      ...this.getters.events.map((e) => {
         (e as any).category = 'events';
         return e;
       })
     );
     cards.push(
-      ...this.state.exams.data.map(e => {
+      ...this.state.exams.data.map((e) => {
         (e as any).category = 'exams';
         return e;
       })
@@ -156,7 +156,7 @@ class ApiGetters extends Getters<ApiState> {
   get stats() {
     const subjects = [
       ...Object.keys(this.getters.absencesBySubject),
-      ...Object.keys(this.getters.groupedEvaluations)
+      ...Object.keys(this.getters.groupedEvaluations),
     ].filter((e, i, a) => a.indexOf(e) === i);
     const ret: Stat[] = [];
     for (const subject of subjects) {
@@ -175,7 +175,7 @@ class ApiGetters extends Getters<ApiState> {
         absencesCount: getAbsencesCount(absences),
         subject,
         subjectCategoryName: (absences.length ? absences : evaluations)[0]
-          .subjectCategoryName
+          .subjectCategoryName,
       });
     }
     if (subjects.length > 1)
@@ -186,7 +186,7 @@ class ApiGetters extends Getters<ApiState> {
         classAverage: null,
         absencesCount: getAbsencesCount(this.getters.absences),
         subject: 'Összes tantárgy',
-        subjectCategoryName: 'Összes tantárgy'
+        subjectCategoryName: 'Összes tantárgy',
       });
     return ret;
   }
@@ -289,7 +289,7 @@ class ApiActions extends Actions<
       Vue.set(this.state.timetable, range, {
         data: {},
         loading: true,
-        loaded: false
+        loaded: false,
       });
     } else this.state.timetable[range].loading = true;
     const response = await api.getTimetable(from, to);
@@ -311,5 +311,5 @@ export default new Module({
   state: ApiState,
   getters: ApiGetters,
   mutations: ApiMutations,
-  actions: ApiActions
+  actions: ApiActions,
 });

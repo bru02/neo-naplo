@@ -17,7 +17,7 @@
     <div
       :class="{
         'vts__message--padded': !toast.closeText,
-        vts__message: true
+        vts__message: true,
       }"
     >
       <div v-html="toast.msg"></div>
@@ -43,7 +43,7 @@ import { ToastOptions } from '../store/modules/toasts';
 import VTouch from 'vuetify/lib/directives/touch';
 
 @Component({
-  directives: { touch: VTouch }
+  directives: { touch: VTouch },
 })
 export default class Toast extends mixins(Mixin) {
   active = false;

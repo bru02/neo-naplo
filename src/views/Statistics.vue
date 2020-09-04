@@ -15,7 +15,7 @@
             <v-list-item-subtitle
               ><span
                 :style="{
-                  color: getEvaluationColor(item.average)
+                  color: getEvaluationColor(item.average),
                 }"
                 v-if="item.average"
                 >{{ item.average }}</span
@@ -24,7 +24,7 @@
               }}
               <span
                 :style="{
-                  color: item.absencesCount.color
+                  color: item.absencesCount.color,
                 }"
                 >{{ item.absencesCount.text }}</span
               ></v-list-item-subtitle
@@ -44,8 +44,8 @@ import { Stat } from '../store/modules/api';
 @Component({
   computed: apiMapper.mapGetters(['stats']),
   metaInfo: {
-    title: 'Statisztikák'
-  }
+    title: 'Statisztikák',
+  },
 })
 export default class Statistics extends mixins(Mixin) {
   stats!: Stat[];

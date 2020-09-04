@@ -15,7 +15,7 @@
                 : evaluation.weight === '50%'
                 ? 'thin'
                 : 'bold'
-            }`
+            }`,
           ]"
         >
           {{ evaluation.numberValue }}

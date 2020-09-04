@@ -32,7 +32,7 @@ import { Lesson } from '../../api-types';
 import { timeMapper } from '@/store';
 import { day as getDay } from '@/helpers';
 @Component({
-  computed: timeMapper.mapGetters(['time', 'date'])
+  computed: timeMapper.mapGetters(['time', 'date']),
 })
 export default class ChangedLessonCard extends mixins(Mixin) {
   time!: Date;

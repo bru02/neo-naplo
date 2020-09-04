@@ -7,27 +7,27 @@ module.exports = {
   transpileDependencies: ['vuetify'],
   outputDir: 'public',
   devServer: {
-    proxy: 'http://127.0.0.1:8000'
+    proxy: 'http://127.0.0.1:8000',
   },
   indexPath:
     process.env.NODE_ENV === 'production'
       ? '../resources/views/index.blade.php'
       : 'index.html',
-  chainWebpack: config => {
+  chainWebpack: (config) => {
     config.plugin('VuetifyLoaderPlugin').tap(() => [
       {
-        progressiveImages: true
-      }
+        progressiveImages: true,
+      },
     ]);
     config.plugin('bundle-analyzer').use(BundleAnalyzerPlugin, [
       {
-        token: process.env.BUNDLE_ANALYZER_PLUGIN
-      }
+        token: process.env.BUNDLE_ANALYZER_PLUGIN,
+      },
     ]);
     config.plugin('workbox').use(InjectManifest, [
       {
-        swSrc: './src/sw.js'
-      }
+        swSrc: './src/sw.js',
+      },
     ]);
   },
   pwa: {
@@ -37,10 +37,10 @@ module.exports = {
     appleMobileWebAppStatusBarStyle: 'black',
     workboxPluginMode: 'InjectManifest',
     workboxOptions: {
-      swSrc: './src/sw.js'
+      swSrc: './src/sw.js',
     },
     manifestOptions: {
-      background_color: '#ffffff'
-    }
-  }
+      background_color: '#ffffff',
+    },
+  },
 };

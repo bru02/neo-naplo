@@ -7,7 +7,7 @@
   >
     <v-card
       v-touch="{
-        right: () => (dialog = false)
+        right: () => (dialog = false),
       }"
     >
       <v-toolbar dark color="indigo darken-2" dense v-show="mobile">
@@ -35,7 +35,7 @@ import { Watch, Prop } from 'vue-property-decorator';
 import VTouch from 'vuetify/lib/directives/touch';
 
 @Component({
-  directives: { touch: VTouch }
+  directives: { touch: VTouch },
 })
 export default class Dialog extends mixins(Mixin) {
   @Prop(String) readonly title!: String | undefined;

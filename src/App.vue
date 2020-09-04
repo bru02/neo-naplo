@@ -69,11 +69,11 @@ import { fromCache } from './utils';
   computed: authMapper.mapGetters(['isAuthenticated']),
   metaInfo: {
     title: '...',
-    titleTemplate: '%s | Neo Napló'
+    titleTemplate: '%s | Neo Napló',
   },
   components: {
-    Toast
-  }
+    Toast,
+  },
 })
 export default class App extends mixins(Mixin) {
   drawer = false;
@@ -85,31 +85,31 @@ export default class App extends mixins(Mixin) {
     {
       name: 'Feljegyzések',
       icon: 'mdi-comment-processing-outline',
-      link: '/notes'
+      link: '/notes',
     },
     {
       name: 'Órarend',
       icon: 'mdi-calendar-text-outline',
-      link: '/timetable'
+      link: '/timetable',
     },
     {
       name: 'Jegyek',
       icon: 'mdi-calendar-check-outline',
-      link: '/evaluations'
+      link: '/evaluations',
     },
     {
       name: 'Statisztikák',
       icon: 'mdi-chart-timeline-variant',
-      link: '/statistics'
+      link: '/statistics',
     },
 
     {
       name: 'Számonkérések',
       icon: 'mdi-file-document-edit-outline',
-      link: '/exams'
+      link: '/exams',
     },
     { name: 'Profil', icon: 'mdi-account', link: '/profile' },
-    { name: 'Beállítások', icon: 'mdi-settings', link: '/settings' }
+    { name: 'Beállítások', icon: 'mdi-settings', link: '/settings' },
   ];
 
   async created() {
@@ -118,7 +118,7 @@ export default class App extends mixins(Mixin) {
       return config;
     });
     apiClient.interceptors.response.use(
-      res => {
+      (res) => {
         this.loading--;
         return res;
       },
@@ -128,22 +128,22 @@ export default class App extends mixins(Mixin) {
         switch (response?.status) {
           case 424:
             toast.error('KRÉTA éppen frissít', {
-              icon: 'mdi-sync-alert'
+              icon: 'mdi-sync-alert',
             });
             break;
           case 401:
             toast.error('Azonosítási hiba', {
-              icon: 'mdi-account-alert'
+              icon: 'mdi-account-alert',
             });
             break;
           case 500:
             toast.error('Belső hiba', {
-              icon: 'mdi-wrench'
+              icon: 'mdi-wrench',
             });
             break;
           default:
             toast.error('Hálózati hiba', {
-              icon: 'mdi-wifi-off'
+              icon: 'mdi-wifi-off',
             });
             break;
         }
@@ -175,7 +175,7 @@ export default class App extends mixins(Mixin) {
         Vue.set(this.$store.state.api.timetable, `${w.from}-${w.to}`, {
           data,
           loading: false,
-          loaded: true
+          loaded: true,
         });
       }
     } else if (this.$route.name !== 'Belépés') {

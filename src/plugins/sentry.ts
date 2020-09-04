@@ -12,9 +12,9 @@ if (
       // @ts-ignore
       new VueIntegration({
         Vue,
-        attachProps: true
-      })
+        attachProps: true,
+      }),
     ],
-    release: 'filc@' + process.env.VUE_APP_SHA
+    release: 'filc@' + process.env.VUE_APP_SHA,
   });
 }

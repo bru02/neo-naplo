@@ -17,7 +17,7 @@
             <v-list-item-title>{{ abs[0].subject }}</v-list-item-title>
             <v-list-item-subtitle
               :style="{
-                color: getAbsenceColor(abs[0].justificationState)
+                color: getAbsenceColor(abs[0].justificationState),
               }"
               >{{ abs[0].justificationStateName }}</v-list-item-subtitle
             >
@@ -85,12 +85,12 @@ import { Absence } from '../api-types';
   computed: {
     ...apiMapper.mapGetters(['absences', 'groupedAbsences']),
     ...apiMapper.mapState({
-      loading: state => state.general.loading
-    })
+      loading: (state) => state.general.loading,
+    }),
   },
   metaInfo: {
-    title: 'Hiányzások'
-  }
+    title: 'Hiányzások',
+  },
 })
 export default class AbsencesComponent extends mixins(Mixin) {
   selectedAbsence: Absence | boolean = false;
@@ -116,7 +116,7 @@ export default class AbsencesComponent extends mixins(Mixin) {
       Justified: 'mdi-check',
       BeJustified: 'mdi-help-circle-outline',
       UnJustified: 'mdi-close',
-      Mixed: 'mdi-help'
+      Mixed: 'mdi-help',
     }[this.getJustificationState(abs)];
   }
 }

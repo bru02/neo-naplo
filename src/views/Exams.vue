@@ -34,12 +34,12 @@ import { Exam } from '../api-types';
 
 @Component({
   computed: apiMapper.mapState({
-    exams: state => state.exams.data,
-    loading: state => state.exams.loading
+    exams: (state) => state.exams.data,
+    loading: (state) => state.exams.loading,
   }),
   metaInfo: {
-    title: 'Számonkérések'
-  }
+    title: 'Számonkérések',
+  },
 })
 export default class ExamsComponent extends mixins(Mixin) {
   exams!: Exam[];

@@ -86,22 +86,22 @@ import {
   Lesson,
   Event,
   TimetableAPI,
-  Exam
+  Exam,
 } from '../api-types';
 @Component({
   computed: {
     ...apiMapper.mapState({
-      loadingCount: state => {
-        const score = res => (state[res].loaded ? 0 : 1);
+      loadingCount: (state) => {
+        const score = (res) => (state[res].loaded ? 0 : 1);
         return score('general') + score('events') + score('exams');
       },
-      instituteName: state => state.general.data.instituteName,
-      evaluations: state => state.general.data.evaluations,
-      exams: state => state.exams.data,
-      notes: state => state.general.data.notes
+      instituteName: (state) => state.general.data.instituteName,
+      evaluations: (state) => state.general.data.evaluations,
+      exams: (state) => state.exams.data,
+      notes: (state) => state.general.data.notes,
     }),
     ...apiMapper.mapGetters(['cards', 'absences', 'events']),
-    ...timeMapper.mapGetters(['date', 'time'])
+    ...timeMapper.mapGetters(['date', 'time']),
   },
   components: {
     AbsencesList,
@@ -113,11 +113,11 @@ import {
     ExamCard,
     NextLessonCard,
     ChangedLessonCard,
-    Dialog
+    Dialog,
   },
   metaInfo: {
-    title: 'Faliújság'
-  }
+    title: 'Faliújság',
+  },
 })
 export default class HomeComponent extends mixins(Mixin) {
   selectedAbsenceGroup: Absence[] | boolean = false;
@@ -137,12 +137,12 @@ export default class HomeComponent extends mixins(Mixin) {
   maxLen = 10;
 
   mounted() {
-    this.obtain('general').then(d => {
+    this.obtain('general').then((d) => {
       if (d.instituteCode === 'klik035220001') this.obtain('hirdetmenyek');
     });
     this.obtain('events');
     this.obtain('exams');
-    this.obtain('timetable').then(tt => {
+    this.obtain('timetable').then((tt) => {
       this.timetable = tt;
     });
   }
@@ -155,7 +155,7 @@ export default class HomeComponent extends mixins(Mixin) {
       }
     }
     return lessons.filter(
-      l =>
+      (l) =>
         (!!l.deputyTeacher || l.state === 'Missed') &&
         l.endTime * 1000 > +this.time
     );

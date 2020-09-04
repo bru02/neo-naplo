@@ -8,7 +8,7 @@
         class="mx-auto"
         loading
         v-touch="{
-          right: () => $router.go(-1)
+          right: () => $router.go(-1),
         }"
       >
         <template v-slot:progress>
@@ -18,7 +18,7 @@
               :key="i"
               :style="{
                 width: `${(bars[c] || 0) * 100}%`,
-                background: c
+                background: c,
               }"
             ></span>
           </div>
@@ -53,12 +53,12 @@
                   <span
                     class="avr"
                     :style="{
-                      color: getEvaluationColor(currentSubject.average)
+                      color: getEvaluationColor(currentSubject.average),
                     }"
                     >{{
                       getAverage([
                         ...currentSubject.evaluations,
-                        ...(added[subject] || [])
+                        ...(added[subject] || []),
                       ])
                     }}</span
                   >
@@ -68,7 +68,7 @@
                   <span
                     class="avr"
                     :style="{
-                      color: getEvaluationColor(currentSubject.classAverage)
+                      color: getEvaluationColor(currentSubject.classAverage),
                     }"
                     >{{ currentSubject.classAverage }}</span
                   >
@@ -86,8 +86,8 @@
           <v-tab-item
             v-if="
               currentSubject &&
-                currentSubject.evaluations &&
-                currentSubject.evaluations.length
+              currentSubject.evaluations &&
+              currentSubject.evaluations.length
             "
           >
             <v-list>
@@ -131,8 +131,8 @@
           <v-tab-item
             v-if="
               currentSubject &&
-                currentSubject.absences &&
-                currentSubject.absences.length
+              currentSubject.absences &&
+              currentSubject.absences.length
             "
           >
             <v-list two-line>
@@ -146,7 +146,7 @@
                   <v-list-item-title>{{ abs.subject }}</v-list-item-title>
                   <v-list-item-subtitle
                     :style="{
-                      color: getAbsenceColor(abs.justificationState)
+                      color: getAbsenceColor(abs.justificationState),
                     }"
                     >{{ abs.justificationStateName }}</v-list-item-subtitle
                   >
@@ -170,7 +170,7 @@
                   >
                   <v-list-item-subtitle
                     :style="{
-                      color: getAbsenceColor(type)
+                      color: getAbsenceColor(type),
                     }"
                     >{{
                       absences[0].justificationStateName
@@ -215,9 +215,9 @@
           <v-btn
             v-show="
               currentSubject &&
-                currentSubject.evaluations &&
-                currentSubject.evaluations.length > 0 &&
-                active === 0
+              currentSubject.evaluations &&
+              currentSubject.evaluations.length > 0 &&
+              active === 0
             "
             color="red"
             dark
@@ -300,11 +300,11 @@ import EvaluationDialog from '@/components/dialogs/EvaluationDialog.vue';
     AbsencesList,
     EvaluationListItem,
     AbsenceDialog,
-    EvaluationDialog
+    EvaluationDialog,
   },
   metaInfo: {
-    title: 'Statisztikák'
-  }
+    title: 'Statisztikák',
+  },
 })
 export default class Statistics extends mixins(Mixin) {
   @Prop({ default: false }) subject!: string;
@@ -339,7 +339,7 @@ export default class Statistics extends mixins(Mixin) {
       subject: this.subject,
       id: +new Date(),
       isAtlagbaBeleszamit: true,
-      form: 'Mark'
+      form: 'Mark',
     });
   }
 
@@ -348,7 +348,7 @@ export default class Statistics extends mixins(Mixin) {
       sm: 563,
       md: 900,
       lg: 1185,
-      xl: 1785
+      xl: 1785,
     };
     return Object.entries(sizes)
       .map(
@@ -375,7 +375,7 @@ export default class Statistics extends mixins(Mixin) {
         ...this.currentSubject.evaluations.filter(
           (e: Evaluation) => e.isAtlagbaBeleszamit && e.form === 'Mark'
         ),
-        ...(this.added[this.subject] ?? [])
+        ...(this.added[this.subject] ?? []),
       ],
       'numberValue'
     );
@@ -419,8 +419,8 @@ export default class Statistics extends mixins(Mixin) {
 
   get sumAbsences() {
     return (
-      this.currentSubject?.absences.filter(e => e.type === 'Absence').length ??
-      0
+      this.currentSubject?.absences.filter((e) => e.type === 'Absence')
+        .length ?? 0
     );
   }
 
@@ -490,13 +490,14 @@ export default class Statistics extends mixins(Mixin) {
       case 'evaluation':
         if (!this.selectedEvaluation)
           this.selectedEvaluation =
-            (this.currentSubject?.evaluations ?? []).find(e => e.id === +id) ??
-            false;
+            (this.currentSubject?.evaluations ?? []).find(
+              (e) => e.id === +id
+            ) ?? false;
         break;
       case 'absence':
         if (!this.selectedAbsence)
           this.selectedAbsence =
-            (this.currentSubject?.absences ?? []).find(e => e.id === +id) ??
+            (this.currentSubject?.absences ?? []).find((e) => e.id === +id) ??
             false;
         break;
 

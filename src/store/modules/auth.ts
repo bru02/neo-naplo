@@ -4,7 +4,7 @@ import {
   Mutations,
   Actions,
   Module,
-  Context
+  Context,
 } from 'vuex-smart-module';
 import api from '@/api';
 import apiModule from './api';
@@ -43,13 +43,13 @@ class AuthActions extends Actions<
   async login({ username, password, school, rme }) {
     return api
       .login(username, password, school, rme)
-      .then(res => {
+      .then((res) => {
         if (res.data?.access_token) {
           this.commit('updateToken', res.data.access_token);
           return res;
         }
       })
-      .catch(e => {
+      .catch((e) => {
         throw e;
       });
   }
@@ -73,5 +73,5 @@ export default new Module({
   state: AuthState,
   getters: AuthGetters,
   mutations: AuthMutations,
-  actions: AuthActions
+  actions: AuthActions,
 });

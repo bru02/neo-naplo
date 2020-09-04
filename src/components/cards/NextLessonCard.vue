@@ -53,7 +53,7 @@
       </template>
       <LessonList
         :lessons="lessons || []"
-        v-on:input="l => $emit('input', l)"
+        v-on:input="(l) => $emit('input', l)"
       />
     </Dialog>
     <Dialog title="Bepakolás" v-model="packDialog">
@@ -93,7 +93,7 @@ import Dialog from '@/components/dialogs/Dialog.vue';
 
 @Component({
   computed: timeMapper.mapGetters(['time', 'date']),
-  components: { LessonList, Dialog }
+  components: { LessonList, Dialog },
 })
 export default class NextLessonCard extends mixins(Mixin) {
   time!: Date;
@@ -165,34 +165,34 @@ export default class NextLessonCard extends mixins(Mixin) {
 
   get changes() {
     if (this.mode != 'tomorrow') return [];
-    const substitued = this.lessons.filter(l => !!l.deputyTeacher);
-    const missed = this.lessons.filter(l => l.state === 'Missed');
+    const substitued = this.lessons.filter((l) => !!l.deputyTeacher);
+    const missed = this.lessons.filter((l) => l.state === 'Missed');
     let ret: any[] = [];
     if (substitued.length) {
       ret.push({
         color: '',
-        text: ` amiből `
+        text: ` amiből `,
       });
       ret.push({
         color: 'green--text',
-        text: `${substitued.length}-n helyettesítés lesz`
+        text: `${substitued.length}-n helyettesítés lesz`,
       });
     }
     if (missed.length) {
       if (substitued.length) {
         ret.push({
           color: '',
-          text: ` és `
+          text: ` és `,
         });
       } else {
         ret.push({
           color: '',
-          text: ` amiből `
+          text: ` amiből `,
         });
       }
       ret.push({
         color: 'red--text',
-        text: `${missed.length} elmarad`
+        text: `${missed.length} elmarad`,
       });
     }
     return ret;
@@ -206,7 +206,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   get packData() {
     const lessonsBefore = (
       this.timetable[this.timetableKey - 24 * 60 * 60] || []
-    ).map(l => {
+    ).map((l) => {
       return l.subject;
     });
     return this.lessons
@@ -217,10 +217,10 @@ export default class NextLessonCard extends mixins(Mixin) {
       .filter((e, i, a) => {
         return a.indexOf(e) === i;
       })
-      .map(subject => {
+      .map((subject) => {
         return {
           name: subject,
-          indeterminate: lessonsBefore.includes(subject)
+          indeterminate: lessonsBefore.includes(subject),
         };
       })
       .sort((a, b) => +!b.indeterminate - +!a.indeterminate);
@@ -250,8 +250,9 @@ export default class NextLessonCard extends mixins(Mixin) {
   get directions() {
     return `https://www.google.com/maps/dir//${
       this.instituteName
-    }/data=!4m6!4m5!2m3!6e1!7e2!8j${this.firstLessonTomorrow.startTime +
-      110 * 60}!3e3`;
+    }/data=!4m6!4m5!2m3!6e1!7e2!8j${
+      this.firstLessonTomorrow.startTime + 110 * 60
+    }!3e3`;
   }
 }
 </script>

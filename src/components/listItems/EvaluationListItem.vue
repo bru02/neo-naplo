@@ -44,7 +44,7 @@ export default class EvaluationListItem extends mixins(Mixin) {
           : this.eval.weight === '50%'
           ? 'thin'
           : 'bold'
-      }`]: true
+      }`]: true,
     };
   }
 }

@@ -9,16 +9,16 @@ import {
   getSubjectIcon,
   getEvaluationIcon,
   getAverage,
-  getClassGroupTextFromUID
+  getClassGroupTextFromUID,
 } from './utils/evaluations';
 @Component({
   computed: {
     ...apiMapper.mapState({
-      state: state => state,
-      osztalyCsoportok: state => state.general.data.osztalyCsoportok
+      state: (state) => state,
+      osztalyCsoportok: (state) => state.general.data.osztalyCsoportok,
     }),
-    ...timeMapper.mapGetters(['time', 'date'])
-  }
+    ...timeMapper.mapGetters(['time', 'date']),
+  },
 })
 export default class Mixin extends Vue {
   state!: ApiState;
@@ -43,7 +43,7 @@ export default class Mixin extends Vue {
     return {
       Justified: colors[5],
       BeJustified: colors[2],
-      UnJustified: colors[1]
+      UnJustified: colors[1],
     }[justificationState];
   }
 

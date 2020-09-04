@@ -7,7 +7,7 @@ const directory = './src/assets';
 const sizes = [563, 900, 1185, 1785].reverse();
 const names = ['sm', 'md', 'lg', 'xl'].reverse();
 fs.readdirSync(`${directory}/subject-bg`) /*.slice(0, 1)*/
-  .forEach(async file => {
+  .forEach(async (file) => {
     const path = `${directory}/subject-bg/${file}`;
     imageMagick(path).size((er, val) => {
       if (val) {

@@ -56,7 +56,7 @@ import Dialog from './Dialog.vue';
 import { Prop } from 'vue-property-decorator';
 import { Note } from '../../api-types';
 @Component({
-  components: { Dialog }
+  components: { Dialog },
 })
 export default class NoteDialog extends mixins(Mixin) {
   open = false;

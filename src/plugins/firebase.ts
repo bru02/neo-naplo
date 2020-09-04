@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: 'efilc-239813.appspot.com',
   messagingSenderId: '189077601555',
   appId: '1:189077601555:web:318300dfc3a2d300',
-  measurementId: 'G-YMDKBPFV5P'
+  measurementId: 'G-YMDKBPFV5P',
 };
 firebase.initializeApp(firebaseConfig);
 

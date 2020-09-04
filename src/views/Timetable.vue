@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: none; overflow:scroll;">
+  <v-container style="max-width: none; overflow: scroll;">
     <v-sheet class="text-center" height="45">
       <v-btn
         text
@@ -71,8 +71,8 @@ import { day, utc2date, formatDate, formatTime } from '../helpers';
   components: { LessonsList, DataViewer },
   computed: timeMapper.mapGetters(['date']),
   metaInfo: {
-    title: 'Órarend'
-  }
+    title: 'Órarend',
+  },
 })
 export default class TimetableComponent extends mixins(Mixin) {
   date!: Date;
@@ -98,7 +98,7 @@ export default class TimetableComponent extends mixins(Mixin) {
       }
       if (!this.mobile) {
         const counts = Object.values(v)
-          .flatMap(e => e)
+          .flatMap((e) => e)
           .map((l: Lesson) => l.count);
         this.min = Math.min(...counts);
         const max = Math.max(...counts);
@@ -110,7 +110,7 @@ export default class TimetableComponent extends mixins(Mixin) {
                 return e.getBoundingClientRect().height;
               })
             );
-            lis.forEach(e => ((e as HTMLElement).style.height = `${max}px`));
+            lis.forEach((e) => ((e as HTMLElement).style.height = `${max}px`));
           }
         });
       }
@@ -155,7 +155,7 @@ export default class TimetableComponent extends mixins(Mixin) {
     classRoom,
     count,
     presenceTypeName,
-    osztalyCsoportUid
+    osztalyCsoportUid,
   }: Lesson) {
     return {
       Időpont: `${count}. óra, ${formatDate(date)}; ${formatTime(
@@ -170,7 +170,7 @@ export default class TimetableComponent extends mixins(Mixin) {
       Osztálycsoport: this.getClassGroupTextFromUID(
         osztalyCsoportUid,
         this.osztalyCsoportok
-      )
+      ),
     };
   }
   day = day;

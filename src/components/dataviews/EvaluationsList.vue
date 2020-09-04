@@ -9,13 +9,13 @@
       :items="evaluationsByType.MidYear"
     >
       <template v-slot:default="props">
-        <v-list two-line subheader style="position:relative">
+        <v-list two-line subheader style="position: relative;">
           <template v-for="(item, i) in props.items">
             <v-lazy
               min-height="48"
               v-if="
                 view === 'sort:subject' &&
-                  (i === 0 || props.items[i - 1].subject != item.subject)
+                (i === 0 || props.items[i - 1].subject != item.subject)
               "
               :key="item.subject"
             >
@@ -26,7 +26,7 @@
                   :style="{
                     color: getEvaluationColor(
                       getAverage(groupedEvaluations[item.subject])
-                    )
+                    ),
                   }"
                 >
                   {{
@@ -87,7 +87,7 @@ import { getEvaluationTypeName } from '../../utils/evaluations';
 import group from '../../utils';
 @Component({
   components: { EvaluationListItem },
-  directives: { pushpin: VPushPin }
+  directives: { pushpin: VPushPin },
 })
 export default class EvaluationList extends mixins(Mixin) {
   @Prop() readonly evaluations!: Evaluation[];
@@ -110,30 +110,30 @@ export default class EvaluationList extends mixins(Mixin) {
       {
         id: 'sort:date',
         text: 'Dátum',
-        icon: 'mdi-timeline-text'
+        icon: 'mdi-timeline-text',
       },
       {
         id: 'sort:creatingTime',
         text: 'Beírás',
-        icon: 'mdi-timeline-plus'
+        icon: 'mdi-timeline-plus',
       },
       {
         id: 'sort:subject',
         text: 'Tárgy',
-        icon: 'mdi-format-list-bulleted-square'
+        icon: 'mdi-format-list-bulleted-square',
       },
       {
         id: 'sort:numberValue',
         text: 'Értékelés',
-        icon: 'mdi-format-list-bulleted-type'
+        icon: 'mdi-format-list-bulleted-type',
       },
       ...Object.keys(this.evaluationsByType)
-        .filter(k => k !== 'MidYear')
-        .map(k => ({
+        .filter((k) => k !== 'MidYear')
+        .map((k) => ({
           id: `type:${k}`,
           text: getEvaluationTypeName(k as any),
-          icon: 'mdi-timeline'
-        }))
+          icon: 'mdi-timeline',
+        })),
     ];
   }
   /*getPushpinOpts(subject) {

@@ -55,38 +55,38 @@ export interface Absence {
 export enum JustificationState {
   BeJustified = 'BeJustified',
   Justified = 'Justified',
-  UnJustified = 'UnJustified'
+  UnJustified = 'UnJustified',
 }
 
 export enum JustificationType {
   Parental = 'Parental',
   Takeout = 'Takeout',
-  UnJustified = 'UnJustified'
+  UnJustified = 'UnJustified',
 }
 
 export enum JustificationTypeName {
   Igazolatlan = 'Igazolatlan',
   Kikérő = 'Kikérő',
-  SzülőiIgazolás = 'Szülői igazolás'
+  SzülőiIgazolás = 'Szülői igazolás',
 }
 
 export enum Mode {
   Lesson = 'Lesson',
-  OutsideLesson = 'OutsideLesson'
+  OutsideLesson = 'OutsideLesson',
 }
 
 export enum ModeName {
   TanóraiMulasztás = 'Tanórai mulasztás',
-  TanóránKívüliMulasztás = 'Tanórán kívüli mulasztás'
+  TanóránKívüliMulasztás = 'Tanórán kívüli mulasztás',
 }
 
 export enum ItemType {
   Absence = 'Absence',
-  Delay = 'Delay'
+  Delay = 'Delay',
 }
 
 export enum ItemTypeName {
-  Hiányzás = 'Hiányzás'
+  Hiányzás = 'Hiányzás',
 }
 
 export interface ClassAverage {
@@ -120,21 +120,21 @@ export enum Form {
   Percent = 'Percent',
   Diligence = 'Diligence',
   Deportment = 'Deportment',
-  Text = 'Text'
+  Text = 'Text',
 }
 
 export enum EvaluationType {
   MidYear = 'MidYear',
   QuarterEvaluation = 'QuarterEvaluation',
   HalfYear = 'HalfYear',
-  EndYear = 'EndYear'
+  EndYear = 'EndYear',
 }
 
 export enum Weight {
   The100 = '100%',
   The200 = '200%',
   The50 = '50%',
-  Na = '-'
+  Na = '-',
 }
 
 export interface Event {
@@ -254,13 +254,13 @@ export interface Lesson {
 export enum CalendarOraType {
   OrarendiOra = 'OrarendiOra',
   TanitasiOra = 'TanitasiOra',
-  UresOra = 'UresOra'
+  UresOra = 'UresOra',
 }
 
 export enum State {
   Missed = 'Missed',
   NotRegistered = 'NotRegistered',
-  Registered = 'Registered'
+  Registered = 'Registered',
 }
 
 export interface Exam {

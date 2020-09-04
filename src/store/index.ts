@@ -14,8 +14,8 @@ const root = new Module({
     auth,
     time,
     settings,
-    toasts
-  }
+    toasts,
+  },
 });
 export default createStore(root);
 export const apiMapper = createMapper(api);
