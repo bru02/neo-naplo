@@ -6,7 +6,7 @@
           v-if="abs.length === 1"
           :key="date"
           v-ripple
-          @click="selectedAbsence = abs[0]"
+          @click="$router.push(`/absences/${$event}`)"
         >
           <v-list-item-avatar>
             <v-icon :color="getAbsenceColor(abs[0].justificationState)">{{
@@ -24,7 +24,7 @@
           </v-list-item-content>
           <v-list-item-action>
             <v-list-item-action-text>{{
-              date | formatDate
+              abs[0].date | formatDate
             }}</v-list-item-action-text>
             {{ abs[0].numberOfLessons }}.óra
           </v-list-item-action>
@@ -44,7 +44,7 @@
 
             <v-list-item-action>
               <v-list-item-action-text>{{
-                date | formatDate
+                abs[0].date | formatDate
               }}</v-list-item-action-text>
             </v-list-item-action>
           </template>
@@ -53,7 +53,7 @@
             v-for="a in abs"
             :key="a.id"
             v-ripple
-            @click="selectedAbsence = a"
+            @click="$router.push(`/absences/${$event}`)"
           >
             <v-list-item-content>
               <v-list-item-title>{{ a.subject }}</v-list-item-title>
@@ -77,8 +77,6 @@
 <script lang="ts">
 import { apiMapper } from '@/store';
 import Mixin from '@/mixins';
-import { Watch } from 'vue-property-decorator';
-
 import Component, { mixins } from 'vue-class-component';
 import { Absence } from '../api-types';
 @Component({

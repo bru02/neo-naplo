@@ -14,24 +14,21 @@
       {{ toast.icon }}
     </v-icon>
 
-    <div
-      :class="{
-        'vts__message--padded': !toast.closeText,
-        vts__message: true,
-      }"
-    >
-      <div v-html="toast.msg"></div>
-    </div>
-    <slot></slot>
-    <v-btn
-      :icon="!toast.closeText"
-      :text="!!toast.closeText"
-      :class="{ 'vts__close--icon': !toast.closeText, vts__close: true }"
-      @click="close"
-    >
-      <v-icon v-if="!toast.closeText">mdi-close</v-icon>
-      <span v-else>{{ toast.closeText }}</span>
-    </v-btn>
+    {{ toast.msg }}
+
+    <template v-slot:action>
+      <slot></slot>
+
+      <v-btn
+        :icon="!toast.closeText"
+        :text="!!toast.closeText"
+        :class="{ 'vts__close--icon': !toast.closeText, vts__close: true }"
+        @click="close"
+      >
+        <v-icon v-if="!toast.closeText">mdi-close</v-icon>
+        <span v-else>{{ toast.closeText }}</span>
+      </v-btn>
+    </template>
   </v-snackbar>
 </template>
 

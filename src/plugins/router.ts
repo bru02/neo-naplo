@@ -114,7 +114,7 @@ const routes: RouteConfig[] = [
     ],
   },
   {
-    path: '/absences/:id?',
+    path: '/absences',
     component: Absences,
     name: 'Hiányzások',
     meta: {
@@ -122,7 +122,7 @@ const routes: RouteConfig[] = [
     },
     children: [
       {
-        path: '/absence/:id',
+        path: '/absences/:id',
         component: AbsenceDialog,
         props: true,
         beforeEnter: async (to, _, next) => {
@@ -142,7 +142,7 @@ const routes: RouteConfig[] = [
     ],
   },
   {
-    path: '/notes/:id?',
+    path: '/notes',
     component: Notes,
     name: 'Feljegyzések',
     meta: {
@@ -183,7 +183,7 @@ const routes: RouteConfig[] = [
     redirect: '/timetable/0',
   },
   {
-    path: '/evaluations/:id?',
+    path: '/evaluations',
     component: Evaluations,
     name: 'Jegyek',
     meta: {
@@ -226,26 +226,6 @@ const routes: RouteConfig[] = [
     meta: {
       auth: true,
     },
-    children: [
-      {
-        path: '/statistics/:subject/evaluation/:id',
-        component: EvaluationDialog,
-        props: true,
-        beforeEnter: async (to, _, next) => {
-          await obtain('general');
-          const evaluation = store.state.api.general.data?.evaluations.find(
-            ({ id }) => +to.params.id === id
-          );
-          if (!evaluation) {
-            toast.error('Nem található az értékelés!');
-            next(false);
-            return;
-          }
-          to.params.eval = evaluation;
-          next();
-        },
-      },
-    ],
     props: true,
   },
   {

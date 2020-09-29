@@ -226,9 +226,8 @@ class User extends Model implements Authenticatable, JWTSubject
                     $this->getJWTIdentifier(),
                     $this->rme
                 );
-                print_r($user); 
 
-                if(!$user) break;
+                if (!$user || !is_object($user)) continue;
                 if ($user->refresh_token !== $this->refresh_token) {
                     $this->setTokens([
                         'access_token' => $user->access_token,

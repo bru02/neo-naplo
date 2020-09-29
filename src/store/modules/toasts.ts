@@ -26,6 +26,12 @@ class ToastsGetters extends Getters<ToastsState> {
 
 class ToastsMutations extends Mutations<ToastsState> {
   addToast({ toast, front }: { toast: ToastOptions; front?: boolean }) {
+    if (
+      this.state.queue.some((t) => {
+        return t.msg === toast.msg;
+      })
+    )
+      return;
     this.state.queue[front || false ? 'unshift' : 'push']({
       ...toast,
       id: nextId++,

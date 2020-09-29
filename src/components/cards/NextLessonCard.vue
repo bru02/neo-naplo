@@ -49,10 +49,7 @@
           </v-icon>
         </v-btn>
       </template>
-      <LessonList
-        :lessons="lessons || []"
-        v-on:input="(l) => $emit('input', l)"
-      />
+      <LessonList :lessons="lessons || []" v-on:input="selectedLesson = l" />
     </Dialog>
     <Dialog title="Bepakolás" v-model="packDialog">
       <v-list>
@@ -78,13 +75,14 @@
         </v-list-item>
       </v-list>
     </Dialog>
+    <DataViewer title="Óra" :fn="lessonValues" v-model="selectedLesson" />
   </v-col>
 </template>
 <script lang="ts">
 import Mixin from '@/mixins';
 import Component, { mixins } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { TimetableAPI } from '../../api-types';
+import { Lesson, TimetableAPI } from '../../api-types';
 import { timeMapper } from '@/store';
 import LessonList from '@/components/dataviews/LessonsList.vue';
 import Dialog from '@/components/dialogs/Dialog.vue';
@@ -104,7 +102,7 @@ export default class NextLessonCard extends mixins(Mixin) {
   pack: string[] = [];
 
   lessonsDialog = false;
-
+  selectedLesson: Lesson | null = null;
   get mode() {
     let timetableKey = +this.date / 1000;
     let lessons = this.timetable[timetableKey] || [];
@@ -204,9 +202,13 @@ export default class NextLessonCard extends mixins(Mixin) {
   get packData() {
     const lessonsBefore = (
       this.timetable[this.timetableKey - 24 * 60 * 60] || []
-    ).map((l) => {
-      return l.subject;
-    });
+    )
+      .filter((l) => {
+        return l.presenceType !== 'Absence' && l.state !== 'Missed';
+      })
+      .map((l) => {
+        return l.subject;
+      });
     return this.lessons
       .filter((e, i, a) => {
         return e.state != 'Missed';

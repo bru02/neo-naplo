@@ -22,7 +22,7 @@
         v-for="card in cardsToRender"
         :key="(card.id || card.date || card[0].date) + card.category"
       >
-        <v-lazy :height="150">
+        <v-lazy :height="100">
           <NoteCard
             :note="card"
             v-if="card.category === 'notes'"
@@ -37,7 +37,7 @@
             :absences="card"
             v-else-if="card.category === 'absences'"
             @input="$router.push(`/absence/${$event}`)"
-            v-on:lesson="$router.push(`/absence/${$event}`)"
+            @absences="selectedAbsenceGroup = event"
           />
           <EventCard
             :event="card"
@@ -62,13 +62,18 @@
       </v-alert>
     </v-row>
     <router-view></router-view>
+    <Dialog title="Mulasztások" v-model="selectedAbsenceGroup">
+      <AbsencesList
+        :absences="selectedAbsenceGroup.items"
+        v-model="selectedAbsence"
+      />
+    </Dialog>
   </v-container>
 </template>
 <script lang="ts">
 import Mixin from '@/mixins';
 import { apiMapper, timeMapper } from '@/store';
 import AbsencesList from '@/components/dataviews/AbsencesList.vue';
-import DataViewer from '@/components/dialogs/DataViewer.vue';
 import AbsencesCard from '@/components/cards/AbsencesCard.vue';
 import EvaluationCard from '@/components/cards/EvaluationCard.vue';
 import EventCard from '@/components/cards/EventCard.vue';
@@ -105,7 +110,6 @@ import {
   },
   components: {
     AbsencesList,
-    DataViewer,
     AbsencesCard,
     EvaluationCard,
     EventCard,

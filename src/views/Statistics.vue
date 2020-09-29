@@ -49,5 +49,8 @@ import { Stat } from '../store/modules/api';
 })
 export default class Statistics extends mixins(Mixin) {
   stats!: Stat[];
+  mounted() {
+    this.obtain('general');
+  }
 }
 </script>

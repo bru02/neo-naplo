@@ -5,7 +5,7 @@
     @click.native="
       absences.length === 1
         ? $emit('input', absences[0].id)
-        : $emit('input', absences)
+        : $emit('absences', absences)
     "
   >
     <v-card-title primary-title>
