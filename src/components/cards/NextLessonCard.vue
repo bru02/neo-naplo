@@ -8,9 +8,7 @@
     >
       <div class="d-flex flex-no-wrap">
         <v-avatar class="ma-3" size="auto" tile v-if="mobile && lessonButtons">
-          <v-icon>
-            mdi-bag-personal{{ pack.length === packData.length ? '' : '-off' }}
-          </v-icon>
+          <v-icon> mdi-bag-personal{{ packed ? '' : '-off' }} </v-icon>
         </v-avatar>
         <div>
           <v-card-title primary-title>
@@ -44,15 +42,20 @@
           <v-icon> mdi-directions </v-icon>
         </v-btn>
         <v-btn icon @click="packDialog = true">
-          <v-icon>
-            mdi-bag-personal{{ pack.length === packData.length ? '' : '-off' }}
-          </v-icon>
+          <v-icon> mdi-bag-personal{{ packed ? '' : '-off' }} </v-icon>
         </v-btn>
       </template>
       <LessonList :lessons="lessons || []" v-on:input="selectedLesson = l" />
     </Dialog>
     <Dialog title="Bepakolás" v-model="packDialog">
-      <v-list>
+      <template v-slot:toolbar v-if="lessonButtons">
+        <v-btn icon @click="packDialog = lessonsDialog = false">
+          <v-fab-transition>
+            <v-icon :key="packed"> mdi-check{{ packed ? '-all' : '' }} </v-icon>
+          </v-fab-transition>
+        </v-btn>
+      </template>
+      <transition-group name="list" tag="v-list">
         <v-list-item
           v-for="subject in packData"
           :key="subject.name"
@@ -73,9 +76,9 @@
             <v-list-item-title> {{ subject.name }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-      </v-list>
+      </transition-group>
     </Dialog>
-    <DataViewer title="Óra" :fn="lessonValues" v-model="selectedLesson" />
+    <lesson-dialog v-if="!!selectedLesson" :lesson="selectedLesson" />
   </v-col>
 </template>
 <script lang="ts">
@@ -86,10 +89,16 @@ import { Lesson, TimetableAPI } from '../../api-types';
 import { timeMapper } from '@/store';
 import LessonList from '@/components/dataviews/LessonsList.vue';
 import Dialog from '@/components/dialogs/Dialog.vue';
+import LessonDialog from '@/components/dialogs/LessonDialog.vue';
+
+interface packDataItem {
+  name: string;
+  indeterminate: boolean;
+}
 
 @Component({
   computed: timeMapper.mapGetters(['time', 'date']),
-  components: { LessonList, Dialog },
+  components: { LessonList, Dialog, LessonDialog },
 })
 export default class NextLessonCard extends mixins(Mixin) {
   time!: Date;
@@ -100,6 +109,7 @@ export default class NextLessonCard extends mixins(Mixin) {
 
   packDialog = false;
   pack: string[] = [];
+  packData: packDataItem[] = [];
 
   lessonsDialog = false;
   selectedLesson: Lesson | null = null;
@@ -199,32 +209,6 @@ export default class NextLessonCard extends mixins(Mixin) {
   get firstLessonTomorrow() {
     return this.timetable[this.timetableKey]?.[0] ?? undefined;
   }
-  get packData() {
-    const lessonsBefore = (
-      this.timetable[this.timetableKey - 24 * 60 * 60] || []
-    )
-      .filter((l) => {
-        return l.presenceType !== 'Absence' && l.state !== 'Missed';
-      })
-      .map((l) => {
-        return l.subject;
-      });
-    return this.lessons
-      .filter((e, i, a) => {
-        return e.state != 'Missed';
-      })
-      .map(({ subject }) => subject)
-      .filter((e, i, a) => {
-        return a.indexOf(e) === i;
-      })
-      .map((subject) => {
-        return {
-          name: subject,
-          indeterminate: lessonsBefore.includes(subject),
-        };
-      })
-      .sort((a, b) => +!b.indeterminate - +!a.indeterminate);
-  }
   @Watch('packDialog')
   onPackDialogChange(value) {
     const timetableKey = this.firstLessonTomorrow.date;
@@ -233,6 +217,31 @@ export default class NextLessonCard extends mixins(Mixin) {
       this.pack =
         JSON.parse(localStorage.getItem('packData') || '{}')[timetableKey] ||
         [];
+      const lessonsBefore = (
+        this.timetable[this.timetableKey - 24 * 60 * 60] || []
+      )
+        .filter((l) => {
+          return l.presenceType !== 'Absence' && l.state !== 'Missed';
+        })
+        .map((l) => {
+          return l.subject;
+        });
+      this.packData = this.lessons
+        .filter((e) => {
+          return e.state != 'Missed';
+        })
+        .map(({ subject }) => subject)
+        .filter((e, i, a) => {
+          return a.indexOf(e) === i;
+        })
+        .map((subject) => {
+          return {
+            name: subject,
+            indeterminate:
+              lessonsBefore.includes(subject) && !this.pack.includes(subject),
+          };
+        })
+        .sort((a, b) => this.getSortIndex(a) - this.getSortIndex(b));
     } else {
       localStorage.setItem(
         'packData',
@@ -240,12 +249,31 @@ export default class NextLessonCard extends mixins(Mixin) {
       );
     }
   }
+
+  @Watch('lessonButtons')
+  onModeChanged(v: boolean) {
+    if (v) this.onPackDialogChange(true);
+  }
+
   toggle(subject) {
+    const currIndex = this.packData.findIndex((d) => d.name === subject);
+    let newIndex = currIndex;
     if (this.pack.includes(subject)) {
+      newIndex = this.findFirstWithSortIndex(1);
+      if (newIndex === -1) newIndex = this.findFirstWithSortIndex(2);
+      if (newIndex === -1) newIndex = currIndex;
       this.pack.splice(this.pack.indexOf(subject), 1);
     } else {
+      this.packData[currIndex].indeterminate = false;
+      newIndex = this.findFirstWithSortIndex(2) - 1;
+      if (newIndex === -2) newIndex = this.packData.length;
       this.pack.push(subject);
     }
+
+    const newVal = [...this.packData];
+    newVal.splice(currIndex, 1);
+    newVal.splice(newIndex, 0, this.packData[currIndex]);
+    this.packData = newVal;
   }
   get directions() {
     return `https://www.google.com/maps/dir//${
@@ -254,5 +282,28 @@ export default class NextLessonCard extends mixins(Mixin) {
       this.firstLessonTomorrow.startTime + 110 * 60
     }!3e3`;
   }
+  get packed() {
+    return this.packData.length === this.pack.length;
+  }
+  getSortIndex(x: packDataItem) {
+    if (this.pack.includes(x.name)) return 2;
+    return x.indeterminate ? 1 : 0;
+  }
+  findFirstWithSortIndex(i: 0 | 1 | 2) {
+    return this.packData.map(this.getSortIndex).indexOf(i);
+  }
 }
 </script>
+<style>
+.list-enter,
+.list-leave-to {
+  opacity: 0;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: opacity 0.5s ease;
+}
+.list-move {
+  transition: transform 0.5s ease-out;
+}
+</style>

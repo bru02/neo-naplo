@@ -1,10 +1,9 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify/lib/framework';
-
+import { VList } from 'vuetify/es5/components/VList';
 import hu from 'vuetify/src/locale/hu';
-import en from 'vuetify/src/locale/en';
 
-Vue.use(Vuetify);
+Vue.use(Vuetify, { components: { VList } });
 const storedTheme = localStorage.getItem('dark_theme');
 
 export default new Vuetify({
@@ -12,7 +11,7 @@ export default new Vuetify({
     iconfont: 'mdi',
   },
   lang: {
-    locales: { hu, en },
+    locales: { hu },
     current: 'hu',
   },
   theme: {
