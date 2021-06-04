@@ -1,8 +1,7 @@
 import { Workbox, messageSW } from 'workbox-window';
-import { messaging } from './plugins/firebase';
 import { toast } from './plugins/toasts';
 
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   registerSW();
 }
 
@@ -42,5 +41,4 @@ async function registerSW() {
   wb.addEventListener('externalwaiting', showSkipWaitingPrompt);
 
   registration = await wb.register();
-  registration && messaging.useServiceWorker(registration);
 }

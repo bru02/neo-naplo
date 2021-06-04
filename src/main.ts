@@ -4,7 +4,6 @@ import store from './store';
 import router from './plugins/router';
 import vuetify from './plugins/vuetify';
 import './plugins/sentry';
-import { analytics } from './plugins/firebase';
 import '@mdi/font/css/materialdesignicons.css';
 import { Route } from 'vue-router';
 import './plugins/toasts';
@@ -85,9 +84,6 @@ export default new Vue({
       } else {
         next();
       }
-    });
-    this.$router.afterEach((to: Route) => {
-      analytics.logEvent('page_view', { page_path: to.fullPath });
     });
   },
 });
