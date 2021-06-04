@@ -5,13 +5,13 @@
       :evaluations="evaluations"
       :groupedClassAverages="groupedClassAverages"
       :groupedEvaluations="groupedEvaluations"
-      @input="$router.push(`/evaluations/${$event}`)"
+      @input="$router.push(`/evaluations/${$event.id}`)"
     ></EvaluationsTable>
     <EvaluationsList
       v-else
       :evaluations="evaluations"
       :groupedEvaluations="groupedEvaluations"
-      @input="$router.push(`/evaluations/${$event}`)"
+      @input="$router.push(`/evaluations/${$event.id}`)"
     >
     </EvaluationsList>
     <router-view></router-view>

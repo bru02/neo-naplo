@@ -44,9 +44,9 @@
         ></v-progress-linear>
       </template>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <router-view></router-view>
-    </v-content>
+    </v-main>
     <Toast />
   </v-app>
 </template>
@@ -107,7 +107,7 @@ export default class App extends mixins(Mixin) {
       link: '/exams',
     },
     { name: 'Profil', icon: 'mdi-account', link: '/profile' },
-    { name: 'Beállítások', icon: 'mdi-settings', link: '/settings' },
+    { name: 'Beállítások', icon: 'mdi-cog', link: '/settings' },
   ];
 
   async created() {

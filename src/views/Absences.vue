@@ -6,7 +6,7 @@
           v-if="abs.length === 1"
           :key="date"
           v-ripple
-          @click="$router.push(`/absences/${$event}`)"
+          @click="$router.push(`/absences/${abs[0].id}`)"
         >
           <v-list-item-avatar>
             <v-icon :color="getAbsenceColor(abs[0].justificationState)">{{
@@ -53,7 +53,7 @@
             v-for="a in abs"
             :key="a.id"
             v-ripple
-            @click="$router.push(`/absences/${$event}`)"
+            @click="$router.push(`/absences/${a.id}`)"
           >
             <v-list-item-content>
               <v-list-item-title>{{ a.subject }}</v-list-item-title>

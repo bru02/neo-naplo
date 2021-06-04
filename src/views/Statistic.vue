@@ -209,7 +209,7 @@
       </v-btn>
     </v-bottom-navigation>
 
-    <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
         <v-fab-transition>
           <v-btn
@@ -270,8 +270,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <absence-dialog :abs="selectedAbsence"></absence-dialog>
-    <evaluation-dialog :abs="selectedEvaluation"></evaluation-dialog>
+    <absence-dialog
+      v-if="selectedAbsence"
+      :abs="selectedAbsence"
+    ></absence-dialog>
+    <evaluation-dialog
+      v-if="selectedEvaluation"
+      :eval="selectedEvaluation"
+    ></evaluation-dialog>
   </v-container>
 </template>
 <script lang="ts">

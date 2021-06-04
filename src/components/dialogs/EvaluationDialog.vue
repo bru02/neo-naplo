@@ -121,7 +121,7 @@ export default class EvaluationDialog extends mixins(Mixin) {
         this.eval.subject
       ];
       const others = [...evals];
-      others.splice(others.indexOf(eval), 1);
+      others.splice(others.indexOf(this.eval), 1);
       return Math.round(100 * (getAverage(evals) - getAverage(others))) / 100;
     }
     return false;

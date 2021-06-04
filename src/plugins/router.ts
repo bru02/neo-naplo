@@ -220,7 +220,7 @@ const routes: RouteConfig[] = [
     props: true,
   },
   {
-    path: '/statistics/:subject',
+    path: '/statistics/:subject/:type?/:id?',
     component: Statistic,
     name: 'Statisztika',
     meta: {

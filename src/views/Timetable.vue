@@ -10,8 +10,8 @@
       >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      {{ new Date(week.from) | formatDate(false) }} -
-      {{ new Date(week.to) | formatDate(false) }}
+      {{ formatDate(new Date(week.from), false) }} -
+      {{ formatDate(new Date(week.to), false) }}
       <v-btn
         text
         icon
@@ -73,6 +73,7 @@ import { day, utc2date, formatDate, formatTime } from '../helpers';
   metaInfo: {
     title: 'Órarend',
   },
+  methods: { formatDate },
 })
 export default class TimetableComponent extends mixins(Mixin) {
   date!: Date;
@@ -121,8 +122,8 @@ export default class TimetableComponent extends mixins(Mixin) {
     if (this.lessonHash) {
       if (this.selectedLesson) return;
       const [date, nol] = this.lessonHash.split(':');
-      for (const l of this.timetable[date] ?? []) {
-        if (l.count === nol) {
+      for (const l of this.timetable[+date] ?? []) {
+        if (l.count === +nol) {
           this.selectedLesson = l;
           break;
         }
@@ -169,7 +170,7 @@ export default class TimetableComponent extends mixins(Mixin) {
       Jelenlét: presenceTypeName,
       Osztálycsoport: this.getClassGroupTextFromUID(
         osztalyCsoportUid,
-        this.osztalyCsoportok
+        this.osztalyCsoportok || []
       ),
     };
   }

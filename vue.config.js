@@ -1,4 +1,3 @@
-const BundleAnalyzerPlugin = require('@bundle-analyzer/webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 
 process.env.VUE_APP_SHA = process.env.SOURCE_VERSION;
@@ -7,7 +6,7 @@ module.exports = {
   transpileDependencies: ['vuetify'],
   outputDir: 'public',
   devServer: {
-    proxy: 'http://127.0.0.1:8000',
+    proxy: 'https://neo-naplo.herokuapp.com',
   },
   indexPath:
     process.env.NODE_ENV === 'production'

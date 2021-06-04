@@ -22,7 +22,7 @@
         v-for="card in cardsToRender"
         :key="(card.id || card.date || card[0].date) + card.category"
       >
-        <v-lazy :height="100">
+        <v-lazy :min-height="100">
           <NoteCard
             :note="card"
             v-if="card.category === 'notes'"
@@ -37,7 +37,7 @@
             :absences="card"
             v-else-if="card.category === 'absences'"
             @input="$router.push(`/absence/${$event}`)"
-            @absences="selectedAbsenceGroup = event"
+            @absences="selectedAbsenceGroup = $event"
           />
           <EventCard
             :event="card"
@@ -64,8 +64,8 @@
     <router-view></router-view>
     <Dialog title="Mulasztások" v-model="selectedAbsenceGroup">
       <AbsencesList
-        :absences="selectedAbsenceGroup.items"
-        v-model="selectedAbsence"
+        :absences="selectedAbsenceGroup"
+        @input="$router.push(`/absence/${$event.id}`)"
       />
     </Dialog>
   </v-container>
